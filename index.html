@@ -273,6 +273,45 @@ p.hero-lead{font-size:15px;line-height:2.1;color:var(--light);max-width:460px;
 .price-line{display:flex;justify-content:space-between;gap:14px;font-size:13px;color:var(--muted);line-height:1.7}
 .price-line b{color:var(--gold-light)}
 .buy-legal{font-size:11px;color:var(--muted);line-height:1.8;text-align:center;margin-top:12px}
+.section-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border-strong),transparent);margin:0 6%}
+.part2-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+.part2-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:26px;backdrop-filter:blur(18px)}
+.part2-card h3,.part2-card h4{color:var(--gold-light);font-weight:900;margin-bottom:14px}
+.part2-card p{color:var(--muted);font-size:13px;line-height:1.9}
+.form-textarea{resize:vertical;min-height:82px}
+.checkbox-row{display:flex;align-items:flex-start;gap:10px;background:rgba(200,149,42,.055);border:1px solid rgba(200,149,42,.2);
+  border-radius:14px;padding:13px 14px;margin:14px 0;color:var(--muted);font-size:12px;line-height:1.8;cursor:pointer}
+.checkbox-row input{width:18px;height:18px;accent-color:var(--gold);margin-top:4px;flex-shrink:0}
+.mini-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:14px;margin-top:16px}
+.mini-table{width:100%;border-collapse:collapse;min-width:680px}
+.mini-table th,.mini-table td{padding:12px 13px;border-bottom:1px solid rgba(255,255,255,.055);font-size:12px;text-align:right;white-space:nowrap}
+.mini-table th{background:rgba(255,255,255,.035);color:var(--gold-light);font-weight:900}
+.mini-table td{color:var(--light)}
+.mini-table tr:last-child td{border-bottom:none}
+.small-btn{border:1px solid var(--border-strong);background:rgba(200,149,42,.08);color:var(--gold-light);
+  border-radius:8px;padding:6px 12px;font-size:11px;font-weight:900;cursor:pointer}
+.small-btn:hover{background:rgba(200,149,42,.14)}
+.antiwhale-box{background:linear-gradient(135deg,rgba(200,149,42,.08),rgba(255,255,255,.02));border:1px solid rgba(200,149,42,.22);
+  border-radius:18px;padding:18px;margin-bottom:18px}
+.antiwhale-box ul{list-style:none;display:grid;gap:8px;margin-top:12px;color:var(--muted);font-size:12px;line-height:1.7}
+.antiwhale-box li::before{content:'◈';color:var(--gold-light);margin-left:8px}
+.sell-balances,.fee-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.sell-metric{background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:14px;padding:13px;text-align:center}
+.sell-metric small{display:block;color:var(--muted);font-size:11px;margin-bottom:5px;font-weight:800}
+.sell-metric b{display:block;color:var(--gold-light);font-size:17px}
+.sell-preview{background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:16px}
+.preview-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.055);font-size:13px;color:var(--light)}
+.preview-row:last-child{border-bottom:none}
+.preview-row.fee span:last-child{color:#fca5a5}
+.preview-row.net{font-weight:900}
+.preview-row.net span:last-child{color:var(--gold-light)}
+.sell-warning{margin-top:12px;border-radius:12px;padding:11px 13px;font-size:12px;line-height:1.7;border:1px solid rgba(200,149,42,.22);color:var(--muted)}
+.feature-pending{text-align:center;border:1px dashed var(--border-strong);border-radius:18px;padding:22px;margin-top:18px;color:var(--muted);line-height:1.8}
+.feature-pending b{display:block;color:var(--gold-light);font-size:17px;margin-bottom:8px}
+.refund-modal-card{background:rgba(10,14,24,.98);border:1px solid var(--border-strong);border-radius:22px;
+  width:min(420px,94vw);padding:28px;box-shadow:0 40px 100px rgba(0,0,0,.7)}
+.refund-id{display:inline-block;margin:12px 0;padding:7px 14px;border-radius:8px;background:rgba(200,149,42,.11);
+  border:1px solid rgba(200,149,42,.3);color:var(--gold-light);font-family:ui-monospace,Consolas,monospace;font-weight:900}
 
 /* CTA */
 .cta-sec{margin:0 6% 80px;padding:60px 7%;
@@ -352,6 +391,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   .hero-visual{display:none}
   .buy-grid{grid-template-columns:1fr}
   .dashboard-shell{grid-template-columns:1fr}
+  .part2-grid{grid-template-columns:1fr}
   .nav-links{display:none}
   .hero{padding:60px 5% 0}
   .sec{padding:60px 5%}
@@ -367,6 +407,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   .user-box{min-width:0;width:100%;max-width:230px}
   .user-menu{left:auto;right:0;width:220px}
   .dash-grid{grid-template-columns:1fr}
+  .sell-balances,.fee-grid{grid-template-columns:1fr}
   .stat-item{min-width:140px;padding:18px 18px}
   .stat-item b{font-size:17px}
   .panel{padding:24px 20px}
@@ -651,6 +692,63 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   </div>
 </section>
 
+<div class="section-divider"></div>
+
+<!-- ══════════ PILOT DEPOSITS ══════════ -->
+<section class="sec dashboard-sec" id="pilotSection">
+  <h2 class="sec-title">عضوية <span>التجربة المغلقة</span></h2>
+  <p class="sec-desc">إرسال طلب Pilot Deposit قابل للاسترداد للمشاركة في تجربة Arab Rial المغلقة.</p>
+  <div class="part2-grid">
+    <form class="part2-card" id="pilotForm">
+      <h3>طلب Pilot Deposit</h3>
+      <div class="fgroup">
+        <label>مبلغ الإيداع (OMR)</label>
+        <input id="pilotAmount" type="number" min="1" step="0.001" placeholder="مثال: 100" />
+      </div>
+      <div class="fgroup">
+        <label>طريقة الدفع</label>
+        <select id="pilotMethod">
+          <option value="">اختر طريقة الدفع</option>
+          <option value="manual">يدوي / Manual</option>
+          <option value="usdt">USDT</option>
+          <option value="bank_later">تحويل بنكي لاحقًا</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label>رقم مرجع الدفع</label>
+        <input id="pilotReference" placeholder="رقم التحويل أو المرجع" dir="ltr" />
+      </div>
+      <div class="fgroup">
+        <label>ملاحظة (اختيارية)</label>
+        <textarea id="pilotNote" class="form-textarea" placeholder="أي تفاصيل إضافية..."></textarea>
+      </div>
+      <label class="checkbox-row">
+        <input id="pilotAgree" type="checkbox" />
+        <span>أفهم أن هذا المبلغ Deposit تجريبي قابل للاسترداد، وليس شراءً نهائيًا لعملة قانونية أو استثمارًا مضمونًا. يخضع الطلب للمراجعة اليدوية.</span>
+      </label>
+      <div class="legal-notice">ARBR ليست عملة قانونية وليست صادرة من أي بنك مركزي. طلبات الإيداع التجريبي تخضع للمراجعة اليدوية ولا تمثل أي ضمان مالي.</div>
+      <button class="btn-primary" type="submit" style="width:100%;padding:14px;margin-top:14px" id="pilotSubmit">✦ إرسال طلب Pilot Deposit</button>
+    </form>
+    <div class="part2-card">
+      <h3>طلبات التجربة المغلقة</h3>
+      <div id="pilotList">
+        <div class="empty-orders">لا توجد طلبات تجربة مغلقة حتى الآن.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════ SELL PREVIEW ══════════ -->
+<section class="sec dashboard-sec" id="sellSection">
+  <h2 class="sec-title">طلب بيع / استرداد <span>ARBR</span></h2>
+  <p class="sec-desc">معاينة تقديرية فقط وفق نموذج البيع العكسي. لن يتم إرسال طلب بيع في هذه المرحلة.</p>
+  <div class="dash-card" id="sellContent">
+    <div class="empty-orders">جار تحميل معاينة البيع...</div>
+  </div>
+</section>
+
 <!-- ══════════ BUY ══════════ -->
 <section class="sec" id="buy">
   <h2 class="sec-title">اشترِ <span>ARBR</span></h2>
@@ -791,6 +889,18 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   </div>
 </div>
 
+<!-- ══════════ REFUND INSTRUCTIONS MODAL ══════════ -->
+<div class="modal" id="refundModal">
+  <div class="refund-modal-card">
+    <button class="modal-close" id="closeRefund">×</button>
+    <h3 style="color:var(--gold-light);margin-bottom:12px">طلب استرداد Pilot Deposit</h3>
+    <p style="color:var(--muted);font-size:14px;line-height:1.9">لطلب الاسترداد، تواصل مع الإدارة واذكر رقم الطلب.</p>
+    <div class="refund-id" id="refundDepositId">-</div>
+    <p style="color:var(--muted);font-size:12px;line-height:1.8">تتم مراجعة طلبات الاسترداد يدويًا، وسيتم التواصل معك عبر بيانات الحساب المسجلة.</p>
+    <button class="btn-primary" id="refundOk" style="width:100%;padding:12px;margin-top:18px">حسنًا، فهمت</button>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -800,7 +910,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
 <script>
 /* Supabase config
    ضع القيم من Supabase Dashboard > Project Settings > API.
-   استخدم anon/public key فقط هنا، ولا تضع service_role داخل GitHub Pages. */
+   استخدم anon/public key فقط هنا، ولا تضع أي مفتاح إداري داخل GitHub Pages. */
 const SUPABASE_URL = 'https://umxmwcwuwsvkvsbdhbdl.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVteG13Y3d1d3N2a3ZzYmRoYmRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NDYwNjcsImV4cCI6MjA5NTAyMjA2N30.qCwKT7EU21JJKS-_73_uuXdLrhoI3a9644Wk73O2uJY';
 const isSupabaseConfigured =
@@ -815,7 +925,26 @@ let currentUser = null;
 let currentProfile = null;
 let currentWallet = null;
 let currentPurchaseRequests = [];
+let currentPilotDeposits = [];
 let activeOrdersFilter = 'all';
+
+const ARBR_CONFIG = {
+  totalSupply: 100000000,
+  spreadRate: 0.05,
+  exitFeeRate: 0.10,
+  lockDays: 30,
+  maxSellPerDay: 2000,
+  stages: [
+    { name: 'Founders', from: 0, to: 5000000, price: 0.001 },
+    { name: 'Early VIP', from: 5000000, to: 15000000, price: 0.002 },
+    { name: 'Private', from: 15000000, to: 30000000, price: 0.005 },
+    { name: 'Pre Launch', from: 30000000, to: 50000000, price: 0.010 },
+    { name: 'Launch', from: 50000000, to: 70000000, price: 0.025 },
+    { name: 'Growth', from: 70000000, to: 90000000, price: 0.050 },
+    { name: 'Internal Cap', from: 90000000, to: 100000000, price: 0.100 }
+  ]
+};
+const estimatedSoldTokens = 0; // TODO: replace with platform_state.sold_tokens later.
 
 /* Toast */
 const toast = document.getElementById('toast');
@@ -864,6 +993,18 @@ function statusClass(status) {
   if (status === 'approved' || status === 'completed') return 'approved';
   if (status === 'rejected') return 'rejected';
   return 'pending';
+}
+
+function pilotStatusLabel(status) {
+  const labels = {
+    pending: 'قيد المراجعة',
+    active: 'مفعّل',
+    refund_requested: 'طلب استرداد',
+    refunded: 'تم الاسترداد',
+    cancelled: 'ملغي',
+    approved: 'موافق'
+  };
+  return labels[status] || status || 'قيد المراجعة';
 }
 
 function requestAmount(order) {
@@ -942,6 +1083,197 @@ async function loadPurchaseRequests(user = currentUser) {
   return data || [];
 }
 
+async function loadPilotDeposits(user = currentUser) {
+  if (!user) return [];
+  const { data, error } = await supabaseClient
+    .from('pilot_deposits')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+  if (error) return [];
+  return data || [];
+}
+
+function renderPilotDeposits() {
+  const pilotList = document.getElementById('pilotList');
+  if (!pilotList) return;
+  if (!currentPilotDeposits.length) {
+    pilotList.innerHTML = '<div class="empty-orders">لا توجد طلبات تجربة مغلقة حتى الآن.</div>';
+    return;
+  }
+  pilotList.innerHTML = `
+    <div class="mini-table-wrap">
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>رقم الطلب</th>
+            <th>المبلغ</th>
+            <th>طريقة الدفع</th>
+            <th>قابل للاسترداد</th>
+            <th>الحالة</th>
+            <th>التاريخ</th>
+            <th>إجراء</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${currentPilotDeposits.map(deposit => `
+            <tr>
+              <td class="req-id">#PILOT-${String(deposit.id || '').slice(-6).toUpperCase()}</td>
+              <td>${formatNumber(deposit.amount_omr, 'OMR')}</td>
+              <td>${deposit.payment_method || '-'}</td>
+              <td>${deposit.is_refundable ? 'نعم' : 'لا'}</td>
+              <td><span class="status-pill ${statusClass(deposit.status)}">${pilotStatusLabel(deposit.status)}</span></td>
+              <td>${deposit.created_at ? new Date(deposit.created_at).toLocaleDateString('ar') : '-'}</td>
+              <td><button class="small-btn" type="button" data-refund-id="${deposit.id}">تعليمات الاسترداد</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  pilotList.querySelectorAll('[data-refund-id]').forEach(btn => {
+    btn.addEventListener('click', () => openRefundInstructions(btn.dataset.refundId));
+  });
+}
+
+async function submitPilotDeposit(event) {
+  event?.preventDefault();
+  if (!currentUser) {
+    openModal();
+    showToast('يجب تسجيل الدخول أولًا', 'warning');
+    return;
+  }
+  const amount = Number(document.getElementById('pilotAmount').value || 0);
+  const method = document.getElementById('pilotMethod').value;
+  const reference = document.getElementById('pilotReference').value.trim();
+  const note = document.getElementById('pilotNote').value.trim();
+  const agreed = document.getElementById('pilotAgree').checked;
+  if (amount <= 0) { showToast('يرجى إدخال مبلغ صحيح', 'warning'); return; }
+  if (!method) { showToast('يرجى اختيار طريقة الدفع', 'warning'); return; }
+  if (!agreed) { showToast('يجب الموافقة على شروط Pilot Deposit قبل الإرسال', 'warning'); return; }
+
+  const btn = document.getElementById('pilotSubmit');
+  setBusy(btn, true, 'جار الإرسال...');
+  const { error } = await supabaseClient
+    .from('pilot_deposits')
+    .insert({
+      user_id: currentUser.id,
+      amount_omr: amount,
+      payment_method: method,
+      payment_reference: reference,
+      notes: note,
+      status: 'pending',
+      is_refundable: true
+    });
+  setBusy(btn, false);
+  if (error) {
+    showToast('تعذر إرسال Pilot Deposit: ' + error.message, 'error');
+    return;
+  }
+  showToast('تم إرسال طلب Pilot Deposit وسيتم مراجعته يدويًا', 'success');
+  document.getElementById('pilotForm').reset();
+  currentPilotDeposits = await loadPilotDeposits(currentUser);
+  renderPilotDeposits();
+}
+
+function openRefundInstructions(depositId) {
+  document.getElementById('refundDepositId').textContent = '#PILOT-' + String(depositId || '').slice(-6).toUpperCase();
+  document.getElementById('refundModal').classList.add('open');
+}
+
+function closeRefundInstructions() {
+  document.getElementById('refundModal').classList.remove('open');
+}
+
+function calculateSellReturnByStages(soldTokens, sellAmountTokens) {
+  if (!sellAmountTokens || sellAmountTokens <= 0) {
+    return { grossReturn: 0, spreadFee: 0, exitFee: 0, netReturn: 0, stagesUsed: [] };
+  }
+  let remaining = sellAmountTokens;
+  let currentSold = soldTokens > 0 ? soldTokens : ARBR_CONFIG.totalSupply * 0.01;
+  let grossReturn = 0;
+  const stagesUsed = [];
+  for (let i = ARBR_CONFIG.stages.length - 1; i >= 0; i--) {
+    const stage = ARBR_CONFIG.stages[i];
+    if (currentSold <= stage.from) continue;
+    const tokensAvailableInStage = currentSold - stage.from;
+    const tokensHere = Math.min(remaining, tokensAvailableInStage);
+    if (tokensHere <= 0) continue;
+    const stageReturn = tokensHere * stage.price;
+    grossReturn += stageReturn;
+    stagesUsed.push({ name: stage.name, tokens: tokensHere, price: stage.price, return: stageReturn });
+    currentSold -= tokensHere;
+    remaining -= tokensHere;
+    if (remaining <= 0) break;
+  }
+  const spreadFee = grossReturn * ARBR_CONFIG.spreadRate;
+  const exitFee = grossReturn * ARBR_CONFIG.exitFeeRate;
+  return { grossReturn, spreadFee, exitFee, netReturn: grossReturn - spreadFee - exitFee, stagesUsed };
+}
+
+function renderSellSection() {
+  const sellContent = document.getElementById('sellContent');
+  if (!sellContent || !currentUser) return;
+  const balance = Number(currentWallet?.arbr_balance || 0);
+  const locked = Number(currentWallet?.locked_arbr || 0);
+  const available = Math.max(0, balance - locked);
+  sellContent.innerHTML = `
+    <div class="antiwhale-box">
+      <h4>سياسة حماية السيولة</h4>
+      <p>لا يتم احتساب البيع على آخر سعر ظاهر فقط، بل يتم احتسابه عكسيًا عبر مراحل التسعير مع خصم فرق السعر ورسوم الخروج.</p>
+      <ul>
+        <li>لا يوجد بيع فوري مضمون</li>
+        <li>البيع يخضع لتوفر السيولة والمراجعة اليدوية</li>
+        <li>لا يمكن بيع الرصيد المقفل</li>
+        <li>السعر المعروض ليس ضمانًا للتنفيذ</li>
+      </ul>
+    </div>
+    <div class="sell-balances">
+      <div class="sell-metric"><small>رصيد ARBR الكلي</small><b>${formatNumber(balance)}</b></div>
+      <div class="sell-metric"><small>المقفل</small><b>${formatNumber(locked)}</b></div>
+      <div class="sell-metric"><small>المتاح للبيع</small><b>${formatNumber(available)}</b></div>
+    </div>
+    <div class="fee-grid">
+      <div class="sell-metric"><small>Spread Fee</small><b>${(ARBR_CONFIG.spreadRate * 100).toFixed(0)}%</b></div>
+      <div class="sell-metric"><small>Exit Fee</small><b>${(ARBR_CONFIG.exitFeeRate * 100).toFixed(0)}%</b></div>
+      <div class="sell-metric"><small>إجمالي الرسوم</small><b>${((ARBR_CONFIG.spreadRate + ARBR_CONFIG.exitFeeRate) * 100).toFixed(0)}%</b></div>
+    </div>
+    <div class="fgroup">
+      <label>كمية ARBR المراد معاينتها للبيع</label>
+      <input id="sellAmount" type="number" min="1" step="1" max="${available}" placeholder="مثال: 10000" />
+    </div>
+    <div class="sell-preview">
+      <div class="preview-row"><span>الكمية المطلوبة</span><span id="sellPrevAmount">-</span></div>
+      <div class="preview-row"><span>Gross Return</span><span id="sellPrevGross">-</span></div>
+      <div class="preview-row fee"><span>Spread Fee</span><span id="sellPrevSpread">-</span></div>
+      <div class="preview-row fee"><span>Exit Fee</span><span id="sellPrevExit">-</span></div>
+      <div class="preview-row net"><span>Net Return تقريبي</span><span id="sellPrevNet">-</span></div>
+      <div id="sellWarnings"></div>
+    </div>
+    <div class="feature-pending"><b>ميزة البيع قيد التجهيز</b>سيتم تفعيلها بعد مراجعة الإدارة وإعداد السيولة. هذه المعاينة لا تنشئ طلب بيع ولا تضمن سعرًا أو عائدًا.</div>
+  `;
+  document.getElementById('sellAmount').addEventListener('input', updateSellPreview);
+  updateSellPreview();
+}
+
+function updateSellPreview() {
+  const amount = Number(document.getElementById('sellAmount')?.value || 0);
+  const available = Math.max(0, Number(currentWallet?.arbr_balance || 0) - Number(currentWallet?.locked_arbr || 0));
+  const result = calculateSellReturnByStages(estimatedSoldTokens, amount);
+  const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+  setText('sellPrevAmount', amount > 0 ? formatNumber(amount, 'ARBR') : '-');
+  setText('sellPrevGross', amount > 0 ? '$' + result.grossReturn.toFixed(4) : '-');
+  setText('sellPrevSpread', amount > 0 ? '-$' + result.spreadFee.toFixed(4) : '-');
+  setText('sellPrevExit', amount > 0 ? '-$' + result.exitFee.toFixed(4) : '-');
+  setText('sellPrevNet', amount > 0 ? '$' + result.netReturn.toFixed(4) : '-');
+  const warnings = document.getElementById('sellWarnings');
+  if (!warnings) return;
+  const items = [];
+  if (amount > available) items.push('الكمية المطلوبة تتجاوز الرصيد المتاح للبيع.');
+  if (result.netReturn > ARBR_CONFIG.maxSellPerDay) items.push('هذه المعاينة تتجاوز حد البيع اليومي وستحتاج مراجعة خاصة عند تفعيل البيع.');
+  warnings.innerHTML = items.map(item => `<div class="sell-warning">${item}</div>`).join('');
+}
+
 function renderPurchaseRequests() {
   const ordersList = document.getElementById('ordersList');
   if (!ordersList) return;
@@ -1009,10 +1341,14 @@ function updateAuthUI() {
   const userMenuWrap = document.getElementById('userMenuWrap');
   const dashboard = document.getElementById('dashboard');
   const myOrders = document.getElementById('myOrders');
+  const pilotSection = document.getElementById('pilotSection');
+  const sellSection = document.getElementById('sellSection');
   if (headerLoginBtn) headerLoginBtn.style.display = loggedIn ? 'none' : '';
   if (userMenuWrap) userMenuWrap.classList.toggle('show', loggedIn);
   if (dashboard) dashboard.classList.toggle('show', loggedIn);
   if (myOrders) myOrders.classList.toggle('show', loggedIn);
+  if (pilotSection) pilotSection.classList.toggle('show', loggedIn);
+  if (sellSection) sellSection.classList.toggle('show', loggedIn);
 
   if (!loggedIn) {
     document.getElementById('userMenu')?.classList.remove('open');
@@ -1040,6 +1376,8 @@ function updateAuthUI() {
   document.getElementById('dashAccountStatus').textContent = profileHasColumn('account_status') ? (currentProfile.account_status || 'نشط') : 'نشط';
   renderPurchaseRequests();
   renderAllOrders(activeOrdersFilter);
+  renderPilotDeposits();
+  renderSellSection();
 }
 
 async function refreshUserState() {
@@ -1048,17 +1386,20 @@ async function refreshUserState() {
     currentProfile = null;
     currentWallet = null;
     currentPurchaseRequests = [];
+    currentPilotDeposits = [];
     updateAuthUI();
     return;
   }
-  const [profile, wallet, requests] = await Promise.all([
+  const [profile, wallet, requests, pilots] = await Promise.all([
     loadUserProfile(currentUser),
     loadUserWallet(currentUser),
-    loadPurchaseRequests(currentUser)
+    loadPurchaseRequests(currentUser),
+    loadPilotDeposits(currentUser)
   ]);
   currentProfile = profile;
   currentWallet = wallet;
   currentPurchaseRequests = requests;
+  currentPilotDeposits = pilots;
   updateAuthUI();
 }
 
@@ -1113,6 +1454,7 @@ async function logoutUser() {
   currentProfile = null;
   currentWallet = null;
   currentPurchaseRequests = [];
+  currentPilotDeposits = [];
   updateAuthUI();
   document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
   showToast('تم تسجيل الخروج');
@@ -1264,6 +1606,10 @@ document.getElementById('closeSettings').addEventListener('click', closeSettings
 document.getElementById('settingsCloseBtn').addEventListener('click', closeSettings);
 document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
 document.getElementById('settingsModal').addEventListener('click', e => { if (e.target.id === 'settingsModal') closeSettings(); });
+document.getElementById('pilotForm').addEventListener('submit', submitPilotDeposit);
+document.getElementById('closeRefund').addEventListener('click', closeRefundInstructions);
+document.getElementById('refundOk').addEventListener('click', closeRefundInstructions);
+document.getElementById('refundModal').addEventListener('click', e => { if (e.target.id === 'refundModal') closeRefundInstructions(); });
 
 /* Nav active */
 document.querySelectorAll('.nav-links a').forEach(a => {
