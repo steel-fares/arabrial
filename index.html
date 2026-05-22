@@ -1540,15 +1540,21 @@ document.getElementById('doSignup').onclick = async () => {
     email,
     password,
     options: {
-      data: { full_name: fullName, phone },
-      emailRedirectTo: window.location.origin + window.location.pathname
+      emailRedirectTo: 'https://arab-rial.com',
+      data: {
+        full_name: fullName,
+        phone
+      }
     }
   });
   setBusy(btn, false);
   if (error) { showToast('تعذر إنشاء الحساب: ' + error.message, 'error'); return; }
+  if (data?.session) {
+    await supabaseClient.auth.signOut();
+  }
   closeModal();
   await refreshUserState();
-  showToast(data.session ? '✓ تم إنشاء الحساب بنجاح' : '✓ تم إنشاء الحساب. تحقق من بريدك لتأكيده');
+  showToast('تم إنشاء الحساب. يرجى فتح بريدك الإلكتروني لتأكيد الحساب.');
 };
 
 /* Calculator */
