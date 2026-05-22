@@ -1584,6 +1584,7 @@ document.getElementById('submitBuy').addEventListener('click', async () => {
     .insert({
       user_id: currentUser.id,
       amount_omr: amount,
+      amount_usd: amount,
       estimated_arbr: amount * 1000,
       payment_method: paymentMethod,
       note,
