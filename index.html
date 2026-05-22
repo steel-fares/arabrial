@@ -998,17 +998,17 @@ function statusLabel(status) {
 }
 
 function statusClass(status) {
-  if (status === 'approved' || status === 'completed') return 'approved';
-  if (status === 'rejected') return 'rejected';
+  if (['approved', 'completed', 'active', 'refunded'].includes(status)) return 'approved';
+  if (['rejected', 'cancelled'].includes(status)) return 'rejected';
   return 'pending';
 }
 
 function pilotStatusLabel(status) {
   const labels = {
-    pending: 'قيد المراجعة',
-    active: 'مفعّل',
+    pending: 'قيد المراجعة (pending)',
+    active: 'مفعّل (active)',
     refund_requested: 'طلب استرداد',
-    refunded: 'تم الاسترداد',
+    refunded: 'تم الاسترداد (refunded)',
     cancelled: 'ملغي',
     approved: 'موافق'
   };
@@ -1025,6 +1025,15 @@ function requestEstimated(order) {
 
 function requestDate(order) {
   return order.created_at ? new Date(order.created_at).toLocaleDateString('ar') : '-';
+}
+
+function recordHasColumn(record, column) {
+  return record && Object.prototype.hasOwnProperty.call(record, column);
+}
+
+function requestProcessedDate(order) {
+  if (!recordHasColumn(order, 'processed_at')) return '';
+  return order.processed_at ? new Date(order.processed_at).toLocaleDateString('ar') : '-';
 }
 
 function requestId(order) {
@@ -1286,14 +1295,21 @@ function renderPurchaseRequests() {
   const ordersList = document.getElementById('ordersList');
   if (!ordersList) return;
   if (!currentPurchaseRequests.length) {
-    ordersList.innerHTML = '<div class="empty-orders">لا توجد طلبات شراء حتى الآن.</div>';
+    ordersList.innerHTML = `
+      <div class="legal-notice" style="margin-bottom:14px">عند تغيير حالة الطلب إلى approved من Supabase، سيتم تحديث رصيد المستخدم تلقائيًا.</div>
+      <div class="empty-orders">لا توجد طلبات شراء حتى الآن.</div>
+    `;
     return;
   }
   const recent = currentPurchaseRequests.slice(0, 5);
-  ordersList.innerHTML = renderOrdersTable(recent, false);
+  ordersList.innerHTML = `
+    <div class="legal-notice" style="margin-bottom:14px">عند تغيير حالة الطلب إلى approved من Supabase، سيتم تحديث رصيد المستخدم تلقائيًا.</div>
+    ${renderOrdersTable(recent, false)}
+  `;
 }
 
 function renderOrdersTable(orders, showNote = true) {
+  const showProcessedAt = orders.some(order => recordHasColumn(order, 'processed_at'));
   return `
     <div class="orders-table-wrap">
       <table class="orders-table">
@@ -1305,6 +1321,7 @@ function renderOrdersTable(orders, showNote = true) {
             <th>الكمية المقدرة</th>
             <th>الحالة</th>
             <th>التاريخ</th>
+            ${showProcessedAt ? '<th>تاريخ المعالجة</th>' : ''}
             ${showNote ? '<th>الملاحظة</th>' : ''}
           </tr>
         </thead>
@@ -1317,6 +1334,7 @@ function renderOrdersTable(orders, showNote = true) {
               <td>${formatNumber(requestEstimated(order), 'ARBR')}</td>
               <td><span class="status-pill ${statusClass(order.status)}">${statusLabel(order.status)}</span></td>
               <td>${requestDate(order)}</td>
+              ${showProcessedAt ? `<td>${requestProcessedDate(order)}</td>` : ''}
               ${showNote ? `<td>${order.note || order.admin_note || '-'}</td>` : ''}
             </tr>
           `).join('')}
