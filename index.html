@@ -969,6 +969,14 @@ function setBusy(button, busy, text) {
   button.textContent = busy ? text : button.dataset.originalText;
 }
 
+function withTimeout(promise, timeoutMs, message) {
+  let timeoutId;
+  const timeout = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), timeoutMs);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
+}
+
 function formatNumber(value, suffix = '') {
   const n = Number(value || 0);
   return n.toLocaleString('en-US', { maximumFractionDigits: 2 }) + (suffix ? ' ' + suffix : '');
@@ -1498,12 +1506,21 @@ document.getElementById('doLogin').onclick = async () => {
   if (!email) { showToast('⚠️ أدخل البريد الإلكتروني'); return; }
   if (!password) { showToast('⚠️ أدخل كلمة المرور'); return; }
   setBusy(btn, true, 'جار تسجيل الدخول...');
-  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-  setBusy(btn, false);
-  if (error) { showToast('تعذر تسجيل الدخول: ' + error.message, 'error'); return; }
-  closeModal();
-  await refreshUserState();
-  showToast('✓ تم تسجيل الدخول بنجاح');
+  try {
+    const { error } = await withTimeout(
+      supabaseClient.auth.signInWithPassword({ email, password }),
+      15000,
+      'انتهت مهلة الاتصال أثناء تسجيل الدخول'
+    );
+    if (error) { showToast('تعذر تسجيل الدخول: ' + error.message, 'error'); return; }
+    closeModal();
+    await refreshUserState();
+    showToast('✓ تم تسجيل الدخول بنجاح');
+  } catch (error) {
+    showToast(error.message || 'تعذر تسجيل الدخول. حاول مرة أخرى.', 'error');
+  } finally {
+    setBusy(btn, false);
+  }
 };
 
 /* Signup */
@@ -1621,7 +1638,9 @@ document.querySelectorAll('.nav-links a').forEach(a => {
 
 refreshUserState();
 if (supabaseClient) {
-  supabaseClient.auth.onAuthStateChange(() => refreshUserState());
+  supabaseClient.auth.onAuthStateChange(() => {
+    setTimeout(() => refreshUserState(), 0);
+  });
 }
 </script>
 </body>
