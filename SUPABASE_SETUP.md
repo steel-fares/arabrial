@@ -6,6 +6,7 @@
 2. Create a new project.
 3. Go to **SQL Editor**.
 4. Paste and run `supabase/schema.sql`.
+5. Re-run the same file after future schema changes. It is written to be safe for existing tables.
 
 ## 2. Configure Auth
 
@@ -38,8 +39,18 @@ Use only the public `anon` or `publishable` key. Never put the `service_role` ke
 1. Open the page locally.
 2. Create a test account.
 3. Sign in.
-4. Submit a purchase request with amount between `$10` and `$5,000`.
+4. Submit a purchase request with amount between `10 OMR` and `5,000 OMR`.
 5. Confirm the row appears in **Table Editor > purchase_requests**.
+
+Current purchase requests use:
+
+- `amount_omr`
+- `estimated_arbr`
+- `payment_method`
+- `note`
+- `status = pending`
+
+Run the latest `supabase/schema.sql` before testing the live form.
 
 ## 5. GitHub Pages custom domain
 

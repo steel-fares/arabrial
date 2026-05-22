@@ -56,6 +56,22 @@ nav{height:74px;padding:0 6%;display:flex;align-items:center;justify-content:spa
 .nav-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
 .lang-btn{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);
   color:var(--light);padding:8px 14px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer}
+.user-menu-wrap{position:relative;display:none}
+.user-menu-wrap.show{display:block}
+.user-box{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid var(--border-strong);
+  color:var(--text);border-radius:12px;padding:8px 12px;cursor:pointer;min-width:190px;text-align:right}
+.user-avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#080b12;font-weight:900;flex-shrink:0}
+.user-box strong{display:block;font-size:13px;line-height:1.25;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-box small{display:block;font-size:11px;color:var(--gold-light);line-height:1.35}
+.user-menu{position:absolute;top:calc(100% + 10px);left:0;width:210px;background:rgba(10,14,24,.98);
+  border:1px solid var(--border-strong);border-radius:14px;padding:8px;box-shadow:0 24px 70px rgba(0,0,0,.55);
+  display:none;z-index:250}
+.user-menu.open{display:block}
+.menu-item{width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:none;border-radius:10px;
+  background:transparent;color:var(--light);font-size:13px;font-weight:800;cursor:pointer;text-align:right}
+.menu-item:hover{background:rgba(200,149,42,.1);color:var(--gold-light)}
+.menu-item.danger{color:#fda4af}
 
 /* ── Buttons ── */
 .btn-primary{background:linear-gradient(135deg,var(--gold-soft),var(--gold));
@@ -214,6 +230,25 @@ p.hero-lead{font-size:15px;line-height:2.1;color:var(--light);max-width:460px;
   color:var(--gold-light);padding:5px 12px;border-radius:8px;
   font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0}
 
+/* Dashboard */
+.dashboard-sec{display:none}
+.dashboard-sec.show{display:block}
+.dashboard-shell{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;align-items:start}
+.dash-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:26px;backdrop-filter:blur(18px)}
+.dash-card h3{font-size:18px;color:var(--gold-light);margin-bottom:18px;font-weight:900}
+.dash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.dash-stat{background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:14px;padding:14px}
+.dash-stat small{display:block;color:var(--muted);font-size:11px;font-weight:800;margin-bottom:6px}
+.dash-stat b{display:block;color:var(--text);font-size:15px;overflow-wrap:anywhere}
+.orders-list{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow:auto;padding-left:4px}
+.order-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:rgba(255,255,255,.035);
+  border:1px solid var(--border);border-radius:14px;padding:13px 14px}
+.order-row b{font-size:14px;color:var(--text)}
+.order-row small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.status-pill{background:rgba(200,149,42,.14);border:1px solid rgba(200,149,42,.28);color:var(--gold-light);
+  border-radius:999px;padding:5px 10px;font-size:11px;font-weight:900;white-space:nowrap}
+.empty-orders{color:var(--muted);font-size:13px;line-height:1.8;border:1px dashed var(--border-strong);border-radius:14px;padding:18px;text-align:center}
+
 /* CTA */
 .cta-sec{margin:0 6% 80px;padding:60px 7%;
   background:linear-gradient(135deg,rgba(200,149,42,.12),rgba(200,149,42,.04));
@@ -288,6 +323,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   .hero-inner{grid-template-columns:1fr}
   .hero-visual{display:none}
   .buy-grid{grid-template-columns:1fr}
+  .dashboard-shell{grid-template-columns:1fr}
   .nav-links{display:none}
   .hero{padding:60px 5% 0}
   .sec{padding:60px 5%}
@@ -298,6 +334,11 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   p.hero-lead{margin:0 auto}
 }
 @media(max-width:600px){
+  nav{height:auto;min-height:74px;align-items:flex-start;padding-top:12px;padding-bottom:12px}
+  .nav-actions{flex-wrap:wrap;justify-content:flex-end}
+  .user-box{min-width:0;width:100%;max-width:230px}
+  .user-menu{left:auto;right:0;width:220px}
+  .dash-grid{grid-template-columns:1fr}
   .stat-item{min-width:140px;padding:18px 18px}
   .stat-item b{font-size:17px}
   .panel{padding:24px 20px}
@@ -325,7 +366,22 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   </ul>
   <div class="nav-actions">
     <button class="lang-btn">🌐 العربية</button>
-    <button class="btn-primary" data-open-login>تسجيل الدخول</button>
+    <button class="btn-primary" id="headerLoginBtn" data-open-login>تسجيل الدخول</button>
+    <div class="user-menu-wrap" id="userMenuWrap">
+      <button class="user-box" id="userBox" type="button">
+        <span class="user-avatar">AR</span>
+        <span>
+          <strong id="navUserName">مرحبًا</strong>
+          <small id="navUserBalance">الرصيد: 0 ARBR</small>
+        </span>
+      </button>
+      <div class="user-menu" id="userMenu">
+        <button class="menu-item" type="button" data-scroll-dashboard>لوحة التحكم <span>↙</span></button>
+        <button class="menu-item" type="button" data-scroll-orders>طلباتي <span>↙</span></button>
+        <button class="menu-item" type="button" id="openSettingsBtn">الإعدادات <span>⚙</span></button>
+        <button class="menu-item danger" type="button" id="logoutBtn">تسجيل الخروج <span>×</span></button>
+      </div>
+    </div>
   </div>
 </nav>
 
@@ -512,16 +568,44 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   </div>
 </section>
 
+<!-- ══════════ INVESTOR DASHBOARD ══════════ -->
+<section class="sec dashboard-sec" id="dashboard">
+  <h2 class="sec-title">لوحة <span>المستثمر</span></h2>
+  <p class="sec-desc">ملخص حسابك ورصيدك وطلبات الشراء الأخيرة داخل ARBR.</p>
+  <div class="dashboard-shell">
+    <div class="dash-card">
+      <h3>بيانات الحساب</h3>
+      <div class="dash-grid">
+        <div class="dash-stat"><small>الاسم الكامل</small><b id="dashFullName">-</b></div>
+        <div class="dash-stat"><small>البريد الإلكتروني</small><b id="dashEmail">-</b></div>
+        <div class="dash-stat"><small>رقم الهاتف</small><b id="dashPhone">-</b></div>
+        <div class="dash-stat"><small>الدولة</small><b id="dashCountry">-</b></div>
+        <div class="dash-stat"><small>رصيد ARBR</small><b id="dashArbrBalance">0 ARBR</b></div>
+        <div class="dash-stat"><small>ARBR المقفل</small><b id="dashLockedArbr">0 ARBR</b></div>
+        <div class="dash-stat"><small>إجمالي الإيداع OMR</small><b id="dashTotalDeposit">0 OMR</b></div>
+        <div class="dash-stat"><small>حالة الحساب</small><b id="dashAccountStatus">نشط</b></div>
+        <div class="dash-stat"><small>حالة KYC</small><b id="dashKycStatus">غير مكتمل</b></div>
+      </div>
+    </div>
+    <div class="dash-card" id="ordersPanel">
+      <h3>طلبات الشراء الأخيرة</h3>
+      <div class="orders-list" id="ordersList">
+        <div class="empty-orders">لا توجد طلبات شراء حتى الآن.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ══════════ BUY ══════════ -->
 <section class="sec" id="buy">
   <h2 class="sec-title">اشترِ <span>ARBR</span></h2>
-  <p class="sec-desc">سعر الدخول المبكر: $1 = 1,000 ARBR. اختر المبلغ وطريقة الدفع وأرسل طلبك.</p>
+  <p class="sec-desc">سعر الدخول المبكر: 1 OMR = 1,000 ARBR. اختر المبلغ وطريقة الدفع وأرسل طلبك.</p>
   <div class="buy-grid">
 
     <div class="panel">
       <h3>طلب شراء مبدئي</h3>
       <div class="fgroup">
-        <label>المبلغ بالدولار (USD)</label>
+        <label>المبلغ بالريال العماني (OMR)</label>
         <input id="amt" type="number" min="1" value="100" />
       </div>
       <div class="fgroup">
@@ -532,8 +616,8 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
         </select>
       </div>
       <div class="fgroup">
-        <label>محفظة استلام ARBR</label>
-        <input id="wallet" placeholder="0x... أو عنوان المحفظة" />
+        <label>ملاحظة / محفظة استلام ARBR</label>
+        <input id="wallet" placeholder="0x... أو أي ملاحظة للطلب" />
       </div>
       <div class="calc-result">
         <small>الكمية المتوقعة</small>
@@ -564,7 +648,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
       <div style="margin-top:20px;padding:18px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px">
         <p style="color:var(--muted);font-size:13px;line-height:2">
           كل العمليات في المرحلة الأولى تتم بمراجعة يدوية، ويتم إرسال إيصال PDF ورقم طلب للمشارك بعد التأكيد. 
-          الحد الأدنى للشراء <strong style="color:var(--gold-light)">$10</strong>، والحد الأقصى للمرحلة المبدئية <strong style="color:var(--gold-light)">$5,000</strong>.
+          الحد الأدنى للشراء <strong style="color:var(--gold-light)">10 OMR</strong>، والحد الأقصى للمرحلة المبدئية <strong style="color:var(--gold-light)">5,000 OMR</strong>.
         </p>
       </div>
     </div>
@@ -629,6 +713,24 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   </div>
 </div>
 
+<!-- ══════════ SETTINGS MODAL ══════════ -->
+<div class="modal" id="settingsModal">
+  <div class="modal-card">
+    <button class="modal-close" id="closeSettings">×</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div class="logo-mark" style="width:40px;height:40px"><span>ARBR</span></div>
+      <div class="logo-text"><b>الإعدادات</b><small>Investor Profile</small></div>
+    </div>
+    <div class="fgroup"><label>الاسم الكامل</label><input id="settingsFullName" placeholder="اكتب اسمك الكامل" /></div>
+    <div class="fgroup"><label>رقم الهاتف</label><input id="settingsPhone" type="tel" placeholder="+..." /></div>
+    <div class="fgroup"><label>الدولة</label><input id="settingsCountry" placeholder="مثال: Oman" /></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-primary" style="flex:1;padding:13px" id="saveSettingsBtn">حفظ التغييرات</button>
+      <button class="btn-secondary" style="flex:1;padding:13px" id="settingsCloseBtn">إغلاق</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -650,6 +752,11 @@ const supabaseClient = isSupabaseConfigured
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 
+let currentUser = null;
+let currentProfile = null;
+let currentWallet = null;
+let currentPurchaseRequests = [];
+
 /* Toast */
 const toast = document.getElementById('toast');
 function showToast(msg) {
@@ -670,6 +777,220 @@ function setBusy(button, busy, text) {
   button.style.opacity = busy ? '.72' : '';
   button.style.cursor = busy ? 'wait' : '';
   button.textContent = busy ? text : button.dataset.originalText;
+}
+
+function formatNumber(value, suffix = '') {
+  const n = Number(value || 0);
+  return n.toLocaleString('en-US', { maximumFractionDigits: 2 }) + (suffix ? ' ' + suffix : '');
+}
+
+function profileDisplayName() {
+  return currentProfile?.full_name || currentUser?.email || 'مستثمر ARBR';
+}
+
+function statusLabel(status) {
+  const labels = {
+    pending: 'قيد المراجعة',
+    reviewing: 'تحت المراجعة',
+    approved: 'تمت الموافقة',
+    rejected: 'مرفوض',
+    completed: 'مكتمل'
+  };
+  return labels[status] || status || 'قيد المراجعة';
+}
+
+async function getCurrentUser() {
+  if (!requireSupabase()) return null;
+  const { data, error } = await supabaseClient.auth.getSession();
+  if (error) {
+    showToast('تعذر قراءة جلسة الدخول');
+    return null;
+  }
+  return data.session?.user || null;
+}
+
+async function loadUserProfile(user = currentUser) {
+  if (!user) return null;
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .maybeSingle();
+  if (error) {
+    showToast('تعذر تحميل بيانات الحساب');
+    return null;
+  }
+  return data || {
+    id: user.id,
+    email: user.email,
+    full_name: user.user_metadata?.full_name || '',
+    phone: user.user_metadata?.phone || '',
+    country: '',
+    account_status: 'active',
+    kyc_status: 'pending'
+  };
+}
+
+async function loadUserWallet(user = currentUser) {
+  if (!user) return null;
+  const { data, error } = await supabaseClient
+    .from('wallets')
+    .select('*')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (error) {
+    return { arbr_balance: 0, locked_arbr: 0, total_deposit_omr: 0 };
+  }
+  return data || { arbr_balance: 0, locked_arbr: 0, total_deposit_omr: 0 };
+}
+
+async function loadPurchaseRequests(user = currentUser) {
+  if (!user) return [];
+  const { data, error } = await supabaseClient
+    .from('purchase_requests')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+  if (error) {
+    showToast('تعذر تحميل طلبات الشراء');
+    return [];
+  }
+  return data || [];
+}
+
+function renderPurchaseRequests() {
+  const ordersList = document.getElementById('ordersList');
+  if (!ordersList) return;
+  if (!currentPurchaseRequests.length) {
+    ordersList.innerHTML = '<div class="empty-orders">لا توجد طلبات شراء حتى الآن.</div>';
+    return;
+  }
+  ordersList.innerHTML = currentPurchaseRequests.map(order => {
+    const createdAt = order.created_at ? new Date(order.created_at).toLocaleDateString('ar') : '-';
+    const amount = order.amount_omr ?? order.amount_usd ?? 0;
+    const estimated = order.estimated_arbr ?? order.token_amount ?? 0;
+    return `
+      <div class="order-row">
+        <div>
+          <b>${formatNumber(estimated, 'ARBR')}</b>
+          <small>${formatNumber(amount, 'OMR')} · ${order.payment_method || '-'} · ${createdAt}</small>
+        </div>
+        <span class="status-pill">${statusLabel(order.status)}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateAuthUI() {
+  const loggedIn = Boolean(currentUser);
+  const headerLoginBtn = document.getElementById('headerLoginBtn');
+  const userMenuWrap = document.getElementById('userMenuWrap');
+  const dashboard = document.getElementById('dashboard');
+  if (headerLoginBtn) headerLoginBtn.style.display = loggedIn ? 'none' : '';
+  if (userMenuWrap) userMenuWrap.classList.toggle('show', loggedIn);
+  if (dashboard) dashboard.classList.toggle('show', loggedIn);
+
+  if (!loggedIn) {
+    document.getElementById('userMenu')?.classList.remove('open');
+    return;
+  }
+
+  const email = currentProfile?.email || currentUser.email || '-';
+  const balance = currentWallet?.arbr_balance || 0;
+  const locked = currentWallet?.locked_arbr ?? currentWallet?.locked_arbr_balance ?? 0;
+  const totalDeposit = currentWallet?.total_deposit_omr || 0;
+
+  document.getElementById('navUserName').textContent = 'مرحبًا، ' + profileDisplayName();
+  document.getElementById('navUserBalance').textContent = 'الرصيد: ' + formatNumber(balance, 'ARBR');
+  document.getElementById('dashFullName').textContent = currentProfile?.full_name || '-';
+  document.getElementById('dashEmail').textContent = email;
+  document.getElementById('dashPhone').textContent = currentProfile?.phone || '-';
+  document.getElementById('dashCountry').textContent = currentProfile?.country || '-';
+  document.getElementById('dashArbrBalance').textContent = formatNumber(balance, 'ARBR');
+  document.getElementById('dashLockedArbr').textContent = formatNumber(locked, 'ARBR');
+  document.getElementById('dashTotalDeposit').textContent = formatNumber(totalDeposit, 'OMR');
+  document.getElementById('dashAccountStatus').textContent = currentProfile?.account_status || 'active';
+  document.getElementById('dashKycStatus').textContent = currentProfile?.kyc_status || 'pending';
+  renderPurchaseRequests();
+}
+
+async function refreshUserState() {
+  currentUser = await getCurrentUser();
+  if (!currentUser) {
+    currentProfile = null;
+    currentWallet = null;
+    currentPurchaseRequests = [];
+    updateAuthUI();
+    return;
+  }
+  const [profile, wallet, requests] = await Promise.all([
+    loadUserProfile(currentUser),
+    loadUserWallet(currentUser),
+    loadPurchaseRequests(currentUser)
+  ]);
+  currentProfile = profile;
+  currentWallet = wallet;
+  currentPurchaseRequests = requests;
+  updateAuthUI();
+}
+
+function openSettings() {
+  if (!currentUser) {
+    openModal();
+    showToast('يجب تسجيل الدخول أولًا');
+    return;
+  }
+  document.getElementById('settingsFullName').value = currentProfile?.full_name || '';
+  document.getElementById('settingsPhone').value = currentProfile?.phone || '';
+  document.getElementById('settingsCountry').value = currentProfile?.country || '';
+  document.getElementById('settingsModal').classList.add('open');
+  document.getElementById('userMenu')?.classList.remove('open');
+}
+
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('open');
+}
+
+async function saveSettings() {
+  if (!currentUser) return;
+  const btn = document.getElementById('saveSettingsBtn');
+  setBusy(btn, true, 'جار الحفظ...');
+  const updates = {
+    full_name: document.getElementById('settingsFullName').value.trim(),
+    phone: document.getElementById('settingsPhone').value.trim(),
+    country: document.getElementById('settingsCountry').value.trim()
+  };
+  const { error } = await supabaseClient
+    .from('profiles')
+    .update(updates)
+    .eq('id', currentUser.id);
+  setBusy(btn, false);
+  if (error) {
+    showToast('تعذر حفظ الإعدادات: ' + error.message);
+    return;
+  }
+  showToast('✓ تم حفظ التغييرات بنجاح');
+  closeSettings();
+  await refreshUserState();
+}
+
+async function logoutUser() {
+  if (!requireSupabase()) return;
+  await supabaseClient.auth.signOut();
+  currentUser = null;
+  currentProfile = null;
+  currentWallet = null;
+  currentPurchaseRequests = [];
+  updateAuthUI();
+  document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
+  showToast('تم تسجيل الخروج');
+}
+
+function requireLoginBeforePurchase() {
+  if (currentUser) return true;
+  openModal();
+  showToast('يجب تسجيل الدخول أولًا قبل إرسال طلب الشراء');
+  return false;
 }
 
 /* Modal */
@@ -707,6 +1028,7 @@ document.getElementById('doLogin').onclick = async () => {
   setBusy(btn, false);
   if (error) { showToast('تعذر تسجيل الدخول: ' + error.message); return; }
   closeModal();
+  await refreshUserState();
   showToast('✓ تم تسجيل الدخول بنجاح');
 };
 
@@ -734,6 +1056,7 @@ document.getElementById('doSignup').onclick = async () => {
   setBusy(btn, false);
   if (error) { showToast('تعذر إنشاء الحساب: ' + error.message); return; }
   closeModal();
+  await refreshUserState();
   showToast(data.session ? '✓ تم إنشاء الحساب بنجاح' : '✓ تم إنشاء الحساب. تحقق من بريدك لتأكيده');
 };
 
@@ -742,7 +1065,7 @@ const amtInput = document.getElementById('amt');
 const arbResult = document.getElementById('arbResult');
 function calc() {
   const v = Math.max(0, Number(amtInput.value || 0));
-  arbResult.textContent = (v * 1000).toLocaleString('en-US') + ' ARBR';
+  arbResult.textContent = formatNumber(v * 1000, 'ARBR');
 }
 amtInput.addEventListener('input', calc);
 calc();
@@ -750,38 +1073,62 @@ calc();
 /* Buy */
 document.getElementById('submitBuy').addEventListener('click', async () => {
   if (!requireSupabase()) return;
+  if (!requireLoginBeforePurchase()) return;
   const btn = document.getElementById('submitBuy');
-  const w = document.getElementById('wallet').value.trim();
+  const note = document.getElementById('wallet').value.trim();
   const amount = Number(amtInput.value);
   const paymentMethod = document.getElementById('payM').value;
-  if (!w) { showToast('⚠️ أدخل عنوان محفظة الاستلام'); return; }
-  if (amount < 10) { showToast('⚠️ الحد الأدنى للشراء $10'); return; }
-  if (amount > 5000) { showToast('⚠️ الحد الأقصى للمرحلة المبدئية $5,000'); return; }
+  if (!note) { showToast('⚠️ أدخل محفظة الاستلام أو ملاحظة الطلب'); return; }
+  if (amount < 10) { showToast('⚠️ الحد الأدنى للشراء 10 OMR'); return; }
+  if (amount > 5000) { showToast('⚠️ الحد الأقصى للمرحلة المبدئية 5,000 OMR'); return; }
   setBusy(btn, true, 'جار إرسال الطلب...');
-  const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-  if (userError || !user) {
-    setBusy(btn, false);
-    openModal();
-    showToast('سجل الدخول أولاً');
-    return;
-  }
   const { data, error } = await supabaseClient
     .from('purchase_requests')
     .insert({
-      user_id: user.id,
-      amount_usd: amount,
+      user_id: currentUser.id,
+      amount_omr: amount,
+      estimated_arbr: amount * 1000,
       payment_method: paymentMethod,
-      wallet_address: w
+      note,
+      status: 'pending'
     })
     .select('id')
     .single();
   setBusy(btn, false);
   if (error) { showToast('تعذر تسجيل الطلب: ' + error.message); return; }
-  showToast('✓ تم تسجيل طلبك رقم ' + data.id.slice(0, 8));
+  showToast('تم إرسال طلب الشراء وسيتم مراجعته يدويًا');
+  currentPurchaseRequests = await loadPurchaseRequests(currentUser);
+  updateAuthUI();
+  document.getElementById('wallet').value = '';
+  document.getElementById('ordersPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 /* Float btn */
 document.getElementById('floatBtn').onclick = () => showToast('📞 سيتم التواصل معك قريبًا');
+
+/* Account menu */
+document.getElementById('userBox').addEventListener('click', () => {
+  document.getElementById('userMenu').classList.toggle('open');
+});
+document.addEventListener('click', e => {
+  if (!document.getElementById('userMenuWrap').contains(e.target)) {
+    document.getElementById('userMenu').classList.remove('open');
+  }
+});
+document.querySelectorAll('[data-scroll-dashboard]').forEach(btn => btn.addEventListener('click', () => {
+  document.getElementById('dashboard')?.scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('userMenu')?.classList.remove('open');
+}));
+document.querySelectorAll('[data-scroll-orders]').forEach(btn => btn.addEventListener('click', () => {
+  document.getElementById('ordersPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('userMenu')?.classList.remove('open');
+}));
+document.getElementById('openSettingsBtn').addEventListener('click', openSettings);
+document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+document.getElementById('closeSettings').addEventListener('click', closeSettings);
+document.getElementById('settingsCloseBtn').addEventListener('click', closeSettings);
+document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+document.getElementById('settingsModal').addEventListener('click', e => { if (e.target.id === 'settingsModal') closeSettings(); });
 
 /* Nav active */
 document.querySelectorAll('.nav-links a').forEach(a => {
@@ -790,6 +1137,11 @@ document.querySelectorAll('.nav-links a').forEach(a => {
     this.classList.add('active');
   });
 });
+
+refreshUserState();
+if (supabaseClient) {
+  supabaseClient.auth.onAuthStateChange(() => refreshUserState());
+}
 </script>
 </body>
 </html>

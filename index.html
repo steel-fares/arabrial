@@ -56,6 +56,22 @@ nav{height:74px;padding:0 6%;display:flex;align-items:center;justify-content:spa
 .nav-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
 .lang-btn{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);
   color:var(--light);padding:8px 14px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer}
+.user-menu-wrap{position:relative;display:none}
+.user-menu-wrap.show{display:block}
+.user-box{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid var(--border-strong);
+  color:var(--text);border-radius:12px;padding:8px 12px;cursor:pointer;min-width:190px;text-align:right}
+.user-avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#080b12;font-weight:900;flex-shrink:0}
+.user-box strong{display:block;font-size:13px;line-height:1.25;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-box small{display:block;font-size:11px;color:var(--gold-light);line-height:1.35}
+.user-menu{position:absolute;top:calc(100% + 10px);left:0;width:210px;background:rgba(10,14,24,.98);
+  border:1px solid var(--border-strong);border-radius:14px;padding:8px;box-shadow:0 24px 70px rgba(0,0,0,.55);
+  display:none;z-index:250}
+.user-menu.open{display:block}
+.menu-item{width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:none;border-radius:10px;
+  background:transparent;color:var(--light);font-size:13px;font-weight:800;cursor:pointer;text-align:right}
+.menu-item:hover{background:rgba(200,149,42,.1);color:var(--gold-light)}
+.menu-item.danger{color:#fda4af}
 
 /* ── Buttons ── */
 .btn-primary{background:linear-gradient(135deg,var(--gold-soft),var(--gold));
@@ -214,6 +230,50 @@ p.hero-lead{font-size:15px;line-height:2.1;color:var(--light);max-width:460px;
   color:var(--gold-light);padding:5px 12px;border-radius:8px;
   font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0}
 
+/* Dashboard */
+.dashboard-sec{display:none}
+.dashboard-sec.show{display:block}
+.dashboard-shell{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;align-items:start}
+.dash-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:26px;backdrop-filter:blur(18px)}
+.dash-card h3{font-size:18px;color:var(--gold-light);margin-bottom:18px;font-weight:900}
+.dash-profile{display:flex;align-items:center;gap:16px;padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--border)}
+.dash-avatar{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#080b12;font-size:22px;font-weight:900}
+.dash-profile h3{margin:0 0 4px;font-size:19px;color:var(--text)}
+.dash-profile small{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.dash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.dash-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.dash-stat{background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:14px;padding:14px}
+.dash-stat small{display:block;color:var(--muted);font-size:11px;font-weight:800;margin-bottom:6px}
+.dash-stat b{display:block;color:var(--text);font-size:15px;overflow-wrap:anywhere}
+.dash-stat.feature b{font-size:22px;color:var(--gold-light)}
+.legal-notice{margin-top:18px;background:rgba(200,149,42,.055);border:1px solid rgba(200,149,42,.18);
+  color:var(--muted);border-radius:14px;padding:14px 16px;font-size:12px;line-height:1.8}
+.orders-list{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow:auto;padding-left:4px}
+.order-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:rgba(255,255,255,.035);
+  border:1px solid var(--border);border-radius:14px;padding:13px 14px}
+.order-row b{font-size:14px;color:var(--text)}
+.order-row small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.status-pill{background:rgba(200,149,42,.14);border:1px solid rgba(200,149,42,.28);color:var(--gold-light);
+  border-radius:999px;padding:5px 10px;font-size:11px;font-weight:900;white-space:nowrap}
+.status-pill.approved{background:rgba(34,197,94,.13);border-color:rgba(34,197,94,.3);color:#86efac}
+.status-pill.rejected{background:rgba(239,68,68,.13);border-color:rgba(239,68,68,.3);color:#fca5a5}
+.empty-orders{color:var(--muted);font-size:13px;line-height:1.8;border:1px dashed var(--border-strong);border-radius:14px;padding:18px;text-align:center}
+.orders-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:14px;padding:6px;width:fit-content}
+.orders-tab{border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:900;padding:8px 16px;border-radius:10px;cursor:pointer}
+.orders-tab.active{background:rgba(200,149,42,.16);color:var(--gold-light)}
+.orders-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:14px}
+.orders-table{width:100%;border-collapse:collapse;min-width:720px}
+.orders-table th,.orders-table td{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.055);font-size:13px;text-align:right;white-space:nowrap}
+.orders-table th{color:var(--gold-light);background:rgba(255,255,255,.035);font-weight:900}
+.orders-table td{color:var(--light)}
+.orders-table tr:last-child td{border-bottom:none}
+.req-id{color:var(--gold-light);font-weight:900;font-family:ui-monospace,Consolas,monospace}
+.price-info{background:rgba(200,149,42,.065);border:1px solid rgba(200,149,42,.22);border-radius:14px;padding:14px 16px;margin-bottom:18px}
+.price-line{display:flex;justify-content:space-between;gap:14px;font-size:13px;color:var(--muted);line-height:1.7}
+.price-line b{color:var(--gold-light)}
+.buy-legal{font-size:11px;color:var(--muted);line-height:1.8;text-align:center;margin-top:12px}
+
 /* CTA */
 .cta-sec{margin:0 6% 80px;padding:60px 7%;
   background:linear-gradient(135deg,rgba(200,149,42,.12),rgba(200,149,42,.04));
@@ -282,12 +342,16 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   border-radius:12px;padding:13px 28px;font-size:14px;font-weight:700;
   z-index:600;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:rgba(34,197,94,.45);color:#dcfce7}
+.toast.warning{border-color:rgba(240,190,85,.55);color:var(--gold-light)}
+.toast.error{border-color:rgba(239,68,68,.55);color:#fecaca}
 
 /* ── Responsive ── */
 @media(max-width:960px){
   .hero-inner{grid-template-columns:1fr}
   .hero-visual{display:none}
   .buy-grid{grid-template-columns:1fr}
+  .dashboard-shell{grid-template-columns:1fr}
   .nav-links{display:none}
   .hero{padding:60px 5% 0}
   .sec{padding:60px 5%}
@@ -298,6 +362,11 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   p.hero-lead{margin:0 auto}
 }
 @media(max-width:600px){
+  nav{height:auto;min-height:74px;align-items:flex-start;padding-top:12px;padding-bottom:12px}
+  .nav-actions{flex-wrap:wrap;justify-content:flex-end}
+  .user-box{min-width:0;width:100%;max-width:230px}
+  .user-menu{left:auto;right:0;width:220px}
+  .dash-grid{grid-template-columns:1fr}
   .stat-item{min-width:140px;padding:18px 18px}
   .stat-item b{font-size:17px}
   .panel{padding:24px 20px}
@@ -325,7 +394,22 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   </ul>
   <div class="nav-actions">
     <button class="lang-btn">🌐 العربية</button>
-    <button class="btn-primary" data-open-login>تسجيل الدخول</button>
+    <button class="btn-primary" id="headerLoginBtn" data-open-login>تسجيل الدخول</button>
+    <div class="user-menu-wrap" id="userMenuWrap">
+      <button class="user-box" id="userBox" type="button">
+        <span class="user-avatar">AR</span>
+        <span>
+          <strong id="navUserName">مرحبًا</strong>
+          <small id="navUserBalance">الرصيد: 0 ARBR</small>
+        </span>
+      </button>
+      <div class="user-menu" id="userMenu">
+        <button class="menu-item" type="button" data-scroll-dashboard>لوحة التحكم <span>↙</span></button>
+        <button class="menu-item" type="button" data-scroll-orders>طلباتي <span>↙</span></button>
+        <button class="menu-item" type="button" id="openSettingsBtn">الإعدادات <span>⚙</span></button>
+        <button class="menu-item danger" type="button" id="logoutBtn">تسجيل الخروج <span>×</span></button>
+      </div>
+    </div>
   </div>
 </nav>
 
@@ -512,16 +596,75 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   </div>
 </section>
 
+<!-- ══════════ INVESTOR DASHBOARD ══════════ -->
+<section class="sec dashboard-sec" id="dashboard">
+  <h2 class="sec-title">لوحة <span>المستثمر</span></h2>
+  <p class="sec-desc">ملخص حسابك ورصيدك وطلبات الشراء الأخيرة داخل ARBR.</p>
+  <div class="dashboard-shell">
+    <div class="dash-card">
+      <div class="dash-profile">
+        <div class="dash-avatar" id="dashAvatar">A</div>
+        <div>
+          <h3 id="dashFullName">-</h3>
+          <small id="dashEmail">-</small>
+        </div>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-stat"><small>رقم الهاتف</small><b id="dashPhone">-</b></div>
+        <div class="dash-stat"><small>حالة الحساب</small><b id="dashAccountStatus">نشط</b></div>
+      </div>
+      <div class="legal-notice">ARBR رمز منفعة رقمي داخل منصة Arab Rial. ليست عملة قانونية، وليست صادرة من بنك مركزي، ولا يوجد أي ضمان لسعر مستقبلي أو عائد مالي. جميع الطلبات تخضع للمراجعة اليدوية.</div>
+    </div>
+    <div class="dash-card">
+      <h3>الأرصدة والإحصائيات</h3>
+      <div class="dash-stats-grid">
+        <div class="dash-stat feature"><small>رصيد ARBR</small><b id="dashArbrBalance">0 ARBR</b></div>
+        <div class="dash-stat feature"><small>ARBR المقفل</small><b id="dashLockedArbr">0 ARBR</b></div>
+        <div class="dash-stat feature"><small>إجمالي الإيداع</small><b id="dashTotalDeposit">0 OMR</b></div>
+        <div class="dash-stat feature"><small>طلبات الشراء</small><b id="dashTotalRequests">0</b></div>
+        <div class="dash-stat feature"><small>قيد المراجعة</small><b id="dashPendingRequests">0</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="dash-card" id="ordersPanel" style="margin-top:22px">
+      <h3>طلبات الشراء الأخيرة</h3>
+      <div class="orders-list" id="ordersList">
+        <div class="empty-orders">لا توجد طلبات شراء حتى الآن.</div>
+      </div>
+  </div>
+</section>
+
+<!-- ══════════ MY ORDERS ══════════ -->
+<section class="sec dashboard-sec" id="myOrders">
+  <h2 class="sec-title">طلباتي <span>ARBR</span></h2>
+  <p class="sec-desc">تتبع كل طلبات الشراء الخاصة بحسابك فقط.</p>
+  <div class="dash-card">
+    <div class="orders-tabs">
+      <button class="orders-tab active" data-order-filter="all">الكل</button>
+      <button class="orders-tab" data-order-filter="pending">قيد المراجعة</button>
+      <button class="orders-tab" data-order-filter="approved">موافق</button>
+      <button class="orders-tab" data-order-filter="rejected">مرفوض</button>
+    </div>
+    <div id="allOrdersList">
+      <div class="empty-orders">لا توجد طلبات شراء حتى الآن.</div>
+    </div>
+  </div>
+</section>
+
 <!-- ══════════ BUY ══════════ -->
 <section class="sec" id="buy">
   <h2 class="sec-title">اشترِ <span>ARBR</span></h2>
-  <p class="sec-desc">سعر الدخول المبكر: $1 = 1,000 ARBR. اختر المبلغ وطريقة الدفع وأرسل طلبك.</p>
+  <p class="sec-desc">سعر الدخول المبكر: 1 OMR = 1,000 ARBR. اختر المبلغ وطريقة الدفع وأرسل طلبك.</p>
   <div class="buy-grid">
 
     <div class="panel">
       <h3>طلب شراء مبدئي</h3>
+      <div class="price-info">
+        <div class="price-line"><span>سعر الدخول المبكر</span><b>1 OMR = 1,000 ARBR</b></div>
+        <div class="price-line"><span>المرحلة الحالية</span><b>Founders</b></div>
+      </div>
       <div class="fgroup">
-        <label>المبلغ بالدولار (USD)</label>
+        <label>المبلغ بالريال العماني (OMR)</label>
         <input id="amt" type="number" min="1" value="100" />
       </div>
       <div class="fgroup">
@@ -532,14 +675,15 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
         </select>
       </div>
       <div class="fgroup">
-        <label>محفظة استلام ARBR</label>
-        <input id="wallet" placeholder="0x... أو عنوان المحفظة" />
+        <label>ملاحظة / محفظة استلام ARBR</label>
+        <input id="wallet" placeholder="0x... أو أي ملاحظة للطلب" />
       </div>
       <div class="calc-result">
         <small>الكمية المتوقعة</small>
         <b id="arbResult">100,000 ARBR</b>
-        <small style="display:block;margin-top:4px">بدون احتساب رسوم التشغيل أو بوابة الدفع</small>
+        <small style="display:block;margin-top:4px">الكمية تقديرية وسيتم مراجعة الطلب يدويًا قبل التفعيل</small>
       </div>
+      <p class="buy-legal">⚠ ARBR ليست عملة قانونية ولا يوجد ضمان لأي سعر أو عائد مستقبلي.</p>
       <button class="btn-primary" style="width:100%;padding:15px;font-size:15px" id="submitBuy">🪙 إرسال طلب الشراء</button>
     </div>
 
@@ -564,7 +708,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
       <div style="margin-top:20px;padding:18px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px">
         <p style="color:var(--muted);font-size:13px;line-height:2">
           كل العمليات في المرحلة الأولى تتم بمراجعة يدوية، ويتم إرسال إيصال PDF ورقم طلب للمشارك بعد التأكيد. 
-          الحد الأدنى للشراء <strong style="color:var(--gold-light)">$10</strong>، والحد الأقصى للمرحلة المبدئية <strong style="color:var(--gold-light)">$5,000</strong>.
+          الحد الأدنى للشراء <strong style="color:var(--gold-light)">10 OMR</strong>، والحد الأقصى للمرحلة المبدئية <strong style="color:var(--gold-light)">5,000 OMR</strong>.
         </p>
       </div>
     </div>
@@ -629,6 +773,24 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   </div>
 </div>
 
+<!-- ══════════ SETTINGS MODAL ══════════ -->
+<div class="modal" id="settingsModal">
+  <div class="modal-card">
+    <button class="modal-close" id="closeSettings">×</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div class="logo-mark" style="width:40px;height:40px"><span>ARBR</span></div>
+      <div class="logo-text"><b>الإعدادات</b><small>Investor Profile</small></div>
+    </div>
+    <div class="fgroup"><label>الاسم الكامل</label><input id="settingsFullName" placeholder="اكتب اسمك الكامل" /></div>
+    <div class="fgroup"><label>رقم الهاتف</label><input id="settingsPhone" type="tel" placeholder="+..." /></div>
+    <div class="fgroup hidden" id="settingsCountryGroup"><label>الدولة</label><input id="settingsCountry" placeholder="مثال: Oman" /></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-primary" style="flex:1;padding:13px" id="saveSettingsBtn">حفظ التغييرات</button>
+      <button class="btn-secondary" style="flex:1;padding:13px" id="settingsCloseBtn">إغلاق</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -644,16 +806,22 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const isSupabaseConfigured =
   Boolean(window.supabase) &&
   SUPABASE_URL.startsWith('https://') &&
-  !SUPABASE_URL.includes('YOUR_PROJECT_ID') &&
-  !SUPABASE_ANON_KEY.includes('YOUR_SUPABASE');
+  SUPABASE_ANON_KEY.length > 40;
 const supabaseClient = isSupabaseConfigured
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 
+let currentUser = null;
+let currentProfile = null;
+let currentWallet = null;
+let currentPurchaseRequests = [];
+let activeOrdersFilter = 'all';
+
 /* Toast */
 const toast = document.getElementById('toast');
-function showToast(msg) {
+function showToast(msg, type = 'success') {
   toast.textContent = msg;
+  toast.className = 'toast ' + type;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3200);
 }
@@ -670,6 +838,291 @@ function setBusy(button, busy, text) {
   button.style.opacity = busy ? '.72' : '';
   button.style.cursor = busy ? 'wait' : '';
   button.textContent = busy ? text : button.dataset.originalText;
+}
+
+function formatNumber(value, suffix = '') {
+  const n = Number(value || 0);
+  return n.toLocaleString('en-US', { maximumFractionDigits: 2 }) + (suffix ? ' ' + suffix : '');
+}
+
+function profileDisplayName() {
+  return currentProfile?.full_name || currentUser?.email || 'مستثمر ARBR';
+}
+
+function statusLabel(status) {
+  const labels = {
+    pending: 'قيد المراجعة',
+    reviewing: 'تحت المراجعة',
+    approved: 'تمت الموافقة',
+    rejected: 'مرفوض',
+    completed: 'مكتمل'
+  };
+  return labels[status] || status || 'قيد المراجعة';
+}
+
+function statusClass(status) {
+  if (status === 'approved' || status === 'completed') return 'approved';
+  if (status === 'rejected') return 'rejected';
+  return 'pending';
+}
+
+function requestAmount(order) {
+  return Number(order.amount_omr || 0);
+}
+
+function requestEstimated(order) {
+  return Number(order.estimated_arbr || 0);
+}
+
+function requestDate(order) {
+  return order.created_at ? new Date(order.created_at).toLocaleDateString('ar') : '-';
+}
+
+function requestId(order) {
+  return '#ARBR-' + String(order.id || '').slice(-6).toUpperCase();
+}
+
+function profileHasColumn(column) {
+  return currentProfile && Object.prototype.hasOwnProperty.call(currentProfile, column);
+}
+
+async function getCurrentUser() {
+  if (!requireSupabase()) return null;
+  const { data, error } = await supabaseClient.auth.getSession();
+  if (error) {
+    showToast('تعذر قراءة جلسة الدخول');
+    return null;
+  }
+  return data.session?.user || null;
+}
+
+async function loadUserProfile(user = currentUser) {
+  if (!user) return null;
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .maybeSingle();
+  if (error) {
+    showToast('تعذر تحميل بيانات الحساب');
+    return null;
+  }
+  return data || {
+    id: user.id,
+    email: user.email,
+    full_name: user.user_metadata?.full_name || '',
+    phone: user.user_metadata?.phone || ''
+  };
+}
+
+async function loadUserWallet(user = currentUser) {
+  if (!user) return null;
+  const { data, error } = await supabaseClient
+    .from('wallets')
+    .select('*')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (error) {
+    return { arbr_balance: 0, locked_arbr: 0, total_deposit_omr: 0 };
+  }
+  return data || { arbr_balance: 0, locked_arbr: 0, total_deposit_omr: 0 };
+}
+
+async function loadPurchaseRequests(user = currentUser) {
+  if (!user) return [];
+  const { data, error } = await supabaseClient
+    .from('purchase_requests')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+  if (error) {
+    showToast('تعذر تحميل طلبات الشراء');
+    return [];
+  }
+  return data || [];
+}
+
+function renderPurchaseRequests() {
+  const ordersList = document.getElementById('ordersList');
+  if (!ordersList) return;
+  if (!currentPurchaseRequests.length) {
+    ordersList.innerHTML = '<div class="empty-orders">لا توجد طلبات شراء حتى الآن.</div>';
+    return;
+  }
+  const recent = currentPurchaseRequests.slice(0, 5);
+  ordersList.innerHTML = renderOrdersTable(recent, false);
+}
+
+function renderOrdersTable(orders, showNote = true) {
+  return `
+    <div class="orders-table-wrap">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>رقم الطلب</th>
+            <th>المبلغ</th>
+            <th>طريقة الدفع</th>
+            <th>الكمية المقدرة</th>
+            <th>الحالة</th>
+            <th>التاريخ</th>
+            ${showNote ? '<th>الملاحظة</th>' : ''}
+          </tr>
+        </thead>
+        <tbody>
+          ${orders.map(order => `
+            <tr>
+              <td class="req-id">${requestId(order)}</td>
+              <td>${formatNumber(requestAmount(order), 'OMR')}</td>
+              <td>${order.payment_method || '-'}</td>
+              <td>${formatNumber(requestEstimated(order), 'ARBR')}</td>
+              <td><span class="status-pill ${statusClass(order.status)}">${statusLabel(order.status)}</span></td>
+              <td>${requestDate(order)}</td>
+              ${showNote ? `<td>${order.note || order.admin_note || '-'}</td>` : ''}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderAllOrders(filter = activeOrdersFilter) {
+  activeOrdersFilter = filter;
+  document.querySelectorAll('.orders-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.orderFilter === filter);
+  });
+  const allOrdersList = document.getElementById('allOrdersList');
+  if (!allOrdersList) return;
+  const filtered = filter === 'all'
+    ? currentPurchaseRequests
+    : currentPurchaseRequests.filter(order => order.status === filter);
+  if (!filtered.length) {
+    allOrdersList.innerHTML = '<div class="empty-orders">لا توجد طلبات في هذا القسم.</div>';
+    return;
+  }
+  allOrdersList.innerHTML = renderOrdersTable(filtered, true);
+}
+
+function updateAuthUI() {
+  const loggedIn = Boolean(currentUser);
+  const headerLoginBtn = document.getElementById('headerLoginBtn');
+  const userMenuWrap = document.getElementById('userMenuWrap');
+  const dashboard = document.getElementById('dashboard');
+  const myOrders = document.getElementById('myOrders');
+  if (headerLoginBtn) headerLoginBtn.style.display = loggedIn ? 'none' : '';
+  if (userMenuWrap) userMenuWrap.classList.toggle('show', loggedIn);
+  if (dashboard) dashboard.classList.toggle('show', loggedIn);
+  if (myOrders) myOrders.classList.toggle('show', loggedIn);
+
+  if (!loggedIn) {
+    document.getElementById('userMenu')?.classList.remove('open');
+    return;
+  }
+
+  const email = currentProfile?.email || currentUser.email || '-';
+  const balance = currentWallet?.arbr_balance || 0;
+  const locked = currentWallet?.locked_arbr || 0;
+  const totalDeposit = currentWallet?.total_deposit_omr || 0;
+  const pendingRequests = currentPurchaseRequests.filter(order => order.status === 'pending').length;
+  const name = profileDisplayName();
+
+  document.getElementById('navUserName').textContent = 'مرحبًا، ' + name;
+  document.getElementById('navUserBalance').textContent = 'الرصيد: ' + formatNumber(balance, 'ARBR');
+  document.getElementById('dashAvatar').textContent = (name || 'A').trim().charAt(0).toUpperCase();
+  document.getElementById('dashFullName').textContent = currentProfile?.full_name || currentUser.email?.split('@')[0] || '-';
+  document.getElementById('dashEmail').textContent = email;
+  document.getElementById('dashPhone').textContent = currentProfile?.phone || '-';
+  document.getElementById('dashArbrBalance').textContent = formatNumber(balance, 'ARBR');
+  document.getElementById('dashLockedArbr').textContent = formatNumber(locked, 'ARBR');
+  document.getElementById('dashTotalDeposit').textContent = formatNumber(totalDeposit, 'OMR');
+  document.getElementById('dashTotalRequests').textContent = currentPurchaseRequests.length;
+  document.getElementById('dashPendingRequests').textContent = pendingRequests;
+  document.getElementById('dashAccountStatus').textContent = profileHasColumn('account_status') ? (currentProfile.account_status || 'نشط') : 'نشط';
+  renderPurchaseRequests();
+  renderAllOrders(activeOrdersFilter);
+}
+
+async function refreshUserState() {
+  currentUser = await getCurrentUser();
+  if (!currentUser) {
+    currentProfile = null;
+    currentWallet = null;
+    currentPurchaseRequests = [];
+    updateAuthUI();
+    return;
+  }
+  const [profile, wallet, requests] = await Promise.all([
+    loadUserProfile(currentUser),
+    loadUserWallet(currentUser),
+    loadPurchaseRequests(currentUser)
+  ]);
+  currentProfile = profile;
+  currentWallet = wallet;
+  currentPurchaseRequests = requests;
+  updateAuthUI();
+}
+
+function openSettings() {
+  if (!currentUser) {
+    openModal();
+    showToast('يجب تسجيل الدخول أولًا');
+    return;
+  }
+  document.getElementById('settingsFullName').value = currentProfile?.full_name || '';
+  document.getElementById('settingsPhone').value = currentProfile?.phone || '';
+  const countrySupported = profileHasColumn('country');
+  document.getElementById('settingsCountryGroup').classList.toggle('hidden', !countrySupported);
+  document.getElementById('settingsCountry').value = countrySupported ? (currentProfile?.country || '') : '';
+  document.getElementById('settingsModal').classList.add('open');
+  document.getElementById('userMenu')?.classList.remove('open');
+}
+
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('open');
+}
+
+async function saveSettings() {
+  if (!currentUser) return;
+  const btn = document.getElementById('saveSettingsBtn');
+  setBusy(btn, true, 'جار الحفظ...');
+  const updates = {
+    full_name: document.getElementById('settingsFullName').value.trim(),
+    phone: document.getElementById('settingsPhone').value.trim()
+  };
+  if (profileHasColumn('country')) {
+    updates.country = document.getElementById('settingsCountry').value.trim();
+  }
+  const { error } = await supabaseClient
+    .from('profiles')
+    .update(updates)
+    .eq('id', currentUser.id);
+  setBusy(btn, false);
+  if (error) {
+    showToast('تعذر حفظ الإعدادات: ' + error.message, 'error');
+    return;
+  }
+  showToast('✓ تم حفظ التغييرات بنجاح', 'success');
+  closeSettings();
+  await refreshUserState();
+}
+
+async function logoutUser() {
+  if (!requireSupabase()) return;
+  await supabaseClient.auth.signOut();
+  currentUser = null;
+  currentProfile = null;
+  currentWallet = null;
+  currentPurchaseRequests = [];
+  updateAuthUI();
+  document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
+  showToast('تم تسجيل الخروج');
+}
+
+function requireLoginBeforePurchase() {
+  if (currentUser) return true;
+  openModal();
+  showToast('يجب تسجيل الدخول أولًا قبل إرسال طلب الشراء', 'warning');
+  return false;
 }
 
 /* Modal */
@@ -705,8 +1158,9 @@ document.getElementById('doLogin').onclick = async () => {
   setBusy(btn, true, 'جار تسجيل الدخول...');
   const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
   setBusy(btn, false);
-  if (error) { showToast('تعذر تسجيل الدخول: ' + error.message); return; }
+  if (error) { showToast('تعذر تسجيل الدخول: ' + error.message, 'error'); return; }
   closeModal();
+  await refreshUserState();
   showToast('✓ تم تسجيل الدخول بنجاح');
 };
 
@@ -732,8 +1186,9 @@ document.getElementById('doSignup').onclick = async () => {
     }
   });
   setBusy(btn, false);
-  if (error) { showToast('تعذر إنشاء الحساب: ' + error.message); return; }
+  if (error) { showToast('تعذر إنشاء الحساب: ' + error.message, 'error'); return; }
   closeModal();
+  await refreshUserState();
   showToast(data.session ? '✓ تم إنشاء الحساب بنجاح' : '✓ تم إنشاء الحساب. تحقق من بريدك لتأكيده');
 };
 
@@ -742,7 +1197,7 @@ const amtInput = document.getElementById('amt');
 const arbResult = document.getElementById('arbResult');
 function calc() {
   const v = Math.max(0, Number(amtInput.value || 0));
-  arbResult.textContent = (v * 1000).toLocaleString('en-US') + ' ARBR';
+  arbResult.textContent = formatNumber(v * 1000, 'ARBR');
 }
 amtInput.addEventListener('input', calc);
 calc();
@@ -750,38 +1205,65 @@ calc();
 /* Buy */
 document.getElementById('submitBuy').addEventListener('click', async () => {
   if (!requireSupabase()) return;
+  if (!requireLoginBeforePurchase()) return;
   const btn = document.getElementById('submitBuy');
-  const w = document.getElementById('wallet').value.trim();
+  const note = document.getElementById('wallet').value.trim();
   const amount = Number(amtInput.value);
   const paymentMethod = document.getElementById('payM').value;
-  if (!w) { showToast('⚠️ أدخل عنوان محفظة الاستلام'); return; }
-  if (amount < 10) { showToast('⚠️ الحد الأدنى للشراء $10'); return; }
-  if (amount > 5000) { showToast('⚠️ الحد الأقصى للمرحلة المبدئية $5,000'); return; }
+  if (!note) { showToast('⚠️ أدخل محفظة الاستلام أو ملاحظة الطلب', 'warning'); return; }
+  if (amount < 10) { showToast('⚠️ الحد الأدنى للشراء 10 OMR', 'warning'); return; }
+  if (amount > 5000) { showToast('⚠️ الحد الأقصى للمرحلة المبدئية 5,000 OMR', 'warning'); return; }
   setBusy(btn, true, 'جار إرسال الطلب...');
-  const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-  if (userError || !user) {
-    setBusy(btn, false);
-    openModal();
-    showToast('سجل الدخول أولاً');
-    return;
-  }
   const { data, error } = await supabaseClient
     .from('purchase_requests')
     .insert({
-      user_id: user.id,
-      amount_usd: amount,
+      user_id: currentUser.id,
+      amount_omr: amount,
+      estimated_arbr: amount * 1000,
       payment_method: paymentMethod,
-      wallet_address: w
+      note,
+      status: 'pending'
     })
     .select('id')
     .single();
   setBusy(btn, false);
-  if (error) { showToast('تعذر تسجيل الطلب: ' + error.message); return; }
-  showToast('✓ تم تسجيل طلبك رقم ' + data.id.slice(0, 8));
+  if (error) { showToast('تعذر تسجيل الطلب: ' + error.message, 'error'); return; }
+  showToast('تم إرسال طلب الشراء وسيتم مراجعته يدويًا', 'success');
+  currentPurchaseRequests = await loadPurchaseRequests(currentUser);
+  updateAuthUI();
+  document.getElementById('wallet').value = '';
+  document.getElementById('myOrders')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 /* Float btn */
 document.getElementById('floatBtn').onclick = () => showToast('📞 سيتم التواصل معك قريبًا');
+
+/* Account menu */
+document.getElementById('userBox').addEventListener('click', () => {
+  document.getElementById('userMenu').classList.toggle('open');
+});
+document.addEventListener('click', e => {
+  if (!document.getElementById('userMenuWrap').contains(e.target)) {
+    document.getElementById('userMenu').classList.remove('open');
+  }
+});
+document.querySelectorAll('[data-scroll-dashboard]').forEach(btn => btn.addEventListener('click', () => {
+  document.getElementById('dashboard')?.scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('userMenu')?.classList.remove('open');
+}));
+document.querySelectorAll('[data-scroll-orders]').forEach(btn => btn.addEventListener('click', () => {
+  document.getElementById('myOrders')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('userMenu')?.classList.remove('open');
+}));
+document.querySelectorAll('.orders-tab').forEach(btn => {
+  btn.addEventListener('click', () => renderAllOrders(btn.dataset.orderFilter || 'all'));
+});
+document.getElementById('openSettingsBtn').addEventListener('click', openSettings);
+document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+document.getElementById('closeSettings').addEventListener('click', closeSettings);
+document.getElementById('settingsCloseBtn').addEventListener('click', closeSettings);
+document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+document.getElementById('settingsModal').addEventListener('click', e => { if (e.target.id === 'settingsModal') closeSettings(); });
 
 /* Nav active */
 document.querySelectorAll('.nav-links a').forEach(a => {
@@ -790,6 +1272,11 @@ document.querySelectorAll('.nav-links a').forEach(a => {
     this.classList.add('active');
   });
 });
+
+refreshUserState();
+if (supabaseClient) {
+  supabaseClient.auth.onAuthStateChange(() => refreshUserState());
+}
 </script>
 </body>
 </html>
