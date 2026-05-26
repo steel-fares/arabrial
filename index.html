@@ -1920,6 +1920,347 @@ async function loadRedeemRequests(user = currentUser) {
   return data || [];
 }
 
+function isAdminUser() {
+  return currentProfile?.role === 'admin';
+}
+
+function adminFallbackText(value) {
+  return value || t('adminNotAvailable');
+}
+
+function adminDate(value) {
+  return value ? new Date(value).toLocaleString(currentLang === 'ar' ? 'ar' : 'en-US') : '-';
+}
+
+function todayStartIso() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString();
+}
+
+async function enrichAdminRowsWithProfiles(rows) {
+  const userIds = [...new Set((rows || []).map(row => row.user_id).filter(Boolean))];
+  if (!userIds.length) return rows || [];
+  let profileMap = {};
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('id, full_name, email')
+    .in('id', userIds);
+  if (!error && Array.isArray(data)) {
+    profileMap = data.reduce((acc, profile) => {
+      acc[profile.id] = profile;
+      return acc;
+    }, {});
+  }
+  return (rows || []).map(row => ({
+    ...row,
+    _profileName: profileMap[row.user_id]?.full_name || '',
+    _profileEmail: profileMap[row.user_id]?.email || ''
+  }));
+}
+
+async function loadAdminPurchaseRequests() {
+  const { data, error } = await supabaseClient
+    .from('purchase_requests')
+    .select('*')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false })
+    .limit(20);
+  if (error) throw error;
+  adminPurchaseRequests = await enrichAdminRowsWithProfiles(data || []);
+  return adminPurchaseRequests;
+}
+
+async function loadAdminPilotDeposits() {
+  const { data, error } = await supabaseClient
+    .from('pilot_deposits')
+    .select('*')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false })
+    .limit(20);
+  if (error) throw error;
+  adminPilotDeposits = await enrichAdminRowsWithProfiles(data || []);
+  return adminPilotDeposits;
+}
+
+async function loadAdminCounts() {
+  const start = todayStartIso();
+  const [purchaseCount, depositCount, purchaseToday, depositToday] = await Promise.all([
+    supabaseClient.from('purchase_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabaseClient.from('pilot_deposits').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabaseClient.from('purchase_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending').gte('created_at', start),
+    supabaseClient.from('pilot_deposits').select('id', { count: 'exact', head: true }).eq('status', 'pending').gte('created_at', start)
+  ]);
+  const firstError = [purchaseCount, depositCount, purchaseToday, depositToday].find(result => result.error)?.error;
+  if (firstError) throw firstError;
+  adminSummary = {
+    pendingPurchases: purchaseCount.count || 0,
+    pendingDeposits: depositCount.count || 0,
+    totalPending: (purchaseCount.count || 0) + (depositCount.count || 0),
+    todayRequests: (purchaseToday.count || 0) + (depositToday.count || 0)
+  };
+}
+
+async function loadAdminDashboard() {
+  if (!isAdminUser() || !supabaseClient) return;
+  adminDashboardError = '';
+  const content = document.getElementById('adminDashboardContent');
+  const notice = document.getElementById('adminPermissionNotice');
+  if (notice) notice.classList.add('hidden');
+  if (content) content.classList.remove('hidden');
+  document.getElementById('adminPurchaseRequestsTable').innerHTML = `<div class="admin-state-card admin-loading" data-i18n="loadingAdmin">${t('loadingAdmin')}</div>`;
+  document.getElementById('adminPilotDepositsTable').innerHTML = `<div class="admin-state-card admin-loading" data-i18n="loadingAdmin">${t('loadingAdmin')}</div>`;
+  try {
+    await Promise.all([
+      loadAdminCounts(),
+      loadAdminPurchaseRequests(),
+      loadAdminPilotDeposits()
+    ]);
+  } catch (error) {
+    adminDashboardError = error?.message || t('adminRlsRequired');
+    adminPurchaseRequests = [];
+    adminPilotDeposits = [];
+    adminSummary = { pendingPurchases: 0, pendingDeposits: 0, totalPending: 0, todayRequests: 0 };
+    if (notice) {
+      notice.textContent = t('adminRlsRequired');
+      notice.classList.remove('hidden');
+    }
+    if (content) content.classList.add('hidden');
+  }
+  renderAdminSummary();
+  renderAdminPurchaseRequests();
+  renderAdminPilotDeposits();
+  renderAdminNotificationBadge();
+  setLanguage(currentLang);
+}
+
+function renderAdminSummary() {
+  const holder = document.getElementById('adminSummaryCards');
+  if (!holder) return;
+  const cards = [
+    ['adminPendingPurchases', adminSummary.pendingPurchases, '🛒'],
+    ['adminPendingDeposits', adminSummary.pendingDeposits, '💼'],
+    ['adminTotalPending', adminSummary.totalPending, '📌'],
+    ['adminTodayRequests', adminSummary.todayRequests, '🆕']
+  ];
+  holder.innerHTML = cards.map(([key, value, icon]) => `
+    <div class="admin-summary-card">
+      <small>${icon} ${t(key)}</small>
+      <b>${value}</b>
+    </div>
+  `).join('');
+}
+
+function renderAdminNotificationBadge() {
+  const badge = document.getElementById('adminNotificationBadge');
+  const countEl = document.getElementById('adminNotificationCount');
+  const textEl = document.getElementById('adminNotificationText');
+  if (!badge || !countEl || !textEl) return;
+  const count = isAdminUser() ? adminSummary.totalPending : 0;
+  badge.classList.toggle('show', isAdminUser());
+  countEl.textContent = count;
+  textEl.textContent = t('adminNewRequestsWithCount', { count });
+}
+
+function renderAdminPurchaseRequests() {
+  const holder = document.getElementById('adminPurchaseRequestsTable');
+  const countEl = document.getElementById('adminPurchaseCount');
+  if (!holder) return;
+  if (countEl) countEl.textContent = adminSummary.pendingPurchases;
+  if (adminDashboardError) return;
+  if (!adminPurchaseRequests.length) {
+    holder.innerHTML = `<div class="admin-state-card" data-i18n="adminNoPendingPurchases">${t('adminNoPendingPurchases')}</div>`;
+    return;
+  }
+  holder.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>${t('adminRequestId')}</th>
+            <th>${t('adminUser')}</th>
+            <th>${t('adminEmail')}</th>
+            <th>${t('adminAmount')}</th>
+            <th>${t('adminArbrAmount')}</th>
+            <th>${t('paymentMethod')}</th>
+            <th>${t('adminDate')}</th>
+            <th>${t('adminStatus')}</th>
+            <th>${t('adminActions')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${adminPurchaseRequests.map(item => `
+            <tr>
+              <td class="req-id">${requestId(item)}</td>
+              <td>${adminFallbackText(item._profileName || item.user_id)}</td>
+              <td>${adminFallbackText(item._profileEmail)}</td>
+              <td>${formatNumber(requestAmount(item), ARBR_CONFIG.entryCurrency)}</td>
+              <td>${formatNumber(requestEstimated(item), 'ARBR')}</td>
+              <td>${item.payment_method || '-'}</td>
+              <td>${adminDate(item.created_at)}</td>
+              <td><span class="status-pill ${statusClass(item.status)}">${statusLabel(item.status)}</span></td>
+              <td>${adminActionButtons('purchase', item.id)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  bindAdminActionButtons(holder);
+}
+
+function renderAdminPilotDeposits() {
+  const holder = document.getElementById('adminPilotDepositsTable');
+  const countEl = document.getElementById('adminDepositCount');
+  if (!holder) return;
+  if (countEl) countEl.textContent = adminSummary.pendingDeposits;
+  if (adminDashboardError) return;
+  if (!adminPilotDeposits.length) {
+    holder.innerHTML = `<div class="admin-state-card" data-i18n="adminNoPendingDeposits">${t('adminNoPendingDeposits')}</div>`;
+    return;
+  }
+  holder.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>${t('adminDepositId')}</th>
+            <th>${t('adminUser')}</th>
+            <th>${t('adminEmail')}</th>
+            <th>${t('adminAmountOmr')}</th>
+            <th>${t('paymentMethod')}</th>
+            <th>${t('adminReference')}</th>
+            <th>${t('adminDate')}</th>
+            <th>${t('adminStatus')}</th>
+            <th>${t('adminActions')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${adminPilotDeposits.map(item => `
+            <tr>
+              <td class="req-id">${depositId(item)}</td>
+              <td>${adminFallbackText(item._profileName || item.user_id)}</td>
+              <td>${adminFallbackText(item._profileEmail)}</td>
+              <td>${formatNumber(item.amount_omr, ARBR_CONFIG.entryCurrency)}</td>
+              <td>${item.payment_method || '-'}</td>
+              <td>${item.payment_reference || '-'}</td>
+              <td>${adminDate(item.created_at)}</td>
+              <td><span class="status-pill ${statusClass(item.status)}">${pilotStatusLabel(item.status)}</span></td>
+              <td>${adminActionButtons('deposit', item.id)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  bindAdminActionButtons(holder);
+}
+
+function adminActionButtons(type, id) {
+  return `
+    <div class="admin-actions">
+      <button class="admin-action-btn view" type="button" data-admin-view="${type}" data-admin-id="${id}">${t('adminViewDetails')}</button>
+      <button class="admin-action-btn disabled" type="button" data-admin-disabled>${t('adminApprove')}</button>
+      <button class="admin-action-btn disabled" type="button" data-admin-disabled>${t('adminReject')}</button>
+    </div>
+  `;
+}
+
+function bindAdminActionButtons(scope = document) {
+  scope.querySelectorAll('[data-admin-view]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.adminView;
+      const id = btn.dataset.adminId;
+      const item = type === 'purchase'
+        ? adminPurchaseRequests.find(row => String(row.id) === String(id))
+        : adminPilotDeposits.find(row => String(row.id) === String(id));
+      if (item) openAdminDetailsModal(type, item);
+    });
+  });
+  scope.querySelectorAll('[data-admin-disabled]').forEach(btn => {
+    btn.addEventListener('click', showAdminActionDisabledToast);
+  });
+}
+
+function openAdminDetailsModal(type, item) {
+  const content = document.getElementById('adminDetailsContent');
+  if (!content) return;
+  const common = {
+    userId: item.user_id || '-',
+    name: adminFallbackText(item._profileName),
+    email: adminFallbackText(item._profileEmail),
+    status: type === 'purchase' ? statusLabel(item.status) : pilotStatusLabel(item.status),
+    created: adminDate(item.created_at)
+  };
+  if (type === 'purchase') {
+    content.innerHTML = [
+      detailItem(t('adminRequestId'), requestId(item)),
+      detailItem(t('adminUserId'), common.userId),
+      detailItem(t('adminUserName'), common.name),
+      detailItem(t('adminEmail'), common.email),
+      detailItem(t('adminAmount'), formatNumber(requestAmount(item), ARBR_CONFIG.entryCurrency)),
+      detailItem(t('adminArbrAmount'), formatNumber(requestEstimated(item), 'ARBR')),
+      detailItem(t('paymentMethod'), item.payment_method || '-'),
+      detailItem(t('adminStatus'), common.status),
+      detailItem(t('adminCreatedAt'), common.created),
+      detailItem(t('walletNote'), item.note || item.wallet_address || '-', true),
+      detailItem(t('adminNote'), item.admin_notes || item.admin_note || '-', true)
+    ].join('');
+  } else {
+    content.innerHTML = [
+      detailItem(t('adminDepositId'), depositId(item)),
+      detailItem(t('adminUserId'), common.userId),
+      detailItem(t('adminUserName'), common.name),
+      detailItem(t('adminEmail'), common.email),
+      detailItem(t('adminAmountOmr'), formatNumber(item.amount_omr, ARBR_CONFIG.entryCurrency)),
+      detailItem(t('paymentMethod'), item.payment_method || '-'),
+      detailItem(t('paymentReference'), item.payment_reference || '-'),
+      detailItem(t('adminStatus'), common.status),
+      detailItem(t('adminRefundable'), item.is_refundable ? (currentLang === 'ar' ? 'نعم' : 'Yes') : (currentLang === 'ar' ? 'لا' : 'No')),
+      detailItem(t('adminCreatedAt'), common.created),
+      detailItem(t('adminNotes'), item.notes || '-', true)
+    ].join('');
+  }
+  document.getElementById('adminDetailsModal').classList.add('open');
+}
+
+function closeAdminDetailsModal() {
+  document.getElementById('adminDetailsModal').classList.remove('open');
+}
+
+function showAdminActionDisabledToast() {
+  showToast(t('adminApprovalSetupRequired'), 'warning');
+}
+
+function setupAdminRealtime() {
+  if (!supabaseClient) return;
+  if (!isAdminUser()) {
+    if (adminRealtimeChannel) {
+      supabaseClient.removeChannel(adminRealtimeChannel);
+      adminRealtimeChannel = null;
+    }
+    return;
+  }
+  if (adminRealtimeChannel) return;
+  try {
+    adminRealtimeChannel = supabaseClient
+      .channel('arbr-admin-phase1')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'purchase_requests' }, () => {
+        if (!isAdminUser()) return;
+        showToast(t('adminNewRequestReceived'), 'success');
+        loadAdminDashboard();
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pilot_deposits' }, () => {
+        if (!isAdminUser()) return;
+        showToast(t('adminNewRequestReceived'), 'success');
+        loadAdminDashboard();
+      })
+      .subscribe();
+  } catch (error) {
+    adminRealtimeChannel = null;
+  }
+}
+
 function renderPilotDeposits() {
   const pilotList = document.getElementById('pilotList');
   if (!pilotList) return;
@@ -2289,15 +2630,19 @@ function updateAuthUI() {
   const myOrders = document.getElementById('myOrders');
   const pilotSection = document.getElementById('pilotSection');
   const sellSection = document.getElementById('sellSection');
+  const adminDashboard = document.getElementById('adminDashboard');
   if (headerLoginBtn) headerLoginBtn.style.display = loggedIn ? 'none' : '';
   if (userMenuWrap) userMenuWrap.classList.toggle('show', loggedIn);
   if (dashboard) dashboard.classList.toggle('show', loggedIn);
   if (myOrders) myOrders.classList.toggle('show', loggedIn);
   if (pilotSection) pilotSection.classList.toggle('show', loggedIn);
   if (sellSection) sellSection.classList.toggle('show', loggedIn);
+  if (adminDashboard) adminDashboard.classList.toggle('show', loggedIn && isAdminUser());
 
   if (!loggedIn) {
     document.getElementById('userMenu')?.classList.remove('open');
+    renderAdminNotificationBadge();
+    setupAdminRealtime();
     return;
   }
 
@@ -2326,6 +2671,16 @@ function updateAuthUI() {
   renderAllOrders(activeOrdersFilter);
   renderPilotDeposits();
   renderSellSection();
+  if (isAdminUser()) {
+    loadAdminDashboard();
+  } else {
+    adminPurchaseRequests = [];
+    adminPilotDeposits = [];
+    adminSummary = { pendingPurchases: 0, pendingDeposits: 0, totalPending: 0, todayRequests: 0 };
+    adminDashboardError = '';
+    renderAdminNotificationBadge();
+  }
+  setupAdminRealtime();
 }
 
 async function refreshUserState() {
@@ -2407,6 +2762,10 @@ async function logoutUser() {
   currentPurchaseRequests = [];
   currentPilotDeposits = [];
   currentRedeemRequests = [];
+  adminPurchaseRequests = [];
+  adminPilotDeposits = [];
+  adminSummary = { pendingPurchases: 0, pendingDeposits: 0, totalPending: 0, todayRequests: 0 };
+  adminDashboardError = '';
   updateAuthUI();
   document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
   showToast(t('logoutSuccess'));
@@ -2588,6 +2947,14 @@ document.getElementById('successViewOrders').addEventListener('click', viewOrder
 document.getElementById('requestSuccessModal').addEventListener('click', e => { if (e.target.id === 'requestSuccessModal') closeRequestSuccess(); });
 document.getElementById('closeOrderDetails').addEventListener('click', closeOrderDetailsModal);
 document.getElementById('orderDetailsModal').addEventListener('click', e => { if (e.target.id === 'orderDetailsModal') closeOrderDetailsModal(); });
+document.getElementById('closeAdminDetails').addEventListener('click', closeAdminDetailsModal);
+document.getElementById('adminDetailsCloseBtn').addEventListener('click', closeAdminDetailsModal);
+document.getElementById('adminApproveDisabled').addEventListener('click', showAdminActionDisabledToast);
+document.getElementById('adminRejectDisabled').addEventListener('click', showAdminActionDisabledToast);
+document.getElementById('adminDetailsModal').addEventListener('click', e => { if (e.target.id === 'adminDetailsModal') closeAdminDetailsModal(); });
+document.getElementById('adminNotificationBadge').addEventListener('click', () => {
+  document.getElementById('adminDashboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 document.querySelectorAll('[data-lang-toggle]').forEach(btn => btn.addEventListener('click', toggleLanguage));
 
 /* Nav active */
