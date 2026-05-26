@@ -17,6 +17,9 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'Cairo','Tajawal',sans-serif;background:var(--dark);color:var(--text);direction:rtl;overflow-x:hidden}
+body.lang-ar{direction:rtl;text-align:right}
+body.lang-en{direction:ltr;text-align:left}
+.ltr-token{direction:ltr;unicode-bidi:isolate;display:inline-block}
 a{color:inherit;text-decoration:none}
 button,input,select{font-family:inherit}
 
@@ -40,13 +43,9 @@ nav{height:74px;padding:0 6%;display:flex;align-items:center;justify-content:spa
   background:rgba(6,9,16,.88);backdrop-filter:blur(20px);
   border-bottom:1px solid var(--border)}
 .logo{display:flex;align-items:center;gap:12px;min-width:max-content}
-.logo-mark{width:46px;height:46px;border-radius:50%;
-  background:linear-gradient(145deg,#ffe39a,#c8952a 48%,#6d470d);
-  display:grid;place-items:center;flex-shrink:0;
-  box-shadow:0 0 32px rgba(200,149,42,.38),0 0 0 1px rgba(200,149,42,.22);
-  position:relative}
-.logo-mark::before{content:'';position:absolute;inset:5px;border:1px dashed rgba(10,13,20,.55);border-radius:50%}
-.logo-mark span{position:relative;color:#080b12;font-weight:900;font-size:9px;letter-spacing:.5px;line-height:1.1;text-align:center}
+.logo-mark{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;overflow:hidden;
+  background:rgba(200,149,42,.08);box-shadow:0 0 32px rgba(200,149,42,.38),0 0 0 1px rgba(200,149,42,.28)}
+.logo-mark img{width:100%;height:100%;object-fit:contain;display:block}
 .logo-text b{display:block;color:var(--gold-light);font-size:22px;line-height:1;font-weight:900;letter-spacing:1.5px}
 .logo-text small{display:block;color:var(--muted);font-size:8px;letter-spacing:2.5px;margin-top:3px;text-transform:uppercase}
 .nav-links{display:flex;align-items:center;gap:28px;list-style:none}
@@ -123,14 +122,10 @@ p.hero-lead{font-size:15px;line-height:2.1;color:var(--light);max-width:460px;
 .hero-visual{display:flex;flex-direction:column;align-items:center;gap:20px;
   animation:fadeUp .9s .2s ease both;position:relative}
 .coin-wrap{position:relative;width:260px;height:260px}
-.coin{width:260px;height:260px;border-radius:50%;
-  background:conic-gradient(from 0deg,#6d470d 0%,#c8952a 25%,#ffe39a 50%,#c8952a 75%,#6d470d 100%);
-  display:grid;place-items:center;
-  box-shadow:0 0 70px rgba(200,149,42,.55),0 0 140px rgba(200,149,42,.2),inset 0 0 30px rgba(0,0,0,.35);
-  animation:floatCoin 4.5s ease-in-out infinite;position:relative}
-.coin::before{content:'';position:absolute;inset:12px;border:2px dashed rgba(255,255,255,.12);border-radius:50%}
-.coin::after{content:'';position:absolute;inset:24px;border:1px solid rgba(255,220,80,.15);border-radius:50%}
-.coin-letter{font-size:52px;font-weight:900;color:#080b12;letter-spacing:-1px;position:relative;z-index:1;text-shadow:0 2px 4px rgba(0,0,0,.2)}
+.coin{width:260px;height:260px;border-radius:50%;display:grid;place-items:center;
+  background:transparent;animation:floatCoin 4.5s ease-in-out infinite;position:relative}
+.coin-img{width:100%;height:100%;object-fit:contain;display:block;
+  filter:drop-shadow(0 0 70px rgba(200,149,42,.55)) drop-shadow(0 0 120px rgba(200,149,42,.22))}
 .coin-glow{position:absolute;inset:-30px;border-radius:50%;
   background:radial-gradient(circle,rgba(200,149,42,.18),transparent 60%);
   animation:floatCoin 4.5s ease-in-out infinite}
@@ -265,10 +260,19 @@ p.hero-lead{font-size:15px;line-height:2.1;color:var(--light);max-width:460px;
 .orders-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:14px}
 .orders-table{width:100%;border-collapse:collapse;min-width:720px}
 .orders-table th,.orders-table td{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.055);font-size:13px;text-align:right;white-space:nowrap}
+body.lang-en .orders-table th,body.lang-en .orders-table td,
+body.lang-en .mini-table th,body.lang-en .mini-table td{text-align:left}
 .orders-table th{color:var(--gold-light);background:rgba(255,255,255,.035);font-weight:900}
 .orders-table td{color:var(--light)}
 .orders-table tr:last-child td{border-bottom:none}
 .req-id{color:var(--gold-light);font-weight:900;font-family:ui-monospace,Consolas,monospace}
+.order-link{border:none;background:transparent;color:var(--gold-light);font:inherit;font-weight:900;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.helper-text{display:block;margin-top:8px;color:var(--light);font-size:11px;line-height:1.8}
+.fgroup input[readonly]{opacity:.82;cursor:not-allowed;background:rgba(255,255,255,.025)}
+.verification-badge{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:900;border:1px solid rgba(200,149,42,.28);background:rgba(200,149,42,.12);color:var(--gold-light)}
+.verification-badge.verified{border-color:rgba(34,197,94,.34);background:rgba(34,197,94,.13);color:#86efac}
+.verification-badge.rejected{border-color:rgba(239,68,68,.28);background:rgba(239,68,68,.12);color:#fca5a5}
+.service-locked{border:1px solid rgba(200,149,42,.24);background:rgba(200,149,42,.06);border-radius:14px;padding:13px 15px;color:var(--light);font-size:13px;line-height:1.8;margin:12px 0}
 .price-info{background:rgba(200,149,42,.065);border:1px solid rgba(200,149,42,.22);border-radius:14px;padding:14px 16px;margin-bottom:18px}
 .price-line{display:flex;justify-content:space-between;gap:14px;font-size:13px;color:var(--muted);line-height:1.7}
 .price-line b{color:var(--gold-light)}
@@ -308,6 +312,20 @@ p.hero-lead{font-size:15px;line-height:2.1;color:var(--light);max-width:460px;
 .sell-warning{margin-top:12px;border-radius:12px;padding:11px 13px;font-size:12px;line-height:1.7;border:1px solid rgba(200,149,42,.22);color:var(--muted)}
 .feature-pending{text-align:center;border:1px dashed var(--border-strong);border-radius:18px;padding:22px;margin-top:18px;color:var(--muted);line-height:1.8}
 .feature-pending b{display:block;color:var(--gold-light);font-size:17px;margin-bottom:8px}
+.policy-panel{max-width:900px;margin:0 auto}
+.policy-list{list-style:none;display:grid;gap:12px;color:var(--light);line-height:2;font-size:14px}
+.policy-list li{position:relative;padding-inline-start:28px}
+.policy-list li::before{content:'◆';position:absolute;inset-inline-start:0;color:var(--gold-light);font-size:12px}
+.success-box{background:rgba(200,149,42,.08);border:1px solid rgba(200,149,42,.24);border-radius:16px;padding:18px;display:grid;gap:8px}
+.success-box small{color:var(--muted);font-size:12px;font-weight:900}
+.success-box b{color:var(--gold-light);font-size:24px;font-family:ui-monospace,Consolas,monospace}
+.success-copy{color:var(--light);font-size:14px;line-height:1.9;margin-top:16px}
+.modal-wide{width:min(680px,94vw)}
+.details-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.detail-item{background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:14px;padding:13px}
+.detail-item.wide{grid-column:1/-1}
+.detail-item small{display:block;color:var(--muted);font-size:11px;font-weight:900;margin-bottom:6px}
+.detail-item b{display:block;color:var(--text);font-size:14px;overflow-wrap:anywhere}
 .refund-modal-card{background:rgba(10,14,24,.98);border:1px solid var(--border-strong);border-radius:22px;
   width:min(420px,94vw);padding:28px;box-shadow:0 40px 100px rgba(0,0,0,.7)}
 .refund-id{display:inline-block;margin:12px 0;padding:7px 14px;border-radius:8px;background:rgba(200,149,42,.11);
@@ -334,7 +352,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
 .footer-logo{font-size:20px;font-weight:900;color:var(--gold-light);letter-spacing:1px;margin-bottom:8px}
 
 /* ── Floating Call Center ── */
-.float-wrap{position:fixed;bottom:28px;left:28px;z-index:200;display:flex;align-items:center;gap:12px}
+.float-wrap{position:fixed;bottom:28px;right:28px;left:auto;z-index:200;display:flex;flex-direction:row-reverse;align-items:center;gap:12px}
 .float-btn{width:58px;height:58px;border-radius:50%;
   background:linear-gradient(135deg,var(--gold-soft),var(--gold));
   border:none;cursor:pointer;display:grid;place-items:center;font-size:24px;
@@ -344,7 +362,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
 .float-tip{background:var(--card);border:1px solid var(--border-strong);
   border-radius:12px;padding:9px 16px;font-size:13px;font-weight:700;
   color:var(--gold-light);white-space:nowrap;backdrop-filter:blur(16px);
-  opacity:0;transform:translateX(-10px);transition:.25s ease;pointer-events:none}
+  opacity:0;transform:translateX(10px);transition:.25s ease;pointer-events:none}
 .float-wrap:hover .float-tip{opacity:1;transform:translateX(0)}
 @keyframes ringPulse{
   0%{box-shadow:0 8px 28px rgba(200,149,42,.45),0 0 0 0 rgba(200,149,42,.4)}
@@ -407,10 +425,13 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   .user-box{min-width:0;width:100%;max-width:230px}
   .user-menu{left:auto;right:0;width:220px}
   .dash-grid{grid-template-columns:1fr}
+  .details-grid{grid-template-columns:1fr}
   .sell-balances,.fee-grid{grid-template-columns:1fr}
   .stat-item{min-width:140px;padding:18px 18px}
   .stat-item b{font-size:17px}
   .panel{padding:24px 20px}
+  .float-wrap{right:16px;bottom:18px}
+  .float-tip{display:none}
 }
 </style>
 </head>
@@ -423,32 +444,33 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
 <!-- ══════════ NAV ══════════ -->
 <nav>
   <div class="logo">
-    <div class="logo-mark"><span>ARBR</span></div>
-    <div class="logo-text"><b>ARBR</b><small>The Digital Asset</small></div>
+    <div class="logo-mark"><img src="logo.png" alt="Arab Rial ARBR logo" /></div>
+    <div class="logo-text"><b>ARBR</b><small data-i18n="logoSub">The Digital Asset</small></div>
   </div>
   <ul class="nav-links">
-    <li><a href="#home" class="active">الرئيسية</a></li>
-    <li><a href="#about">عن ARBR</a></li>
-    <li><a href="#features">المزايا</a></li>
-    <li><a href="#how">كيف تبدأ</a></li>
-    <li><a href="#buy">اشترِ</a></li>
+    <li><a href="#home" class="active" data-i18n="navHome">الرئيسية</a></li>
+    <li><a href="#about" data-i18n="navAbout">عن ARBR</a></li>
+    <li><a href="#features" data-i18n="navFeatures">المزايا</a></li>
+    <li><a href="#how" data-i18n="navHow">كيف تبدأ</a></li>
+    <li><a href="#policy" data-i18n="navPolicy">سياسة المنصة</a></li>
+    <li><a href="#buy" data-i18n="navBuy">اشترِ</a></li>
   </ul>
   <div class="nav-actions">
-    <button class="lang-btn">🌐 العربية</button>
-    <button class="btn-primary" id="headerLoginBtn" data-open-login>تسجيل الدخول</button>
+    <button class="lang-btn" type="button" data-lang-toggle>English</button>
+    <button class="btn-primary" id="headerLoginBtn" data-open-login data-i18n="login">تسجيل الدخول</button>
     <div class="user-menu-wrap" id="userMenuWrap">
       <button class="user-box" id="userBox" type="button">
         <span class="user-avatar">AR</span>
         <span>
-          <strong id="navUserName">مرحبًا</strong>
+          <strong id="navUserName" data-i18n="hello">مرحبًا</strong>
           <small id="navUserBalance">الرصيد: 0 ARBR</small>
         </span>
       </button>
       <div class="user-menu" id="userMenu">
-        <button class="menu-item" type="button" data-scroll-dashboard>لوحة التحكم <span>↙</span></button>
-        <button class="menu-item" type="button" data-scroll-orders>طلباتي <span>↙</span></button>
-        <button class="menu-item" type="button" id="openSettingsBtn">الإعدادات <span>⚙</span></button>
-        <button class="menu-item danger" type="button" id="logoutBtn">تسجيل الخروج <span>×</span></button>
+        <button class="menu-item" type="button" data-scroll-dashboard><span data-i18n="dashboardMenu">لوحة التحكم</span><span>↙</span></button>
+        <button class="menu-item" type="button" data-scroll-orders><span data-i18n="myOrdersMenu">طلباتي</span><span>↙</span></button>
+        <button class="menu-item" type="button" id="openSettingsBtn"><span data-i18n="settings">الإعدادات</span><span>⚙</span></button>
+        <button class="menu-item danger" type="button" id="logoutBtn"><span data-i18n="logout">تسجيل الخروج</span><span>×</span></button>
       </div>
     </div>
   </div>
@@ -460,27 +482,27 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
 
     <!-- Left content -->
     <div>
-      <div class="kicker">منصة ARBR الرسمية للمستثمرين وVIP</div>
+      <div class="kicker" data-i18n="heroKicker"><span class="ltr-token">ARBR</span> للاستخدام اليومي والتجاري</div>
       <h1 class="hero-name">ARBR</h1>
-      <div class="hero-sub">العملة الرقمية <span>الذكية</span></div>
-      <p class="hero-lead">منصة أصول رقمية متكاملة تربط المستثمرين والتجار داخل منظومة واحدة مبنية على البلوك تشين، بدفع سريع وآمن عبر USDT أو بطاقة Visa.</p>
+      <div class="hero-sub" data-i18n="heroSub">عملة رقمية عربية <span>موثوقة</span></div>
+      <p class="hero-lead" data-i18n="heroLead">لاستخدام الأشخاص والتجار في مدفوعات رقمية واضحة وسهلة داخل شبكة <span class="ltr-token">ARBR</span>.</p>
       <div class="mini-feats">
         <div class="mini-feat">
           <div class="mico">💳</div>
-          <div><b>Visa</b><small>دفع بالبطاقة</small></div>
+          <div><b>Visa</b><small data-i18n="visaPay">دفع بالبطاقة</small></div>
         </div>
         <div class="mini-feat">
           <div class="mico">₮</div>
-          <div><b>USDT</b><small>تحويل رقمي</small></div>
+          <div><b>USDT</b><small data-i18n="digitalTransfer">تحويل رقمي</small></div>
         </div>
         <div class="mini-feat">
           <div class="mico">⛓️</div>
-          <div><b>Blockchain</b><small>أمان وشفافية</small></div>
+          <div><b>Blockchain</b><small data-i18n="securityTransparency">أمان وشفافية</small></div>
         </div>
       </div>
       <div class="hero-btns">
-        <button class="btn-primary" onclick="document.getElementById('buy').scrollIntoView({behavior:'smooth'})">🪙 اشترِ ARBR الآن</button>
-        <button class="btn-secondary" data-open-login>دخول المستثمر ←</button>
+        <button class="btn-primary" onclick="document.getElementById('buy').scrollIntoView({behavior:'smooth'})" data-i18n="buyNow">🪙 اشترِ ARBR الآن</button>
+        <button class="btn-secondary" data-open-login data-i18n="investorLogin">دخول المستخدم ←</button>
       </div>
     </div>
 
@@ -488,15 +510,15 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
     <div class="hero-visual">
       <div class="coin-wrap">
         <div class="coin-glow"></div>
-        <div class="coin"><span class="coin-letter">ARBR</span></div>
+        <div class="coin"><img class="coin-img" src="logo.png" alt="Arab Rial ARBR coin" /></div>
         <div class="coin-shadow"></div>
       </div>
       <div class="price-card">
         <div class="pc-top">
-          <span>سعر ARBR التأسيسي</span>
-          <span class="live">مباشر</span>
+          <span data-i18n="foundingPrice">سعر ARBR التأسيسي</span>
+          <span class="live" data-i18n="live">مباشر</span>
         </div>
-        <div class="pc-price">0.001 OMR</div>
+        <div class="pc-price"><span class="ltr-token">0.001 OMR</span></div>
         <div class="pc-change">+2.48% ↑</div>
         <div class="pc-chart">
           <svg viewBox="0 0 240 60" preserveAspectRatio="none">
@@ -511,7 +533,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
           </svg>
         </div>
         <div class="pc-vol">
-          <span>إجمالي المعروض</span>
+          <span data-i18n="totalSupply">إجمالي المعروض</span>
           <b>100,000,000 ARBR</b>
         </div>
       </div>
@@ -524,123 +546,123 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
 <div class="stats-bar" style="margin-top:-1px">
   <div class="stat-item">
     <span class="s-ico">👥</span>
-    <div><b>+10</b><small>مستثمر مؤهل</small></div>
+    <div><b>+10</b><small data-i18n="qualifiedInvestors">مستثمر مؤهل</small></div>
   </div>
   <div class="stat-item">
     <span class="s-ico">💱</span>
-    <div><b>+100K</b><small>إجمالي التحويلات</small></div>
+    <div><b>+100K</b><small data-i18n="totalTransfers">إجمالي التحويلات</small></div>
   </div>
   <div class="stat-item">
     <span class="s-ico">📈</span>
-    <div><b>+15K</b><small>إجمالي الاستثمارات</small></div>
+    <div><b>+15K</b><small data-i18n="totalInvestments">إجمالي الطلبات</small></div>
   </div>
   <div class="stat-item">
     <span class="s-ico">🪙</span>
-    <div><b>100M ARBR</b><small>إجمالي المعروض</small></div>
+    <div><b>100M ARBR</b><small data-i18n="totalSupply">إجمالي المعروض</small></div>
   </div>
   <div class="stat-item">
     <span class="s-ico">🛡️</span>
-    <div><b>Blockchain</b><small>أمان وشفافية</small></div>
+    <div><b>Blockchain</b><small data-i18n="securityTransparency">أمان وشفافية</small></div>
   </div>
 </div>
 
 <!-- ══════════ ABOUT ══════════ -->
 <section class="sec" id="about">
-  <h2 class="sec-title">عن <span>ARBR</span></h2>
-  <p class="sec-desc">ARBR منصة أصول رقمية تمكّن المستثمرين والتجار المؤهلين من استخدام رمز رقمي داخل شبكة منظمة تدعم المدفوعات والعضويات ومزايا التسوية.</p>
+  <h2 class="sec-title" data-i18n="aboutTitle">عن <span>ARBR</span></h2>
+  <p class="sec-desc" data-i18n="aboutDesc">ARBR منصة أصول رقمية تمكّن المستثمرين والتجار المؤهلين من استخدام رمز رقمي داخل شبكة منظمة تدعم المدفوعات والعضويات ومزايا التسوية.</p>
   <div class="cards-3">
     <div class="card">
       <span class="card-ico">🪙</span>
-      <h3>توكن حقيقي</h3>
-      <p>إصدار ARBR كرمز رقمي على Blockchain مع عنوان عقد واضح وتوزيع شفاف ومراحل بيع محددة.</p>
+      <h3 data-i18n="realToken">توكن حقيقي</h3>
+      <p data-i18n="realTokenDesc">إصدار ARBR كرمز رقمي على Blockchain مع عنوان عقد واضح وتوزيع شفاف ومراحل بيع محددة.</p>
     </div>
     <div class="card">
       <span class="card-ico">🛡️</span>
-      <h3>امتثال وأمان</h3>
-      <p>مراجعة KYC للمشاركين، تسجيل العمليات، إيصالات دفع، ومحفظة مشروع متعددة التوقيع ضمن إجراءات الأمان المتقدمة.</p>
+      <h3 data-i18n="complianceSecurity">امتثال وأمان</h3>
+      <p data-i18n="complianceSecurityDesc">مراجعة KYC للمشاركين، تسجيل العمليات، إيصالات دفع، ومحفظة مشروع متعددة التوقيع ضمن إجراءات الأمان المتقدمة.</p>
     </div>
     <div class="card">
       <span class="card-ico">🏪</span>
-      <h3>جاهز للتجار</h3>
-      <p>يدعم ARBR رصيد الاستخدام للتجار والخصومات ورسوم المنصة ومزايا VIP داخل الشبكة.</p>
+      <h3 data-i18n="merchantReady">جاهز للتجار</h3>
+      <p data-i18n="merchantReadyDesc">يدعم ARBR رصيد الاستخدام للتجار والخصومات ورسوم المنصة ومزايا VIP داخل الشبكة.</p>
     </div>
   </div>
 </section>
 
 <!-- ══════════ FEATURES ══════════ -->
 <section class="sec" id="features" style="padding-top:0">
-  <h2 class="sec-title">لماذا <span>ARBR</span>؟</h2>
-  <p class="sec-desc">مميزات تجعل ARBR الخيار الأول للمستثمرين الرقميين الباحثين عن فرص حقيقية وآمنة.</p>
+  <h2 class="sec-title" data-i18n="whyTitle">لماذا <span>ARBR</span>؟</h2>
+  <p class="sec-desc" data-i18n="whyDesc">مميزات تجعل ARBR الخيار الأول للمستثمرين الرقميين الباحثين عن فرص حقيقية وآمنة.</p>
   <div class="cards-6">
     <div class="card">
       <span class="card-ico">⚡</span>
-      <h3>تحويل فوري</h3>
-      <p>إتمام التحويلات في ثوانٍ داخل الشبكة بدون وسطاء تقليديين.</p>
+      <h3 data-i18n="instantTransfer">تحويل فوري</h3>
+      <p data-i18n="instantTransferDesc">إتمام التحويلات في ثوانٍ داخل الشبكة بدون وسطاء تقليديين.</p>
     </div>
     <div class="card">
       <span class="card-ico">📊</span>
-      <h3>استثمار ذكي</h3>
-      <p>أدوات متكاملة لتتبع محفظتك مع تقارير شفافة في الوقت الفعلي.</p>
+      <h3 data-i18n="smartInvestment">شفافية الطلبات</h3>
+      <p data-i18n="smartInvestmentDesc">أدوات متكاملة لتتبع محفظتك مع تقارير شفافة في الوقت الفعلي.</p>
     </div>
     <div class="card">
       <span class="card-ico">🔐</span>
-      <h3>أمان متعدد الطبقات</h3>
-      <p>تقنية البلوك تشين مع تشفير متقدم وتوقيعات متعددة لحماية أصولك.</p>
+      <h3 data-i18n="layeredSecurity">أمان متعدد الطبقات</h3>
+      <p data-i18n="layeredSecurityDesc">تقنية البلوك تشين مع تشفير متقدم وتوقيعات متعددة لحماية أصولك.</p>
     </div>
     <div class="card">
       <span class="card-ico">🌐</span>
-      <h3>وصول عالمي</h3>
-      <p>تداول ARBR مع أي مستثمر حول العالم عبر شبكة لامركزية مفتوحة.</p>
+      <h3 data-i18n="globalAccess">وصول عالمي</h3>
+      <p data-i18n="globalAccessDesc">تداول ARBR مع أي مستثمر حول العالم عبر شبكة لامركزية مفتوحة.</p>
     </div>
     <div class="card">
       <span class="card-ico">💎</span>
-      <h3>عضوية VIP</h3>
-      <p>حصص حصرية للأعضاء المؤسسين مع مزايا إضافية وأسعار دخول مبكر.</p>
+      <h3 data-i18n="vipMembership">عضوية VIP</h3>
+      <p data-i18n="vipMembershipDesc">حصص حصرية للأعضاء المؤسسين مع مزايا إضافية وأسعار دخول مبكر.</p>
     </div>
     <div class="card">
       <span class="card-ico">📱</span>
-      <h3>لوحة تحكم متكاملة</h3>
-      <p>إدارة محفظتك وطلباتك وسجل معاملاتك من مكان واحد بواجهة سهلة.</p>
+      <h3 data-i18n="fullDashboard">لوحة تحكم متكاملة</h3>
+      <p data-i18n="fullDashboardDesc">إدارة محفظتك وطلباتك وسجل معاملاتك من مكان واحد بواجهة سهلة.</p>
     </div>
   </div>
 </section>
 
 <!-- ══════════ HOW TO START ══════════ -->
 <section class="sec" id="how" style="background:rgba(12,17,28,.55)">
-  <h2 class="sec-title">كيف <span>تبدأ؟</span></h2>
-  <p class="sec-desc">أربع خطوات بسيطة للانضمام إلى مجتمع ARBR والبدء في رحلتك الاستثمارية الرقمية.</p>
+  <h2 class="sec-title" data-i18n="howTitle">كيف <span>تبدأ؟</span></h2>
+  <p class="sec-desc" data-i18n="howDesc">أربع خطوات بسيطة للانضمام إلى منصة ARBR ومتابعة رصيدك وطلباتك الرقمية.</p>
   <div class="steps-grid">
     <div class="step-card">
       <div class="step-num">01</div>
       <span class="step-ico">👤</span>
-      <h3>أنشئ حسابك</h3>
-      <p>سجل بياناتك الأساسية وأنشئ حساب مستثمر لإدارة طلبات الشراء.</p>
+      <h3 data-i18n="stepCreate">أنشئ حسابك</h3>
+      <p data-i18n="stepCreateDesc">سجل بياناتك الأساسية وأنشئ حساب مستثمر لإدارة طلبات الشراء.</p>
     </div>
     <div class="step-card">
       <div class="step-num">02</div>
       <span class="step-ico">✅</span>
-      <h3>تحقق بسيط</h3>
-      <p>أدخل الاسم والهاتف والبريد ومحفظة الاستلام بطريقة آمنة وسريعة.</p>
+      <h3 data-i18n="stepVerify">تحقق بسيط</h3>
+      <p data-i18n="stepVerifyDesc">أدخل الاسم والهاتف والبريد ومحفظة الاستلام بطريقة آمنة وسريعة.</p>
     </div>
     <div class="step-card">
       <div class="step-num">03</div>
       <span class="step-ico">💳</span>
-      <h3>اختر الدفع</h3>
-      <p>ادفع عبر USDT أو Visa/Mastercard بطريقة مشفرة وموثوقة.</p>
+      <h3 data-i18n="stepPay">اختر الدفع</h3>
+      <p data-i18n="stepPayDesc">ادفع عبر USDT أو Visa/Mastercard بطريقة مشفرة وموثوقة.</p>
     </div>
     <div class="step-card">
       <div class="step-num">04</div>
       <span class="step-ico">🚀</span>
-      <h3>استلم ARBR</h3>
-      <p>بعد مراجعة الدفع يُصدر ARBR فورًا إلى محفظتك أو حسابك داخل المنصة.</p>
+      <h3 data-i18n="stepReceive">استلم ARBR</h3>
+      <p data-i18n="stepReceiveDesc">بعد مراجعة الدفع يُصدر ARBR فورًا إلى محفظتك أو حسابك داخل المنصة.</p>
     </div>
   </div>
 </section>
 
 <!-- ══════════ INVESTOR DASHBOARD ══════════ -->
 <section class="sec dashboard-sec" id="dashboard">
-  <h2 class="sec-title">لوحة <span>المستثمر</span></h2>
-  <p class="sec-desc">ملخص حسابك ورصيدك وطلبات الشراء الأخيرة داخل ARBR.</p>
+  <h2 class="sec-title" data-i18n="dashboardTitle">لوحة <span>المستثمر</span></h2>
+  <p class="sec-desc" data-i18n="dashboardDesc">ملخص حسابك ورصيدك وطلبات الشراء الأخيرة داخل ARBR.</p>
   <div class="dashboard-shell">
     <div class="dash-card">
       <div class="dash-profile">
@@ -651,43 +673,43 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
         </div>
       </div>
       <div class="dash-grid">
-        <div class="dash-stat"><small>رقم الهاتف</small><b id="dashPhone">-</b></div>
-        <div class="dash-stat"><small>حالة الحساب</small><b id="dashAccountStatus">نشط</b></div>
+        <div class="dash-stat"><small data-i18n="phone">رقم الهاتف</small><b id="dashPhone">-</b></div>
+        <div class="dash-stat"><small data-i18n="accountStatus">حالة الحساب</small><b id="dashAccountStatus">نشط</b></div>
+        <div class="dash-stat"><small data-i18n="verificationStatus">حالة التوثيق</small><b id="dashVerificationStatus">غير موثق</b></div>
       </div>
-      <div class="legal-notice">ARBR رمز منفعة رقمي داخل منصة Arab Rial. ليست عملة قانونية، وليست صادرة من بنك مركزي، ولا يوجد أي ضمان لسعر مستقبلي أو عائد مالي. جميع الطلبات تخضع للمراجعة اليدوية.</div>
     </div>
     <div class="dash-card">
-      <h3>الأرصدة والإحصائيات</h3>
+      <h3 data-i18n="balancesStats">الأرصدة والإحصائيات</h3>
       <div class="dash-stats-grid">
-        <div class="dash-stat feature"><small>رصيد ARBR</small><b id="dashArbrBalance">0 ARBR</b></div>
-        <div class="dash-stat feature"><small>ARBR المقفل</small><b id="dashLockedArbr">0 ARBR</b></div>
-        <div class="dash-stat feature"><small>إجمالي الإيداع</small><b id="dashTotalDeposit">0 OMR</b></div>
-        <div class="dash-stat feature"><small>طلبات الشراء</small><b id="dashTotalRequests">0</b></div>
-        <div class="dash-stat feature"><small>قيد المراجعة</small><b id="dashPendingRequests">0</b></div>
+        <div class="dash-stat feature"><small data-i18n="arbrBalance">رصيد ARBR</small><b id="dashArbrBalance">0 ARBR</b></div>
+        <div class="dash-stat feature"><small data-i18n="lockedArbr">ARBR المقفل</small><b id="dashLockedArbr">0 ARBR</b></div>
+        <div class="dash-stat feature"><small data-i18n="totalDeposit">إجمالي الإيداع</small><b id="dashTotalDeposit">0 OMR</b></div>
+        <div class="dash-stat feature"><small data-i18n="purchaseRequests">طلبات الشراء</small><b id="dashTotalRequests">0</b></div>
+        <div class="dash-stat feature"><small data-i18n="pendingReview">قيد المراجعة</small><b id="dashPendingRequests">0</b></div>
       </div>
     </div>
   </div>
   <div class="dash-card" id="ordersPanel" style="margin-top:22px">
-      <h3>طلبات الشراء الأخيرة</h3>
+      <h3 data-i18n="recentPurchases">طلبات الشراء الأخيرة</h3>
       <div class="orders-list" id="ordersList">
-        <div class="empty-orders">لا توجد طلبات شراء حتى الآن.</div>
+        <div class="empty-orders" data-i18n="noPurchaseRequests">لا توجد طلبات شراء حتى الآن.</div>
       </div>
   </div>
 </section>
 
 <!-- ══════════ MY ORDERS ══════════ -->
 <section class="sec dashboard-sec" id="myOrders">
-  <h2 class="sec-title">طلباتي <span>ARBR</span></h2>
-  <p class="sec-desc">تتبع كل طلبات الشراء الخاصة بحسابك فقط.</p>
+  <h2 class="sec-title" data-i18n="myOrdersTitle">طلباتي <span>ARBR</span></h2>
+  <p class="sec-desc" data-i18n="myOrdersDesc">تتبع كل طلبات الشراء الخاصة بحسابك فقط.</p>
   <div class="dash-card">
     <div class="orders-tabs">
-      <button class="orders-tab active" data-order-filter="all">الكل</button>
-      <button class="orders-tab" data-order-filter="pending">قيد المراجعة</button>
-      <button class="orders-tab" data-order-filter="approved">موافق</button>
-      <button class="orders-tab" data-order-filter="rejected">مرفوض</button>
+      <button class="orders-tab active" data-order-filter="all" data-i18n="all">الكل</button>
+      <button class="orders-tab" data-order-filter="pending" data-i18n="pending">قيد المراجعة</button>
+      <button class="orders-tab" data-order-filter="approved" data-i18n="approved">موافق</button>
+      <button class="orders-tab" data-order-filter="rejected" data-i18n="rejectedStatus">مرفوض</button>
     </div>
     <div id="allOrdersList">
-      <div class="empty-orders">لا توجد طلبات شراء حتى الآن.</div>
+      <div class="empty-orders" data-i18n="noPurchaseRequests">لا توجد طلبات شراء حتى الآن.</div>
     </div>
   </div>
 </section>
@@ -696,43 +718,43 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
 
 <!-- ══════════ MEMBERSHIP DEPOSITS ══════════ -->
 <section class="sec dashboard-sec" id="pilotSection">
-  <h2 class="sec-title">عضوية <span>ARBR</span></h2>
-  <p class="sec-desc">إرسال طلب إيداع عضوية قابل للاسترداد داخل منصة Arab Rial.</p>
+  <h2 class="sec-title" data-i18n="pilotTitle">عضوية <span>ARBR</span></h2>
+  <p class="sec-desc" data-i18n="pilotDesc">إرسال طلب إيداع عضوية قابل للاسترداد داخل منصة Arab Rial.</p>
   <div class="part2-grid">
     <form class="part2-card" id="pilotForm">
-      <h3>طلب إيداع عضوية</h3>
+      <h3 data-i18n="pilotFormTitle">طلب إيداع عضوية</h3>
       <div class="fgroup">
-        <label>مبلغ الإيداع (OMR)</label>
-        <input id="pilotAmount" type="number" min="1" step="0.001" placeholder="مثال: 100" />
+        <label data-i18n="pilotAmount">مبلغ الإيداع (OMR)</label>
+        <input id="pilotAmount" type="number" min="1" step="0.001" placeholder="مثال: 100" data-i18n-placeholder="amountPlaceholder" />
       </div>
       <div class="fgroup">
-        <label>طريقة الدفع</label>
+        <label data-i18n="paymentMethod">طريقة الدفع</label>
         <select id="pilotMethod">
-          <option value="">اختر طريقة الدفع</option>
-          <option value="manual">يدوي / Manual</option>
+          <option value="" data-i18n="choosePayment">اختر طريقة الدفع</option>
+          <option value="manual" data-i18n="platformAdminMethod">إدارة المنصة</option>
           <option value="usdt">USDT</option>
-          <option value="bank_later">تحويل بنكي</option>
+          <option value="bank_later" data-i18n="bankTransfer">تحويل بنكي</option>
         </select>
       </div>
       <div class="fgroup">
-        <label>رقم مرجع الدفع</label>
-        <input id="pilotReference" placeholder="رقم التحويل أو المرجع" dir="ltr" />
+        <label data-i18n="paymentReference">رقم مرجع الدفع</label>
+        <input id="pilotReference" placeholder="رقم التحويل أو المرجع" dir="ltr" data-i18n-placeholder="paymentReferencePlaceholder" />
       </div>
       <div class="fgroup">
-        <label>ملاحظة (اختيارية)</label>
-        <textarea id="pilotNote" class="form-textarea" placeholder="أي تفاصيل إضافية..."></textarea>
+        <label data-i18n="optionalNote">ملاحظة (اختيارية)</label>
+        <textarea id="pilotNote" class="form-textarea" placeholder="أي تفاصيل إضافية..." data-i18n-placeholder="extraDetailsPlaceholder"></textarea>
       </div>
       <label class="checkbox-row">
         <input id="pilotAgree" type="checkbox" />
-        <span>أفهم أن هذا المبلغ إيداع عضوية قابل للاسترداد، وليس شراءً لعملة قانونية أو استثمارًا مضمونًا. يخضع الطلب للمراجعة اليدوية.</span>
+        <span data-i18n="pilotAgreement">أفهم أن هذا الطلب خاص بإيداع عضوية داخل منصة Arab Rial، ويتم اعتماده بعد مراجعة بيانات العملية من الإدارة.</span>
       </label>
-      <div class="legal-notice">ARBR ليست عملة قانونية وليست صادرة من أي بنك مركزي. طلبات إيداع العضوية تخضع للمراجعة اليدوية ولا تمثل أي ضمان مالي.</div>
-      <button class="btn-primary" type="submit" style="width:100%;padding:14px;margin-top:14px" id="pilotSubmit">✦ إرسال طلب إيداع العضوية</button>
+      <div class="service-locked hidden" id="pilotLockedNotice" data-i18n="verificationRequired">يرجى إكمال التحقق من الحساب لاستخدام هذه الخدمة.</div>
+      <button class="btn-primary" type="submit" style="width:100%;padding:14px;margin-top:14px" id="pilotSubmit" data-i18n="submitPilot">✦ إرسال طلب إيداع العضوية</button>
     </form>
     <div class="part2-card">
-      <h3>طلبات إيداع العضوية</h3>
+      <h3 data-i18n="pilotRequests">طلبات إيداع العضوية</h3>
       <div id="pilotList">
-        <div class="empty-orders">لا توجد طلبات إيداع عضوية حتى الآن.</div>
+        <div class="empty-orders" data-i18n="noPilotDeposits">لا توجد طلبات إيداع عضوية حتى الآن.</div>
       </div>
     </div>
   </div>
@@ -742,71 +764,70 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
 
 <!-- ══════════ SELL PREVIEW ══════════ -->
 <section class="sec dashboard-sec" id="sellSection">
-  <h2 class="sec-title">طلب بيع / استرداد <span>ARBR</span></h2>
-  <p class="sec-desc">معاينة تقديرية وفق نموذج البيع العكسي ورسوم المنصة، وتخضع طلبات البيع والاسترداد للمراجعة اليدوية وتوفر السيولة.</p>
+  <h2 class="sec-title" data-i18n="sellTitle">طلب بيع / استرداد <span>ARBR</span></h2>
+  <p class="sec-desc" data-i18n="sellDesc">معاينة تقديرية وفق نموذج البيع العكسي ورسوم المنصة، ويتم اعتماد الطلب بعد مراجعة الإدارة وتأكيد بيانات العملية.</p>
   <div class="dash-card" id="sellContent">
-    <div class="empty-orders">جار تحميل معاينة البيع...</div>
+    <div class="empty-orders" data-i18n="loadingSell">جار تحميل معاينة البيع...</div>
   </div>
 </section>
 
 <!-- ══════════ BUY ══════════ -->
 <section class="sec" id="buy">
-  <h2 class="sec-title">اشترِ <span>ARBR</span></h2>
-  <p class="sec-desc">سعر الدخول المبكر: 1 OMR = 1,000 ARBR. اختر المبلغ وطريقة الدفع وأرسل طلبك.</p>
+  <h2 class="sec-title" data-i18n="buyTitle">اشترِ <span>ARBR</span></h2>
+  <p class="sec-desc" data-i18n="buyDesc">سعر الدخول المبكر: <span class="ltr-token">1 OMR = 1,000 ARBR</span>. اختر المبلغ وطريقة الدفع وأرسل طلبك.</p>
   <div class="buy-grid">
 
     <div class="panel">
-      <h3>طلب شراء ARBR</h3>
+      <h3 data-i18n="buyFormTitle">طلب شراء ARBR</h3>
       <div class="price-info">
-        <div class="price-line"><span>سعر الدخول المبكر</span><b>1 OMR = 1,000 ARBR</b></div>
-        <div class="price-line"><span>المرحلة الحالية</span><b>Founders</b></div>
+        <div class="price-line"><span data-i18n="earlyPriceLabel">سعر الدخول المبكر</span><b><span class="ltr-token">1 OMR = 1,000 ARBR</span></b></div>
+        <div class="price-line"><span data-i18n="currentStage">المرحلة الحالية</span><b>Founders</b></div>
       </div>
       <div class="fgroup">
-        <label>المبلغ بالريال العماني (OMR)</label>
-        <input id="amt" type="number" min="1" value="100" />
+        <label data-i18n="amountOmani">المبلغ بالريال العماني (OMR)</label>
+        <input id="amt" type="number" min="1" value="100" placeholder="مثال: 100" data-i18n-placeholder="amountPlaceholder" />
       </div>
       <div class="fgroup">
-        <label>طريقة الدفع</label>
+        <label data-i18n="paymentMethod">طريقة الدفع</label>
         <select id="payM">
           <option>USDT (TRC20 / Polygon)</option>
           <option>Visa / Mastercard</option>
         </select>
       </div>
       <div class="fgroup">
-        <label>ملاحظة / محفظة استلام ARBR</label>
-        <input id="wallet" placeholder="0x... أو أي ملاحظة للطلب" />
+        <label data-i18n="walletNote">ملاحظة / محفظة استلام ARBR</label>
+        <input id="wallet" placeholder="0x... أو أي ملاحظة للطلب" data-i18n-placeholder="walletPlaceholder" />
       </div>
       <div class="calc-result">
-        <small>الكمية المتوقعة</small>
-        <b id="arbResult">100,000 ARBR</b>
-        <small style="display:block;margin-top:4px">الكمية تقديرية وسيتم مراجعة الطلب يدويًا قبل التفعيل.</small>
+        <small data-i18n="estimatedAmount">الكمية المتوقعة</small>
+        <b id="arbResult"><span class="ltr-token">100,000 ARBR</span></b>
+        <small style="display:block;margin-top:4px" data-i18n="estimatedNote">الكمية تقديرية ويتم اعتماد الطلب بعد تأكيد بيانات العملية.</small>
       </div>
-      <p class="buy-legal">⚠ ARBR ليست عملة قانونية ولا يوجد ضمان لأي سعر أو عائد مستقبلي.</p>
-      <button class="btn-primary" style="width:100%;padding:15px;font-size:15px" id="submitBuy">🪙 إرسال طلب الشراء</button>
+      <button class="btn-primary" style="width:100%;padding:15px;font-size:15px" id="submitBuy" data-i18n="submitBuy">🪙 إرسال طلب الشراء</button>
     </div>
 
     <div class="panel">
-      <h3>طرق الدفع المتاحة</h3>
+      <h3 data-i18n="paymentMethods">طرق الدفع المتاحة</h3>
       <div class="pay-methods">
         <div class="pay-method">
           <div>
             <b>₮ USDT</b>
-            <small>TRC20 / Polygon / حسب الشبكة المعتمدة</small>
+            <small data-i18n="usdtNetwork">TRC20 / Polygon / حسب الشبكة المعتمدة</small>
           </div>
-          <span class="badge">يدوي حاليًا</span>
+          <span class="badge" data-i18n="manualNow">متاح الآن</span>
         </div>
         <div class="pay-method">
           <div>
             <b>💳 Visa / Mastercard</b>
-            <small>عبر رابط دفع آمن ومشفر</small>
+            <small data-i18n="securePaymentLink">عبر رابط دفع آمن ومشفر</small>
           </div>
-          <span class="badge">جاهز للربط</span>
+          <span class="badge" data-i18n="readyToConnect">جاهز للربط</span>
         </div>
       </div>
       <div style="margin-top:20px;padding:18px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px">
         <p style="color:var(--muted);font-size:13px;line-height:2">
-          تتم العمليات بمراجعة يدوية، ويتم إرسال إيصال PDF ورقم طلب للمشارك بعد التأكيد. 
-          الحد الأدنى للشراء <strong style="color:var(--gold-light)">10 OMR</strong>، والحد الأقصى للطلب <strong style="color:var(--gold-light)">5,000 OMR</strong>.
+          <span data-i18n="buyProcessText">يعالج النظام طلب الشراء ويتحقق من بيانات الدفع تلقائيًا. بعد التأكيد يتم تحديث حالة الطلب وإضافة الرصيد المعتمد، وقد تخضع بعض الطلبات لمراجعة إضافية لأسباب أمنية أو تنظيمية.</span>
+          <span data-i18n="buyLimitText">الحد الأدنى للطلب <strong style="color:var(--gold-light)">10 OMR</strong>، ولا يوجد حد أقصى ثابت للطلبات.</span>
         </p>
       </div>
     </div>
@@ -814,13 +835,29 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   </div>
 </section>
 
+<!-- ══════════ PLATFORM POLICY ══════════ -->
+<section class="sec" id="policy" style="padding-top:0">
+  <h2 class="sec-title" data-i18n="policyTitle">سياسة المنصة <span>والشفافية</span></h2>
+  <p class="sec-desc" data-i18n="policyDesc">Arab Rial منصة أصول رقمية رسمية لإدارة رصيد ARBR داخل النظام، مع لوحة متابعة واضحة لكل مستخدم.</p>
+  <div class="panel policy-panel">
+    <ul class="policy-list">
+      <li data-i18n="policyPoint1">Arab Rial منصة أصول رقمية رسمية لإدارة رصيد ARBR داخل النظام.</li>
+      <li data-i18n="policyPoint2">تتم مراجعة جميع طلبات الشراء والبيع والاسترداد من إدارة المنصة.</li>
+      <li data-i18n="policyPoint3">يتم تحديث أرصدة المستخدمين فقط من خلال عمليات معتمدة ومسجلة.</li>
+      <li data-i18n="policyPoint4">كل طلب يمتلك رقمًا مرجعيًا وحالة واضحة يمكن متابعتها.</li>
+      <li data-i18n="policyPoint5">توفر المنصة لوحة شفافة لتتبع الأرصدة والطلبات وسجل العمليات.</li>
+      <li data-i18n="policyPoint6">تتطلب بعض الخدمات إكمال توثيق الحساب قبل استخدامها.</li>
+    </ul>
+  </div>
+</section>
+
 <!-- ══════════ CTA ══════════ -->
 <div class="cta-sec">
   <div>
-    <h2>ابدأ رحلتك مع ARBR الآن 🚀</h2>
-    <p>انضم إلى المستثمرين الأوائل واستفد من أسعار الدخول المبكر الحصرية.</p>
+    <h2 data-i18n="ctaTitle">ابدأ رحلتك مع ARBR الآن 🚀</h2>
+    <p data-i18n="ctaDesc">انضم إلى المستثمرين الأوائل واستفد من أسعار الدخول المبكر الحصرية.</p>
   </div>
-  <button class="btn-primary" style="padding:15px 36px;font-size:16px" data-open-login>تسجيل الدخول الآن</button>
+  <button class="btn-primary" style="padding:15px 36px;font-size:16px" data-open-login data-i18n="loginNow">تسجيل الدخول الآن</button>
 </div>
 
 <!-- ══════════ FOOTER ══════════ -->
@@ -830,43 +867,39 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   © 2026 ARBR Network.
 </footer>
 
-<!-- ══════════ FLOATING CALL CENTER ══════════ -->
-<div class="float-wrap">
-  <button class="float-btn" id="floatBtn">📞</button>
-  <div class="float-tip">تواصل مع الدعم</div>
-</div>
+<!-- Floating call button removed -->
 
 <!-- ══════════ LOGIN MODAL ══════════ -->
 <div class="modal" id="loginModal">
   <div class="modal-card">
     <button class="modal-close" id="closeModal">×</button>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
-      <div class="logo-mark" style="width:40px;height:40px"><span>ARBR</span></div>
-      <div class="logo-text"><b>ARBR</b><small>Investor Access</small></div>
+      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.png" alt="Arab Rial ARBR logo" /></div>
+      <div class="logo-text"><b>ARBR</b><small data-i18n="investorAccess">Account Access</small></div>
     </div>
     <div class="tabs">
-      <button class="tab active" id="loginTab">تسجيل الدخول</button>
-      <button class="tab" id="signupTab">إنشاء حساب</button>
+      <button class="tab active" id="loginTab" data-i18n="login">تسجيل الدخول</button>
+      <button class="tab" id="signupTab" data-i18n="signup">إنشاء حساب</button>
     </div>
 
     <!-- Login Form -->
     <div id="loginForm">
-      <div class="fgroup"><label>البريد الإلكتروني</label><input id="loginEmail" type="email" placeholder="name@example.com" /></div>
-      <div class="fgroup"><label>كلمة المرور</label><input id="loginPass" type="password" placeholder="••••••••" /></div>
-      <button class="btn-primary" style="width:100%;padding:13px" id="doLogin">دخول لوحة المستثمر ←</button>
+      <div class="fgroup"><label data-i18n="email">البريد الإلكتروني</label><input id="loginEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder" /></div>
+      <div class="fgroup"><label data-i18n="password">كلمة المرور</label><input id="loginPass" type="password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder" /></div>
+      <button class="btn-primary" style="width:100%;padding:13px" id="doLogin" data-i18n="loginInvestor">دخول لوحة المستثمر ←</button>
     </div>
 
     <!-- Signup Form -->
     <div id="signupForm" class="hidden">
-      <div class="fgroup"><label>الاسم الكامل</label><input id="sName" placeholder="اكتب اسمك الكامل" /></div>
-      <div class="fgroup"><label>رقم الهاتف</label><input id="sPhone" type="tel" placeholder="+..." /></div>
-      <div class="fgroup"><label>البريد الإلكتروني</label><input id="sEmail" type="email" placeholder="name@example.com" /></div>
-      <div class="fgroup"><label>كلمة المرور</label><input id="sPass" type="password" placeholder="••••••••" /></div>
-      <button class="btn-primary" style="width:100%;padding:13px" id="doSignup">إنشاء حساب 🚀</button>
+      <div class="fgroup"><label data-i18n="fullName">الاسم الكامل</label><input id="sName" placeholder="اكتب اسمك الكامل" data-i18n-placeholder="fullNamePlaceholder" /></div>
+      <div class="fgroup"><label data-i18n="phone">رقم الهاتف</label><input id="sPhone" type="tel" placeholder="+..." data-i18n-placeholder="phonePlaceholder" /></div>
+      <div class="fgroup"><label data-i18n="email">البريد الإلكتروني</label><input id="sEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder" /></div>
+      <div class="fgroup"><label data-i18n="password">كلمة المرور</label><input id="sPass" type="password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder" /></div>
+      <button class="btn-primary" style="width:100%;padding:13px" id="doSignup" data-i18n="createAccount">إنشاء حساب 🚀</button>
     </div>
 
     <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-top:18px;text-align:center;padding-top:14px;border-top:1px solid var(--border)">
-      دخول آمن لحساب المستثمر ومتابعة الطلبات والأرصدة داخل منصة ARBR.
+      <span data-i18n="loginFootnote">دخول آمن لحساب المستثمر ومتابعة الطلبات والأرصدة داخل منصة ARBR.</span>
     </p>
   </div>
 </div>
@@ -876,16 +909,50 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   <div class="modal-card">
     <button class="modal-close" id="closeSettings">×</button>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-      <div class="logo-mark" style="width:40px;height:40px"><span>ARBR</span></div>
-      <div class="logo-text"><b>الإعدادات</b><small>Investor Profile</small></div>
+      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.png" alt="Arab Rial ARBR logo" /></div>
+      <div class="logo-text"><b data-i18n="settings">الإعدادات</b><small data-i18n="investorProfile">Account Profile</small></div>
     </div>
-    <div class="fgroup"><label>الاسم الكامل</label><input id="settingsFullName" placeholder="اكتب اسمك الكامل" /></div>
-    <div class="fgroup"><label>رقم الهاتف</label><input id="settingsPhone" type="tel" placeholder="+..." /></div>
-    <div class="fgroup hidden" id="settingsCountryGroup"><label>الدولة</label><input id="settingsCountry" placeholder="مثال: Oman" /></div>
+    <div class="fgroup"><label data-i18n="fullName">الاسم الكامل</label><input id="settingsFullName" placeholder="اكتب اسمك الكامل" data-i18n-placeholder="fullNamePlaceholder" /></div>
+    <div class="fgroup">
+      <label data-i18n="phone">رقم الهاتف</label>
+      <input id="settingsPhone" type="tel" placeholder="+..." data-i18n-placeholder="phonePlaceholder" readonly />
+      <small class="helper-text" data-i18n="phoneLockedHelp">رقم الهاتف مرتبط بحسابك ولا يمكن تغييره من لوحة المستخدم. لتحديث رقم الهاتف، يرجى التواصل مع إدارة المنصة.</small>
+    </div>
+    <div class="fgroup hidden" id="settingsCountryGroup"><label data-i18n="country">الدولة</label><input id="settingsCountry" placeholder="مثال: Oman" data-i18n-placeholder="countryPlaceholder" /></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn-primary" style="flex:1;padding:13px" id="saveSettingsBtn">حفظ التغييرات</button>
-      <button class="btn-secondary" style="flex:1;padding:13px" id="settingsCloseBtn">إغلاق</button>
+      <button class="btn-primary" style="flex:1;padding:13px" id="saveSettingsBtn" data-i18n="saveChanges">حفظ التغييرات</button>
+      <button class="btn-secondary" style="flex:1;padding:13px" id="settingsCloseBtn" data-i18n="close">إغلاق</button>
     </div>
+  </div>
+</div>
+
+<!-- ══════════ REQUEST SUCCESS MODAL ══════════ -->
+<div class="modal" id="requestSuccessModal">
+  <div class="modal-card">
+    <button class="modal-close" id="closeSuccessModal">×</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.png" alt="Arab Rial ARBR logo" /></div>
+      <div class="logo-text"><b data-i18n="requestConfirmed">تم تأكيد الطلب</b><small>ARBR</small></div>
+    </div>
+    <div class="success-box">
+      <small data-i18n="requestNumber">رقم الطلب</small>
+      <b id="successRequestNumber">-</b>
+      <span class="status-pill pending" id="successRequestStatus">-</span>
+    </div>
+    <p class="success-copy" id="successRequestMessage" data-i18n="requestUnderReview">تم إرسال طلبك بنجاح وهو الآن قيد المراجعة.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px">
+      <button class="btn-primary" style="flex:1;padding:13px" id="successViewOrders" data-i18n="viewMyOrders">عرض طلباتي</button>
+      <button class="btn-secondary" style="flex:1;padding:13px" id="successCloseBtn" data-i18n="close">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ORDER DETAILS MODAL ══════════ -->
+<div class="modal" id="orderDetailsModal">
+  <div class="modal-card modal-wide">
+    <button class="modal-close" id="closeOrderDetails">×</button>
+    <h3 style="color:var(--gold-light);margin-bottom:16px" data-i18n="orderDetails">تفاصيل الطلب</h3>
+    <div class="details-grid" id="orderDetailsContent"></div>
   </div>
 </div>
 
@@ -893,11 +960,11 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
 <div class="modal" id="refundModal">
   <div class="refund-modal-card">
     <button class="modal-close" id="closeRefund">×</button>
-    <h3 style="color:var(--gold-light);margin-bottom:12px">طلب استرداد إيداع العضوية</h3>
-    <p style="color:var(--muted);font-size:14px;line-height:1.9">لطلب الاسترداد، تواصل مع الإدارة واذكر رقم الطلب.</p>
+    <h3 style="color:var(--gold-light);margin-bottom:12px" data-i18n="refundTitle">طلب استرداد إيداع العضوية</h3>
+    <p style="color:var(--muted);font-size:14px;line-height:1.9" data-i18n="refundDesc">لطلب الاسترداد، تواصل مع الإدارة واذكر رقم الطلب.</p>
     <div class="refund-id" id="refundDepositId">-</div>
-    <p style="color:var(--muted);font-size:12px;line-height:1.8">تتم مراجعة طلبات الاسترداد يدويًا، وسيتم التواصل معك عبر بيانات الحساب المسجلة.</p>
-    <button class="btn-primary" id="refundOk" style="width:100%;padding:12px;margin-top:18px">حسنًا، فهمت</button>
+    <p style="color:var(--muted);font-size:12px;line-height:1.8" data-i18n="refundNote">تتم مراجعة طلبات الاسترداد من الإدارة، وسيتم التواصل معك عبر بيانات الحساب المسجلة.</p>
+    <button class="btn-primary" id="refundOk" style="width:100%;padding:12px;margin-top:18px" data-i18n="okUnderstood">حسنًا، فهمت</button>
   </div>
 </div>
 
@@ -926,14 +993,18 @@ let currentProfile = null;
 let currentWallet = null;
 let currentPurchaseRequests = [];
 let currentPilotDeposits = [];
+let currentRedeemRequests = [];
 let activeOrdersFilter = 'all';
 
 const ARBR_CONFIG = {
   totalSupply: 100000000,
+  entryCurrency: 'OMR',
+  entryTokenRate: 1000,
   spreadRate: 0.05,
   exitFeeRate: 0.10,
   lockDays: 30,
   maxSellPerDay: 2000,
+  largeBuyVerificationAmount: 5000,
   stages: [
     { name: 'Founders', from: 0, to: 5000000, price: 0.001 },
     { name: 'Early VIP', from: 5000000, to: 15000000, price: 0.002 },
@@ -946,6 +1017,497 @@ const ARBR_CONFIG = {
 };
 const estimatedSoldTokens = 0; // TODO: replace with platform_state.sold_tokens later.
 
+const I18N = {
+  ar: {
+    logoSub: 'The Digital Asset',
+    navHome: 'الرئيسية',
+    navAbout: 'عن ARBR',
+    navFeatures: 'المزايا',
+    navHow: 'كيف تبدأ',
+    navPolicy: 'سياسة المنصة',
+    navBuy: 'اشترِ',
+    login: 'تسجيل الدخول',
+    signup: 'إنشاء حساب',
+    hello: 'مرحبًا',
+    greeting: 'مرحبًا، {name}',
+    balanceLabel: 'الرصيد: {amount}',
+    dashboardMenu: 'لوحة التحكم',
+    myOrdersMenu: 'طلباتي',
+    settings: 'الإعدادات',
+    logout: 'تسجيل الخروج',
+    heroKicker: '<span class="ltr-token">ARBR</span> للاستخدام اليومي والتجاري',
+    heroSub: 'عملة رقمية عربية <span>موثوقة</span>',
+    heroLead: 'لاستخدام الأشخاص والتجار في مدفوعات رقمية واضحة وسهلة داخل شبكة <span class="ltr-token">ARBR</span>.',
+    visaPay: 'دفع بالبطاقة',
+    digitalTransfer: 'تحويل رقمي',
+    securityTransparency: 'أمان وشفافية',
+    buyNow: '🪙 اشترِ ARBR الآن',
+    investorLogin: 'دخول المستخدم ←',
+    foundingPrice: 'سعر ARBR التأسيسي',
+    live: 'مباشر',
+    totalSupply: 'إجمالي المعروض',
+    qualifiedInvestors: 'مستخدم موثق',
+    totalTransfers: 'إجمالي التحويلات',
+    totalInvestments: 'إجمالي الطلبات',
+    aboutTitle: 'عن <span>ARBR</span>',
+    aboutDesc: 'Arab Rial منصة أصول رقمية رسمية لإدارة رصيد ARBR داخل النظام، وتوفير تجربة منظمة للأشخاص والتجار لمتابعة الطلبات والأرصدة والمدفوعات.',
+    realToken: 'رصيد رقمي داخل المنصة',
+    realTokenDesc: 'يظهر رصيد ARBR داخل لوحة المستخدم ويتم تحديثه من خلال عمليات معتمدة ومسجلة داخل النظام.',
+    complianceSecurity: 'توثيق وحماية الحساب',
+    complianceSecurityDesc: 'تدعم المنصة توثيق الحسابات، قفل بيانات الاتصال الأساسية، وتسجيل الطلبات برقم مرجعي واضح.',
+    merchantReady: 'جاهز للأشخاص والتجار',
+    merchantReadyDesc: 'يدعم ARBR الاستخدام اليومي والتجاري عبر رصيد واضح وطلبات قابلة للتتبع وطرق دفع منظمة.',
+    whyTitle: 'لماذا <span>ARBR</span>؟',
+    whyDesc: 'مزايا تركز على الثقة، التوثيق، الشفافية، سرعة المعالجة، ولوحة متابعة احترافية.',
+    instantTransfer: 'معالجة سريعة',
+    instantTransferDesc: 'إرسال الطلبات ومتابعتها من لوحة واحدة مع تحديثات حالة واضحة.',
+    smartInvestment: 'شفافية الطلبات',
+    smartInvestmentDesc: 'كل طلب يمتلك رقمًا مرجعيًا وحالة واضحة وتفاصيل يمكن الرجوع إليها.',
+    layeredSecurity: 'أمان متعدد الطبقات',
+    layeredSecurityDesc: 'إجراءات تحقق وتنظيم بيانات الحساب والطلبات للحفاظ على سلامة العمليات.',
+    globalAccess: 'طرق دفع مرنة',
+    globalAccessDesc: 'دعم USDT و Visa / Mastercard مع قابلية إضافة طرق دفع معتمدة.',
+    vipMembership: 'عضوية VIP',
+    vipMembershipDesc: 'حصص حصرية للأعضاء المؤسسين مع مزايا إضافية وأسعار دخول مبكر.',
+    fullDashboard: 'لوحة تحكم متكاملة',
+    fullDashboardDesc: 'إدارة محفظتك وطلباتك وسجل معاملاتك من مكان واحد بواجهة سهلة.',
+    howTitle: 'كيف <span>تبدأ؟</span>',
+    howDesc: 'أربع خطوات بسيطة للانضمام إلى منصة ARBR ومتابعة رصيدك وطلباتك الرقمية.',
+    stepCreate: 'أنشئ حسابك',
+    stepCreateDesc: 'سجل بياناتك الأساسية وأنشئ حسابًا لإدارة طلبات الشراء.',
+    stepVerify: 'تحقق بسيط',
+    stepVerifyDesc: 'أدخل الاسم والهاتف والبريد ومحفظة الاستلام بطريقة آمنة وسريعة.',
+    stepPay: 'اختر الدفع',
+    stepPayDesc: 'ادفع عبر USDT أو Visa/Mastercard بطريقة مشفرة وموثوقة.',
+    stepReceive: 'استلم ARBR',
+    stepReceiveDesc: 'بعد مراجعة الدفع يُصدر ARBR فورًا إلى محفظتك أو حسابك داخل المنصة.',
+    dashboardTitle: 'لوحة <span>المستثمر</span>',
+    dashboardDesc: 'ملخص حسابك ورصيدك وطلبات الشراء الأخيرة داخل ARBR.',
+    phone: 'رقم الهاتف',
+    accountStatus: 'حالة الحساب',
+    verificationStatus: 'حالة التوثيق',
+    activeStatus: 'نشط',
+    balancesStats: 'الأرصدة والإحصائيات',
+    arbrBalance: 'رصيد ARBR',
+    lockedArbr: 'ARBR المقفل',
+    totalDeposit: 'إجمالي الإيداع',
+    purchaseRequests: 'طلبات الشراء',
+    pendingReview: 'قيد المراجعة',
+    recentPurchases: 'طلبات الشراء الأخيرة',
+    myOrdersTitle: 'طلباتي <span>ARBR</span>',
+    myOrdersDesc: 'تتبع كل طلبات الشراء الخاصة بحسابك فقط.',
+    all: 'الكل',
+    pending: 'قيد المراجعة',
+    approved: 'موافق',
+    rejectedStatus: 'مرفوض',
+    rejected: 'تم رفض التحقق',
+    noPurchaseRequests: 'لا توجد طلبات شراء حتى الآن.',
+    noOrdersHere: 'لا توجد طلبات في هذا القسم.',
+    approvedBalanceNotice: 'يتم تحديث الرصيد من خلال العمليات المعتمدة والمسجلة في النظام.',
+    pilotTitle: 'عضوية <span>ARBR</span>',
+    pilotDesc: 'إرسال طلب إيداع عضوية قابل للاسترداد داخل منصة Arab Rial.',
+    pilotFormTitle: 'طلب إيداع عضوية',
+    pilotAmount: 'مبلغ الإيداع (OMR)',
+    paymentMethod: 'طريقة الدفع',
+    choosePayment: 'اختر طريقة الدفع',
+    platformAdminMethod: 'إدارة المنصة',
+    bankTransfer: 'تحويل بنكي',
+    paymentReference: 'رقم مرجع الدفع',
+    optionalNote: 'ملاحظة (اختيارية)',
+    pilotAgreement: 'أفهم أن هذا الطلب خاص بإيداع عضوية داخل منصة Arab Rial، ويتم اعتماده بعد مراجعة بيانات العملية من الإدارة.',
+    submitPilot: '✦ إرسال طلب إيداع العضوية',
+    pilotRequests: 'طلبات إيداع العضوية',
+    noPilotDeposits: 'لا توجد طلبات إيداع عضوية حتى الآن.',
+    sellTitle: 'طلب بيع / استرداد <span>ARBR</span>',
+    sellDesc: 'معاينة تقديرية وفق نموذج البيع العكسي ورسوم المنصة، ويتم اعتماد الطلب بعد مراجعة الإدارة وتأكيد بيانات العملية.',
+    loadingSell: 'جار تحميل معاينة البيع...',
+    buyTitle: 'اشترِ <span>ARBR</span>',
+    buyDesc: 'سعر الدخول المبكر: <span class="ltr-token">1 OMR = 1,000 ARBR</span>. اختر المبلغ وطريقة الدفع وأرسل طلبك.',
+    buyFormTitle: 'طلب شراء ARBR',
+    earlyPriceLabel: 'سعر الدخول المبكر',
+    currentStage: 'المرحلة الحالية',
+    amountOmani: 'المبلغ بالريال العماني (OMR)',
+    walletNote: 'ملاحظة / محفظة استلام ARBR',
+    estimatedAmount: 'الكمية المتوقعة',
+    estimatedNote: 'الكمية تقديرية ويتم اعتماد الطلب بعد تأكيد بيانات العملية.',
+    submitBuy: '🪙 إرسال طلب الشراء',
+    paymentMethods: 'طرق الدفع المتاحة',
+    usdtNetwork: 'TRC20 / Polygon / حسب الشبكة المعتمدة',
+    manualNow: 'متاح الآن',
+    securePaymentLink: 'عبر رابط دفع آمن ومشفر',
+    readyToConnect: 'جاهز للربط',
+    buyProcessText: 'يعالج النظام طلب الشراء ويتحقق من بيانات الدفع تلقائيًا. بعد التأكيد يتم تحديث حالة الطلب وإضافة الرصيد المعتمد، وقد تُحال بعض الطلبات إلى مراجعة الإدارة التفصيلية.',
+    buyLimitText: 'الحد الأدنى للطلب <strong style="color:var(--gold-light)">10 OMR</strong>، ولا يوجد حد أقصى ثابت للطلبات.',
+    ctaTitle: 'ابدأ رحلتك مع ARBR الآن 🚀',
+    ctaDesc: 'انضم إلى مستخدمي المنصة واستفد من أسعار الدخول المبكر الحصرية.',
+    loginNow: 'تسجيل الدخول الآن',
+    investorAccess: 'Account Access',
+    investorProfile: 'Account Profile',
+    loginInvestor: 'دخول لوحة المستخدم ←',
+    email: 'البريد الإلكتروني',
+    password: 'كلمة المرور',
+    fullName: 'الاسم الكامل',
+    createAccount: 'إنشاء حساب 🚀',
+    loginFootnote: 'دخول آمن لحسابك ومتابعة الطلبات والأرصدة داخل منصة ARBR.',
+    country: 'الدولة',
+    saveChanges: 'حفظ التغييرات',
+    close: 'إغلاق',
+    refundTitle: 'طلب استرداد إيداع العضوية',
+    refundDesc: 'لطلب الاسترداد، تواصل مع الإدارة واذكر رقم الطلب.',
+    refundNote: 'تتم مراجعة طلبات الاسترداد من الإدارة، وسيتم التواصل معك عبر بيانات الحساب المسجلة.',
+    requestConfirmed: 'تم تأكيد الطلب',
+    requestNumber: 'رقم الطلب',
+    requestUnderReview: 'تم إرسال طلبك بنجاح وهو الآن قيد المراجعة.',
+    viewMyOrders: 'عرض طلباتي',
+    orderDetails: 'تفاصيل الطلب',
+    policyTitle: 'سياسة المنصة <span>والشفافية</span>',
+    policyDesc: 'Arab Rial منصة أصول رقمية رسمية لإدارة رصيد ARBR داخل النظام، مع لوحة متابعة واضحة لكل مستخدم.',
+    policyPoint1: 'Arab Rial منصة أصول رقمية رسمية لإدارة رصيد ARBR داخل النظام.',
+    policyPoint2: 'تتم مراجعة جميع طلبات الشراء والبيع والاسترداد من إدارة المنصة.',
+    policyPoint3: 'يتم تحديث أرصدة المستخدمين فقط من خلال عمليات معتمدة ومسجلة.',
+    policyPoint4: 'كل طلب يمتلك رقمًا مرجعيًا وحالة واضحة يمكن متابعتها.',
+    policyPoint5: 'توفر المنصة لوحة شفافة لتتبع الأرصدة والطلبات وسجل العمليات.',
+    policyPoint6: 'تتطلب بعض الخدمات إكمال توثيق الحساب قبل استخدامها.',
+    phoneLockedHelp: 'رقم الهاتف مرتبط بحسابك ولا يمكن تغييره من لوحة المستخدم. لتحديث رقم الهاتف، يرجى التواصل مع إدارة المنصة.',
+    verificationRequired: 'يرجى إكمال التحقق من الحساب لاستخدام هذه الخدمة.',
+    unverified: 'غير موثق',
+    verificationPending: 'قيد المراجعة',
+    verificationVerified: 'موثق',
+    verificationRejected: 'مرفوض',
+    grossValue: 'القيمة الإجمالية',
+    serviceFee: 'رسوم الخدمة',
+    processingFee: 'رسوم المعالجة',
+    estimatedFinalValue: 'القيمة النهائية التقديرية',
+    sellCalcNote: 'القيمة المعروضة تقديرية، ويتم اعتماد الطلب بعد مراجعة الإدارة وتأكيد بيانات العملية.',
+    submitSellRequest: 'إرسال طلب البيع / الاسترداد',
+    walletAddress: 'المحفظة / العنوان',
+    createdDate: 'تاريخ الإنشاء',
+    reviewedDate: 'تاريخ المراجعة',
+    adminNote: 'ملاحظة الإدارة',
+    okUnderstood: 'حسنًا، فهمت',
+    emailPlaceholder: 'name@example.com',
+    passwordPlaceholder: '••••••••',
+    fullNamePlaceholder: 'اكتب اسمك الكامل',
+    phonePlaceholder: '+...',
+    countryPlaceholder: 'مثال: Oman',
+    amountPlaceholder: 'مثال: 100',
+    paymentReferencePlaceholder: 'رقم التحويل أو المرجع',
+    extraDetailsPlaceholder: 'أي تفاصيل إضافية...',
+    walletPlaceholder: '0x... أو أي ملاحظة للطلب',
+    requestSubmitted: 'تم إرسال طلبك بنجاح وهو الآن قيد المراجعة.',
+    loginRequired: 'يجب تسجيل الدخول أولًا',
+    loginBeforePurchase: 'يجب تسجيل الدخول أولًا قبل إرسال طلب الشراء',
+    settingsSaved: '✓ تم حفظ التغييرات بنجاح',
+    logoutSuccess: 'تم تسجيل الخروج',
+    loginSuccess: '✓ تم تسجيل الدخول بنجاح',
+    accountCreated: 'تم إنشاء الحساب. يرجى فتح بريدك الإلكتروني لتأكيد الحساب.',
+    enterEmail: '⚠️ أدخل البريد الإلكتروني',
+    enterPassword: '⚠️ أدخل كلمة المرور',
+    enterFullName: '⚠️ أدخل الاسم الكامل',
+    enterPhone: '⚠️ أدخل رقم الهاتف',
+    shortPassword: '⚠️ كلمة المرور يجب ألا تقل عن 6 أحرف',
+    enterWallet: '⚠️ أدخل محفظة الاستلام أو ملاحظة الطلب',
+    minPurchase: '⚠️ الحد الأدنى للشراء 10 OMR',
+    invalidAmount: 'يرجى إدخال مبلغ صحيح',
+    choosePaymentWarning: 'يرجى اختيار طريقة الدفع',
+    agreePilot: 'يجب الموافقة على شروط إيداع العضوية قبل الإرسال',
+    pilotSubmitted: 'تم إرسال طلبك بنجاح وهو الآن قيد المراجعة.',
+    sellSubmitted: 'تم إرسال طلبك بنجاح وهو الآن قيد المراجعة.',
+    sending: 'جار الإرسال...',
+    saving: 'جار الحفظ...',
+    loggingIn: 'جار تسجيل الدخول...',
+    creatingAccount: 'جار إنشاء الحساب...',
+    submittingRequest: 'جار إرسال الطلب...',
+    supabaseMissing: 'أضف رابط ومفتاح Supabase داخل الملف أولًا',
+    sessionReadFailed: 'تعذر قراءة جلسة الدخول',
+    profileLoadFailed: 'تعذر تحميل بيانات الحساب',
+    purchaseLoadFailed: 'تعذر تحميل طلبات الشراء',
+    loginFailed: 'تعذر تسجيل الدخول',
+    loginRetry: 'تعذر تسجيل الدخول. حاول مرة أخرى.',
+    signupFailed: 'تعذر إنشاء الحساب',
+    settingsSaveFailed: 'تعذر حفظ الإعدادات',
+    pilotSubmitFailed: 'تعذر إرسال طلب إيداع العضوية',
+    requestFailed: 'تعذر تسجيل الطلب',
+    loginTimeout: 'انتهت مهلة الاتصال أثناء تسجيل الدخول',
+    verified: 'تم التحقق من الهوية',
+    pendingIdentity: 'قيد المراجعة',
+    rejectedIdentity: 'تم رفض التحقق',
+    not_verified: 'لم يتم التحقق من الهوية'
+  },
+  en: {
+    logoSub: 'The Digital Asset',
+    navHome: 'Home',
+    navAbout: 'About ARBR',
+    navFeatures: 'Features',
+    navHow: 'How to Start',
+    navPolicy: 'Platform Policy',
+    navBuy: 'Buy',
+    login: 'Login',
+    signup: 'Create Account',
+    hello: 'Hello',
+    greeting: 'Hello, {name}',
+    balanceLabel: 'Balance: {amount}',
+    dashboardMenu: 'Dashboard',
+    myOrdersMenu: 'My Orders',
+    settings: 'Settings',
+    logout: 'Logout',
+    heroKicker: '<span class="ltr-token">ARBR</span> for everyday and merchant use',
+    heroSub: 'A trusted <span>Arabic digital currency</span>',
+    heroLead: 'For people and merchants who need clear, simple digital payments inside the <span class="ltr-token">ARBR</span> network.',
+    visaPay: 'Card payment',
+    digitalTransfer: 'Digital transfer',
+    securityTransparency: 'Security and transparency',
+    buyNow: '🪙 Buy ARBR now',
+    investorLogin: 'Account login →',
+    foundingPrice: 'ARBR founding price',
+    live: 'Live',
+    totalSupply: 'Total supply',
+    qualifiedInvestors: 'Verified users',
+    totalTransfers: 'Total transfers',
+    totalInvestments: 'Total requests',
+    aboutTitle: 'About <span>ARBR</span>',
+    aboutDesc: 'Arab Rial is an official digital asset platform for managing ARBR balance inside the system, with an organized experience for users and merchants to track requests, balances, and payments.',
+    realToken: 'Digital balance inside the platform',
+    realTokenDesc: 'ARBR balance appears inside the user dashboard and is updated through approved and recorded transactions.',
+    complianceSecurity: 'Account verification and protection',
+    complianceSecurityDesc: 'The platform supports account verification, locked contact details, and request records with clear reference numbers.',
+    merchantReady: 'Ready for users and merchants',
+    merchantReadyDesc: 'ARBR supports everyday and merchant use through clear balances, trackable requests, and organized payment methods.',
+    whyTitle: 'Why <span>ARBR</span>?',
+    whyDesc: 'Features focused on trust, verification, transparency, fast processing, and a professional dashboard.',
+    instantTransfer: 'Fast processing',
+    instantTransferDesc: 'Submit and track requests from one dashboard with clear status updates.',
+    smartInvestment: 'Request transparency',
+    smartInvestmentDesc: 'Every request has a reference number, clear status, and details you can review.',
+    layeredSecurity: 'Layered security',
+    layeredSecurityDesc: 'Verification procedures and organized account and request data support transaction integrity.',
+    globalAccess: 'Flexible payment methods',
+    globalAccessDesc: 'Support for USDT and Visa / Mastercard with room for additional approved payment methods.',
+    vipMembership: 'VIP membership',
+    vipMembershipDesc: 'Exclusive allocations for founding members with additional benefits and early access prices.',
+    fullDashboard: 'Integrated dashboard',
+    fullDashboardDesc: 'Manage your wallet, requests, and transaction history from one simple interface.',
+    howTitle: 'How to <span>start?</span>',
+    howDesc: 'Four simple steps to join ARBR and track your digital balance and requests.',
+    stepCreate: 'Create your account',
+    stepCreateDesc: 'Enter your basic information and create an account to manage purchase requests.',
+    stepVerify: 'Simple verification',
+    stepVerifyDesc: 'Enter your name, phone, email, and receiving wallet securely and quickly.',
+    stepPay: 'Choose payment',
+    stepPayDesc: 'Pay through USDT or Visa/Mastercard in a secure and reliable way.',
+    stepReceive: 'Receive ARBR',
+    stepReceiveDesc: 'After payment review, ARBR is issued to your wallet or account inside the platform.',
+    dashboardTitle: '<span>Investor</span> Dashboard',
+    dashboardDesc: 'Your account summary, balance, and latest ARBR purchase requests.',
+    phone: 'Phone number',
+    accountStatus: 'Account status',
+    verificationStatus: 'Verification status',
+    activeStatus: 'Active',
+    balancesStats: 'Balances and stats',
+    arbrBalance: 'ARBR balance',
+    lockedArbr: 'Locked ARBR',
+    totalDeposit: 'Total deposit',
+    purchaseRequests: 'Purchase requests',
+    pendingReview: 'Pending review',
+    recentPurchases: 'Recent purchase requests',
+    myOrdersTitle: 'My <span>ARBR</span> Orders',
+    myOrdersDesc: 'Track all purchase requests for your account only.',
+    all: 'All',
+    pending: 'Under review',
+    approved: 'Approved',
+    rejectedStatus: 'Rejected',
+    rejected: 'Verification rejected',
+    noPurchaseRequests: 'No purchase requests yet.',
+    noOrdersHere: 'No requests in this section.',
+    approvedBalanceNotice: 'Balances are updated through approved and recorded system transactions.',
+    pilotTitle: '<span>ARBR</span> Membership',
+    pilotDesc: 'Submit a refundable membership deposit request inside Arab Rial.',
+    pilotFormTitle: 'Membership deposit request',
+    pilotAmount: 'Deposit amount (OMR)',
+    paymentMethod: 'Payment method',
+    choosePayment: 'Choose payment method',
+    platformAdminMethod: 'Platform administration',
+    bankTransfer: 'Bank transfer',
+    paymentReference: 'Payment reference number',
+    optionalNote: 'Note (optional)',
+    pilotAgreement: 'I understand that this request is for a membership deposit inside Arab Rial and is approved after administration reviews the transaction details.',
+    submitPilot: '✦ Submit membership deposit request',
+    pilotRequests: 'Membership deposit requests',
+    noPilotDeposits: 'No membership deposit requests yet.',
+    sellTitle: 'Sell / Redeem <span>ARBR</span>',
+    sellDesc: 'Estimated preview based on the reverse sale model and platform fees. Requests are approved after admin review and transaction verification.',
+    loadingSell: 'Loading sell preview...',
+    buyTitle: 'Buy <span>ARBR</span>',
+    buyDesc: 'Early access price: <span class="ltr-token">1 OMR = 1,000 ARBR</span>. Choose the amount, payment method, and submit your request.',
+    buyFormTitle: 'ARBR purchase request',
+    earlyPriceLabel: 'Early access price',
+    currentStage: 'Current stage',
+    amountOmani: 'Amount in Omani Rial (OMR)',
+    walletNote: 'Note / ARBR receiving wallet',
+    estimatedAmount: 'Estimated amount',
+    estimatedNote: 'The amount is estimated and the request is approved after transaction verification.',
+    submitBuy: '🪙 Submit purchase request',
+    paymentMethods: 'Available payment methods',
+    usdtNetwork: 'TRC20 / Polygon / according to the approved network',
+    manualNow: 'Available now',
+    securePaymentLink: 'Through a secure encrypted payment link',
+    readyToConnect: 'Ready to connect',
+    buyProcessText: 'The system processes the purchase request and verifies payment data automatically. After confirmation, the request status is updated and the approved balance is added. Some requests may be routed to detailed administration review.',
+    buyLimitText: 'Minimum request amount is <strong style="color:var(--gold-light)">10 OMR</strong>, with no fixed maximum request limit.',
+    ctaTitle: 'Start your ARBR journey now 🚀',
+    ctaDesc: 'Join platform users and benefit from exclusive early access prices.',
+    loginNow: 'Login now',
+    investorAccess: 'Account Access',
+    investorProfile: 'Account Profile',
+    loginInvestor: 'Enter user dashboard →',
+    email: 'Email',
+    password: 'Password',
+    fullName: 'Full name',
+    createAccount: 'Create account 🚀',
+    loginFootnote: 'Secure access to your account, requests, and balances inside ARBR.',
+    country: 'Country',
+    saveChanges: 'Save changes',
+    close: 'Close',
+    refundTitle: 'Membership deposit refund',
+    refundDesc: 'To request a refund, contact management and mention the request number.',
+    refundNote: 'Refund requests are reviewed by administration, and you will be contacted using your registered account details.',
+    requestConfirmed: 'Request confirmed',
+    requestNumber: 'Request number',
+    requestUnderReview: 'Your request has been submitted successfully and is now under review.',
+    viewMyOrders: 'View my orders',
+    orderDetails: 'Order details',
+    policyTitle: 'Platform Policy <span>& Transparency</span>',
+    policyDesc: 'Arab Rial is an official digital asset platform for managing ARBR balance inside the system, with a clear dashboard for every user.',
+    policyPoint1: 'Arab Rial is an official digital asset platform for managing ARBR balance inside the system.',
+    policyPoint2: 'All buy, sell, and redeem requests are reviewed by platform administration.',
+    policyPoint3: 'User balances are updated only through approved and recorded transactions.',
+    policyPoint4: 'Every request has a reference number and clear status for tracking.',
+    policyPoint5: 'The platform provides a transparent dashboard for users to track balances, requests, and transaction records.',
+    policyPoint6: 'Some services require account verification before use.',
+    phoneLockedHelp: 'Your phone number is linked to your account and cannot be changed from the user dashboard. To update it, please contact platform administration.',
+    verificationRequired: 'Please complete account verification to use this service.',
+    unverified: 'Unverified',
+    verificationPending: 'Pending Review',
+    verificationVerified: 'Verified',
+    verificationRejected: 'Rejected',
+    grossValue: 'Gross value',
+    serviceFee: 'Service fee',
+    processingFee: 'Processing fee',
+    estimatedFinalValue: 'Estimated final value',
+    sellCalcNote: 'The displayed value is estimated. The request is approved after admin review and transaction verification.',
+    submitSellRequest: 'Submit sell / redeem request',
+    walletAddress: 'Wallet / address',
+    createdDate: 'Created date',
+    reviewedDate: 'Reviewed date',
+    adminNote: 'Admin note',
+    okUnderstood: 'OK, understood',
+    emailPlaceholder: 'name@example.com',
+    passwordPlaceholder: '••••••••',
+    fullNamePlaceholder: 'Enter your full name',
+    phonePlaceholder: '+...',
+    countryPlaceholder: 'Example: Oman',
+    amountPlaceholder: 'Example: 100',
+    paymentReferencePlaceholder: 'Transfer or reference number',
+    extraDetailsPlaceholder: 'Any additional details...',
+    walletPlaceholder: '0x... or any request note',
+    requestSubmitted: 'Your request has been submitted successfully and is now under review.',
+    loginRequired: 'Login required',
+    loginBeforePurchase: 'Please login before submitting a purchase request',
+    settingsSaved: '✓ Changes saved successfully',
+    logoutSuccess: 'Logged out',
+    loginSuccess: '✓ Logged in successfully',
+    accountCreated: 'Account created. Please open your email to confirm the account.',
+    enterEmail: '⚠️ Enter your email',
+    enterPassword: '⚠️ Enter your password',
+    enterFullName: '⚠️ Enter your full name',
+    enterPhone: '⚠️ Enter your phone number',
+    shortPassword: '⚠️ Password must be at least 6 characters',
+    enterWallet: '⚠️ Enter the receiving wallet or request note',
+    minPurchase: '⚠️ Minimum purchase is 10 OMR',
+    invalidAmount: 'Please enter a valid amount',
+    choosePaymentWarning: 'Please choose a payment method',
+    agreePilot: 'You must agree to the membership deposit terms before submitting',
+    pilotSubmitted: 'Your request has been submitted successfully and is now under review.',
+    sellSubmitted: 'Your request has been submitted successfully and is now under review.',
+    sending: 'Sending...',
+    saving: 'Saving...',
+    loggingIn: 'Logging in...',
+    creatingAccount: 'Creating account...',
+    submittingRequest: 'Submitting request...',
+    supabaseMissing: 'Add the Supabase URL and key inside the file first',
+    sessionReadFailed: 'Unable to read login session',
+    profileLoadFailed: 'Unable to load account data',
+    purchaseLoadFailed: 'Unable to load purchase requests',
+    loginFailed: 'Login failed',
+    loginRetry: 'Login failed. Please try again.',
+    signupFailed: 'Unable to create account',
+    settingsSaveFailed: 'Unable to save settings',
+    pilotSubmitFailed: 'Unable to submit membership deposit request',
+    requestFailed: 'Unable to submit request',
+    loginTimeout: 'Login connection timed out',
+    verified: 'Identity verified',
+    pendingIdentity: 'Under review',
+    rejectedIdentity: 'Verification rejected',
+    not_verified: 'Identity not verified'
+  }
+};
+
+let currentLang = localStorage.getItem('arbr_lang') === 'en' ? 'en' : 'ar';
+
+function t(key, params = {}) {
+  let value = I18N[currentLang]?.[key] ?? I18N.ar[key] ?? key;
+  Object.entries(params).forEach(([name, replacement]) => {
+    value = value.replaceAll('{' + name + '}', replacement);
+  });
+  return value;
+}
+
+function setLanguage(lang) {
+  currentLang = lang === 'en' ? 'en' : 'ar';
+  localStorage.setItem('arbr_lang', currentLang);
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  document.body.classList.toggle('lang-ar', currentLang === 'ar');
+  document.body.classList.toggle('lang-en', currentLang === 'en');
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (key && I18N[currentLang]?.[key] !== undefined) el.innerHTML = t(key);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if (key && I18N[currentLang]?.[key] !== undefined) el.setAttribute('placeholder', t(key));
+  });
+  document.querySelectorAll('[data-lang-toggle]').forEach(btn => {
+    btn.textContent = currentLang === 'ar' ? 'English' : 'العربية';
+  });
+  document.querySelectorAll('button[data-i18n]').forEach(btn => {
+    if (!btn.disabled) btn.dataset.originalText = btn.innerHTML;
+  });
+  updateLocalizedUserText();
+}
+
+function toggleLanguage() {
+  setLanguage(currentLang === 'ar' ? 'en' : 'ar');
+  if (currentUser) {
+    renderPurchaseRequests();
+    renderAllOrders(activeOrdersFilter);
+    renderPilotDeposits();
+    renderSellSection();
+  }
+}
+
+function updateLocalizedUserText() {
+  if (currentUser && currentProfile) {
+    const name = profileDisplayName();
+    const balance = currentWallet?.arbr_balance || 0;
+    document.getElementById('navUserName').textContent = t('greeting', { name });
+    document.getElementById('navUserBalance').textContent = t('balanceLabel', { amount: formatNumber(balance, 'ARBR') });
+    document.getElementById('dashAccountStatus').textContent = profileHasColumn('account_status') ? accountStatusLabel(currentProfile.account_status) : t('activeStatus');
+    const verificationEl = document.getElementById('dashVerificationStatus');
+    if (verificationEl) verificationEl.innerHTML = `<span class="verification-badge ${verificationClass()}">${verificationLabel()}</span>`;
+  }
+}
+
 /* Toast */
 const toast = document.getElementById('toast');
 function showToast(msg, type = 'success') {
@@ -957,16 +1519,16 @@ function showToast(msg, type = 'success') {
 
 function requireSupabase() {
   if (supabaseClient) return true;
-  showToast('أضف رابط ومفتاح Supabase داخل الملف أولاً');
+  showToast(t('supabaseMissing'), 'error');
   return false;
 }
 
 function setBusy(button, busy, text) {
-  if (!button.dataset.originalText) button.dataset.originalText = button.textContent;
+  if (!button.dataset.originalText) button.dataset.originalText = button.innerHTML;
   button.disabled = busy;
   button.style.opacity = busy ? '.72' : '';
   button.style.cursor = busy ? 'wait' : '';
-  button.textContent = busy ? text : button.dataset.originalText;
+  button.innerHTML = busy ? text : button.dataset.originalText;
 }
 
 function withTimeout(promise, timeoutMs, message) {
@@ -979,22 +1541,23 @@ function withTimeout(promise, timeoutMs, message) {
 
 function formatNumber(value, suffix = '') {
   const n = Number(value || 0);
-  return n.toLocaleString('en-US', { maximumFractionDigits: 2 }) + (suffix ? ' ' + suffix : '');
+  const formatted = n.toLocaleString('en-US', { maximumFractionDigits: 2 }) + (suffix ? ' ' + suffix : '');
+  return suffix ? '\u2068' + formatted + '\u2069' : formatted;
 }
 
 function profileDisplayName() {
-  return currentProfile?.full_name || currentUser?.email || 'مستثمر ARBR';
+  return currentProfile?.full_name || currentUser?.email || (currentLang === 'ar' ? 'مستخدم ARBR' : 'ARBR user');
 }
 
 function statusLabel(status) {
   const labels = {
-    pending: 'قيد المراجعة',
-    reviewing: 'تحت المراجعة',
-    approved: 'تمت الموافقة',
-    rejected: 'مرفوض',
-    completed: 'مكتمل'
+    pending: t('pending'),
+    reviewing: currentLang === 'ar' ? 'تحت المراجعة' : 'Reviewing',
+    approved: currentLang === 'ar' ? 'تمت الموافقة' : 'Approved',
+    rejected: t('rejectedStatus'),
+    completed: currentLang === 'ar' ? 'مكتمل' : 'Completed'
   };
-  return labels[status] || status || 'قيد المراجعة';
+  return labels[status] || status || t('pending');
 }
 
 function statusClass(status) {
@@ -1005,14 +1568,76 @@ function statusClass(status) {
 
 function pilotStatusLabel(status) {
   const labels = {
-    pending: 'قيد المراجعة (pending)',
-    active: 'مفعّل (active)',
-    refund_requested: 'طلب استرداد',
-    refunded: 'تم الاسترداد (refunded)',
-    cancelled: 'ملغي',
-    approved: 'موافق'
+    pending: currentLang === 'ar' ? 'قيد المراجعة (pending)' : 'Pending',
+    active: currentLang === 'ar' ? 'مفعّل (active)' : 'Active',
+    refund_requested: currentLang === 'ar' ? 'طلب استرداد' : 'Refund requested',
+    refunded: currentLang === 'ar' ? 'تم الاسترداد (refunded)' : 'Refunded',
+    cancelled: currentLang === 'ar' ? 'ملغي' : 'Cancelled',
+    approved: t('approved')
   };
-  return labels[status] || status || 'قيد المراجعة';
+  return labels[status] || status || t('pending');
+}
+
+function identityVerificationLabel(status) {
+  return verificationLabel(status);
+}
+
+function verificationStatus() {
+  const raw = currentProfile?.verification_status || currentProfile?.kyc_status || 'unverified';
+  const mapped = {
+    approved: 'verified',
+    submitted: 'pending',
+    pending: currentProfile?.verification_status ? 'pending' : 'unverified',
+    not_verified: 'unverified'
+  };
+  return mapped[raw] || raw || 'unverified';
+}
+
+function verificationLabel(status = verificationStatus()) {
+  const labels = {
+    unverified: t('unverified'),
+    pending: t('verificationPending'),
+    verified: t('verificationVerified'),
+    rejected: t('verificationRejected')
+  };
+  return labels[status] || labels.unverified;
+}
+
+function verificationClass(status = verificationStatus()) {
+  if (status === 'verified') return 'verified';
+  if (status === 'rejected') return 'rejected';
+  return 'pending';
+}
+
+function isVerified() {
+  return verificationStatus() === 'verified';
+}
+
+function requireVerifiedService() {
+  if (isVerified()) return true;
+  showToast(t('verificationRequired'), 'warning');
+  return false;
+}
+
+function updateVerificationRestrictions() {
+  const verified = isVerified();
+  const pilotNotice = document.getElementById('pilotLockedNotice');
+  const pilotSubmit = document.getElementById('pilotSubmit');
+  if (pilotNotice) pilotNotice.classList.toggle('hidden', verified);
+  if (pilotSubmit) {
+    pilotSubmit.disabled = !verified;
+    pilotSubmit.style.opacity = verified ? '' : '.55';
+    pilotSubmit.style.cursor = verified ? '' : 'not-allowed';
+  }
+}
+
+function accountStatusLabel(status) {
+  const labels = {
+    active: t('activeStatus'),
+    disabled: currentLang === 'ar' ? 'معطل' : 'Disabled',
+    under_review: t('pending')
+  };
+  return labels[status] || status || t('activeStatus');
 }
 
 function requestAmount(order) {
@@ -1024,7 +1649,7 @@ function requestEstimated(order) {
 }
 
 function requestDate(order) {
-  return order.created_at ? new Date(order.created_at).toLocaleDateString('ar') : '-';
+  return order.created_at ? new Date(order.created_at).toLocaleDateString(currentLang === 'ar' ? 'ar' : 'en-US') : '-';
 }
 
 function recordHasColumn(record, column) {
@@ -1033,11 +1658,19 @@ function recordHasColumn(record, column) {
 
 function requestProcessedDate(order) {
   if (!recordHasColumn(order, 'processed_at')) return '';
-  return order.processed_at ? new Date(order.processed_at).toLocaleDateString('ar') : '-';
+  return order.processed_at ? new Date(order.processed_at).toLocaleDateString(currentLang === 'ar' ? 'ar' : 'en-US') : '-';
 }
 
 function requestId(order) {
   return '#ARBR-' + String(order.id || '').slice(-6).toUpperCase();
+}
+
+function depositId(deposit) {
+  return '#DEP-' + String(deposit?.id || '').slice(-6).toUpperCase();
+}
+
+function redeemId(request) {
+  return '#RED-' + String(request?.id || '').slice(-6).toUpperCase();
 }
 
 function profileHasColumn(column) {
@@ -1048,7 +1681,7 @@ async function getCurrentUser() {
   if (!requireSupabase()) return null;
   const { data, error } = await supabaseClient.auth.getSession();
   if (error) {
-    showToast('تعذر قراءة جلسة الدخول');
+    showToast(t('sessionReadFailed'), 'error');
     return null;
   }
   return data.session?.user || null;
@@ -1062,7 +1695,7 @@ async function loadUserProfile(user = currentUser) {
     .eq('id', user.id)
     .maybeSingle();
   if (error) {
-    showToast('تعذر تحميل بيانات الحساب');
+    showToast(t('profileLoadFailed'), 'error');
     return null;
   }
   return data || {
@@ -1094,7 +1727,7 @@ async function loadPurchaseRequests(user = currentUser) {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
   if (error) {
-    showToast('تعذر تحميل طلبات الشراء');
+    showToast(t('purchaseLoadFailed'), 'error');
     return [];
   }
   return data || [];
@@ -1111,11 +1744,23 @@ async function loadPilotDeposits(user = currentUser) {
   return data || [];
 }
 
+async function loadRedeemRequests(user = currentUser) {
+  if (!user) return [];
+  const { data, error } = await supabaseClient
+    .from('redeem_requests')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+  if (error) return [];
+  return data || [];
+}
+
 function renderPilotDeposits() {
   const pilotList = document.getElementById('pilotList');
   if (!pilotList) return;
   if (!currentPilotDeposits.length) {
-    pilotList.innerHTML = '<div class="empty-orders">لا توجد طلبات إيداع عضوية حتى الآن.</div>';
+    pilotList.innerHTML = `<div class="empty-orders" data-i18n="noPilotDeposits">${t('noPilotDeposits')}</div>`;
+    setLanguage(currentLang);
     return;
   }
   pilotList.innerHTML = `
@@ -1123,25 +1768,25 @@ function renderPilotDeposits() {
       <table class="mini-table">
         <thead>
           <tr>
-            <th>رقم الطلب</th>
-            <th>المبلغ</th>
-            <th>طريقة الدفع</th>
-            <th>قابل للاسترداد</th>
-            <th>الحالة</th>
-            <th>التاريخ</th>
-            <th>إجراء</th>
+            <th>${currentLang === 'ar' ? 'رقم الطلب' : 'Request ID'}</th>
+            <th>${currentLang === 'ar' ? 'المبلغ' : 'Amount'}</th>
+            <th>${t('paymentMethod')}</th>
+            <th>${currentLang === 'ar' ? 'قابل للاسترداد' : 'Refundable'}</th>
+            <th>${currentLang === 'ar' ? 'الحالة' : 'Status'}</th>
+            <th>${currentLang === 'ar' ? 'التاريخ' : 'Date'}</th>
+            <th>${currentLang === 'ar' ? 'إجراء' : 'Action'}</th>
           </tr>
         </thead>
         <tbody>
           ${currentPilotDeposits.map(deposit => `
             <tr>
               <td class="req-id">#DEP-${String(deposit.id || '').slice(-6).toUpperCase()}</td>
-              <td>${formatNumber(deposit.amount_omr, 'OMR')}</td>
+              <td>${formatNumber(deposit.amount_omr, ARBR_CONFIG.entryCurrency)}</td>
               <td>${deposit.payment_method || '-'}</td>
-              <td>${deposit.is_refundable ? 'نعم' : 'لا'}</td>
+              <td>${deposit.is_refundable ? (currentLang === 'ar' ? 'نعم' : 'Yes') : (currentLang === 'ar' ? 'لا' : 'No')}</td>
               <td><span class="status-pill ${statusClass(deposit.status)}">${pilotStatusLabel(deposit.status)}</span></td>
-              <td>${deposit.created_at ? new Date(deposit.created_at).toLocaleDateString('ar') : '-'}</td>
-              <td><button class="small-btn" type="button" data-refund-id="${deposit.id}">تعليمات الاسترداد</button></td>
+              <td>${deposit.created_at ? new Date(deposit.created_at).toLocaleDateString(currentLang === 'ar' ? 'ar' : 'en-US') : '-'}</td>
+              <td><button class="small-btn" type="button" data-refund-id="${deposit.id}">${currentLang === 'ar' ? 'تعليمات الاسترداد' : 'Refund instructions'}</button></td>
             </tr>
           `).join('')}
         </tbody>
@@ -1151,27 +1796,29 @@ function renderPilotDeposits() {
   pilotList.querySelectorAll('[data-refund-id]').forEach(btn => {
     btn.addEventListener('click', () => openRefundInstructions(btn.dataset.refundId));
   });
+  setLanguage(currentLang);
 }
 
 async function submitPilotDeposit(event) {
   event?.preventDefault();
   if (!currentUser) {
     openModal();
-    showToast('يجب تسجيل الدخول أولًا', 'warning');
+    showToast(t('loginRequired'), 'warning');
     return;
   }
+  if (!requireVerifiedService()) return;
   const amount = Number(document.getElementById('pilotAmount').value || 0);
   const method = document.getElementById('pilotMethod').value;
   const reference = document.getElementById('pilotReference').value.trim();
   const note = document.getElementById('pilotNote').value.trim();
   const agreed = document.getElementById('pilotAgree').checked;
-  if (amount <= 0) { showToast('يرجى إدخال مبلغ صحيح', 'warning'); return; }
-  if (!method) { showToast('يرجى اختيار طريقة الدفع', 'warning'); return; }
-  if (!agreed) { showToast('يجب الموافقة على شروط إيداع العضوية قبل الإرسال', 'warning'); return; }
+  if (amount <= 0) { showToast(t('invalidAmount'), 'warning'); return; }
+  if (!method) { showToast(t('choosePaymentWarning'), 'warning'); return; }
+  if (!agreed) { showToast(t('agreePilot'), 'warning'); return; }
 
   const btn = document.getElementById('pilotSubmit');
-  setBusy(btn, true, 'جار الإرسال...');
-  const { error } = await supabaseClient
+  setBusy(btn, true, t('sending'));
+  const { data, error } = await supabaseClient
     .from('pilot_deposits')
     .insert({
       user_id: currentUser.id,
@@ -1181,13 +1828,20 @@ async function submitPilotDeposit(event) {
       notes: note,
       status: 'pending',
       is_refundable: true
-    });
+    })
+    .select('id,status')
+    .single();
   setBusy(btn, false);
   if (error) {
-    showToast('تعذر إرسال طلب إيداع العضوية: ' + error.message, 'error');
+    showToast(t('pilotSubmitFailed') + ': ' + error.message, 'error');
     return;
   }
-  showToast('تم إرسال طلب إيداع العضوية وسيتم مراجعته يدويًا', 'success');
+  showToast(t('pilotSubmitted'), 'success');
+  showRequestSuccess({
+    number: depositId(data),
+    status: data?.status || 'pending',
+    message: t('requestUnderReview')
+  });
   document.getElementById('pilotForm').reset();
   currentPilotDeposits = await loadPilotDeposits(currentUser);
   renderPilotDeposits();
@@ -1200,6 +1854,24 @@ function openRefundInstructions(depositId) {
 
 function closeRefundInstructions() {
   document.getElementById('refundModal').classList.remove('open');
+}
+
+function showRequestSuccess({ number, status = 'pending', message = t('requestUnderReview') }) {
+  document.getElementById('successRequestNumber').textContent = number || '-';
+  const statusEl = document.getElementById('successRequestStatus');
+  statusEl.textContent = statusLabel(status);
+  statusEl.className = 'status-pill ' + statusClass(status);
+  document.getElementById('successRequestMessage').textContent = message;
+  document.getElementById('requestSuccessModal').classList.add('open');
+}
+
+function closeRequestSuccess() {
+  document.getElementById('requestSuccessModal').classList.remove('open');
+}
+
+function viewOrdersFromSuccess() {
+  closeRequestSuccess();
+  document.getElementById('myOrders')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function calculateSellReturnByStages(soldTokens, sellAmountTokens) {
@@ -1236,41 +1908,44 @@ function renderSellSection() {
   const available = Math.max(0, balance - locked);
   sellContent.innerHTML = `
     <div class="antiwhale-box">
-      <h4>سياسة حماية السيولة</h4>
-      <p>لا يتم احتساب البيع على آخر سعر ظاهر فقط، بل يتم احتسابه عكسيًا عبر مراحل التسعير مع خصم فرق السعر ورسوم الخروج.</p>
+      <h4>${currentLang === 'ar' ? 'نموذج احتساب البيع والاسترداد' : 'Sell and redeem calculation model'}</h4>
+      <p>${currentLang === 'ar' ? 'يتم احتساب القيمة بشكل تقديري عبر مراحل التسعير المعتمدة مع توضيح الرسوم والقيمة النهائية قبل إرسال الطلب.' : 'The value is estimated through the approved pricing stages, with fees and the final estimated value shown before submission.'}</p>
       <ul>
-        <li>لا يوجد بيع فوري مضمون</li>
-        <li>البيع يخضع لتوفر السيولة والمراجعة اليدوية</li>
-        <li>لا يمكن بيع الرصيد المقفل</li>
-        <li>السعر المعروض ليس ضمانًا للتنفيذ</li>
+        <li>${currentLang === 'ar' ? 'عرض القيمة الإجمالية والرسوم بوضوح' : 'Clear gross value and fee breakdown'}</li>
+        <li>${currentLang === 'ar' ? 'اعتماد الطلب بعد مراجعة الإدارة وتأكيد البيانات' : 'Approval after admin review and transaction verification'}</li>
+        <li>${currentLang === 'ar' ? 'استخدام الرصيد المتاح فقط' : 'Available balance only'}</li>
       </ul>
     </div>
+    ${!isVerified() ? `<div class="service-locked">${t('verificationRequired')}</div>` : ''}
     <div class="sell-balances">
-      <div class="sell-metric"><small>رصيد ARBR الكلي</small><b>${formatNumber(balance)}</b></div>
-      <div class="sell-metric"><small>المقفل</small><b>${formatNumber(locked)}</b></div>
-      <div class="sell-metric"><small>المتاح للبيع</small><b>${formatNumber(available)}</b></div>
+      <div class="sell-metric"><small>${currentLang === 'ar' ? 'رصيد ARBR الكلي' : 'Total ARBR balance'}</small><b>${formatNumber(balance)}</b></div>
+      <div class="sell-metric"><small>${currentLang === 'ar' ? 'المقفل' : 'Locked'}</small><b>${formatNumber(locked)}</b></div>
+      <div class="sell-metric"><small>${currentLang === 'ar' ? 'المتاح للبيع' : 'Available to sell'}</small><b>${formatNumber(available)}</b></div>
     </div>
     <div class="fee-grid">
-      <div class="sell-metric"><small>Spread Fee</small><b>${(ARBR_CONFIG.spreadRate * 100).toFixed(0)}%</b></div>
-      <div class="sell-metric"><small>Exit Fee</small><b>${(ARBR_CONFIG.exitFeeRate * 100).toFixed(0)}%</b></div>
-      <div class="sell-metric"><small>إجمالي الرسوم</small><b>${((ARBR_CONFIG.spreadRate + ARBR_CONFIG.exitFeeRate) * 100).toFixed(0)}%</b></div>
+      <div class="sell-metric"><small>${t('serviceFee')}</small><b>${(ARBR_CONFIG.spreadRate * 100).toFixed(0)}%</b></div>
+      <div class="sell-metric"><small>${t('processingFee')}</small><b>${(ARBR_CONFIG.exitFeeRate * 100).toFixed(0)}%</b></div>
+      <div class="sell-metric"><small>${currentLang === 'ar' ? 'إجمالي الرسوم' : 'Total fees'}</small><b>${((ARBR_CONFIG.spreadRate + ARBR_CONFIG.exitFeeRate) * 100).toFixed(0)}%</b></div>
     </div>
     <div class="fgroup">
-      <label>كمية ARBR المراد معاينتها للبيع</label>
-      <input id="sellAmount" type="number" min="1" step="1" max="${available}" placeholder="مثال: 10000" />
+      <label>${currentLang === 'ar' ? 'كمية ARBR المراد معاينتها للبيع' : 'ARBR amount to preview for sale'}</label>
+      <input id="sellAmount" type="number" min="1" step="1" max="${available}" placeholder="${currentLang === 'ar' ? 'مثال: 10000' : 'Example: 10000'}" />
     </div>
     <div class="sell-preview">
-      <div class="preview-row"><span>الكمية المطلوبة</span><span id="sellPrevAmount">-</span></div>
-      <div class="preview-row"><span>Gross Return</span><span id="sellPrevGross">-</span></div>
-      <div class="preview-row fee"><span>Spread Fee</span><span id="sellPrevSpread">-</span></div>
-      <div class="preview-row fee"><span>Exit Fee</span><span id="sellPrevExit">-</span></div>
-      <div class="preview-row net"><span>Net Return تقريبي</span><span id="sellPrevNet">-</span></div>
+      <div class="preview-row"><span>${currentLang === 'ar' ? 'الكمية المطلوبة' : 'Requested amount'}</span><span id="sellPrevAmount">-</span></div>
+      <div class="preview-row"><span>${t('grossValue')}</span><span id="sellPrevGross">-</span></div>
+      <div class="preview-row fee"><span>${t('serviceFee')}</span><span id="sellPrevSpread">-</span></div>
+      <div class="preview-row fee"><span>${t('processingFee')}</span><span id="sellPrevExit">-</span></div>
+      <div class="preview-row net"><span>${t('estimatedFinalValue')}</span><span id="sellPrevNet">-</span></div>
       <div id="sellWarnings"></div>
     </div>
-    <div class="feature-pending"><b>تنبيه البيع والاسترداد</b>تخضع طلبات البيع والاسترداد للمراجعة الإدارية وتوفر السيولة. هذه المعاينة لا تضمن سعرًا أو عائدًا.</div>
+    <div class="feature-pending"><b>${currentLang === 'ar' ? 'ملاحظة العملية' : 'Transaction note'}</b>${t('sellCalcNote')}</div>
+    <button class="btn-primary" type="button" id="submitSellRequest" style="width:100%;padding:14px;margin-top:16px" ${!isVerified() ? 'disabled' : ''}>${t('submitSellRequest')}</button>
   `;
   document.getElementById('sellAmount').addEventListener('input', updateSellPreview);
+  document.getElementById('submitSellRequest').addEventListener('click', submitSellRequest);
   updateSellPreview();
+  setLanguage(currentLang);
 }
 
 function updateSellPreview() {
@@ -1279,16 +1954,56 @@ function updateSellPreview() {
   const result = calculateSellReturnByStages(estimatedSoldTokens, amount);
   const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
   setText('sellPrevAmount', amount > 0 ? formatNumber(amount, 'ARBR') : '-');
-  setText('sellPrevGross', amount > 0 ? '$' + result.grossReturn.toFixed(4) : '-');
-  setText('sellPrevSpread', amount > 0 ? '-$' + result.spreadFee.toFixed(4) : '-');
-  setText('sellPrevExit', amount > 0 ? '-$' + result.exitFee.toFixed(4) : '-');
-  setText('sellPrevNet', amount > 0 ? '$' + result.netReturn.toFixed(4) : '-');
+  setText('sellPrevGross', amount > 0 ? formatNumber(result.grossReturn, ARBR_CONFIG.entryCurrency) : '-');
+  setText('sellPrevSpread', amount > 0 ? '-' + formatNumber(result.spreadFee, ARBR_CONFIG.entryCurrency) : '-');
+  setText('sellPrevExit', amount > 0 ? '-' + formatNumber(result.exitFee, ARBR_CONFIG.entryCurrency) : '-');
+  setText('sellPrevNet', amount > 0 ? formatNumber(result.netReturn, ARBR_CONFIG.entryCurrency) : '-');
   const warnings = document.getElementById('sellWarnings');
   if (!warnings) return;
   const items = [];
-  if (amount > available) items.push('الكمية المطلوبة تتجاوز الرصيد المتاح للبيع.');
-  if (result.netReturn > ARBR_CONFIG.maxSellPerDay) items.push('هذه المعاينة تتجاوز حد البيع اليومي وستحتاج مراجعة خاصة عند تفعيل البيع.');
+  if (amount > available) items.push(currentLang === 'ar' ? 'الكمية المطلوبة تتجاوز الرصيد المتاح للبيع.' : 'Requested amount exceeds the available sell balance.');
+  if (result.netReturn > ARBR_CONFIG.maxSellPerDay) items.push(currentLang === 'ar' ? 'سيتم توجيه هذا الطلب إلى مسار مراجعة الإدارة التفصيلي.' : 'This request will be routed to the detailed admin review flow.');
   warnings.innerHTML = items.map(item => `<div class="sell-warning">${item}</div>`).join('');
+}
+
+async function submitSellRequest() {
+  if (!currentUser) {
+    openModal();
+    showToast(t('loginRequired'), 'warning');
+    return;
+  }
+  if (!requireVerifiedService()) return;
+  const amount = Number(document.getElementById('sellAmount')?.value || 0);
+  const available = Math.max(0, Number(currentWallet?.arbr_balance || 0) - Number(currentWallet?.locked_arbr || 0));
+  if (amount <= 0) { showToast(t('invalidAmount'), 'warning'); return; }
+  if (amount > available) { showToast(currentLang === 'ar' ? 'الكمية المطلوبة تتجاوز الرصيد المتاح.' : 'Requested amount exceeds available balance.', 'warning'); return; }
+  const result = calculateSellReturnByStages(estimatedSoldTokens, amount);
+  const btn = document.getElementById('submitSellRequest');
+  setBusy(btn, true, t('submittingRequest'));
+  const { data, error } = await supabaseClient
+    .from('redeem_requests')
+    .insert({
+      user_id: currentUser.id,
+      amount_arbr: amount,
+      estimated_gross_omr: result.grossReturn,
+      service_fee_omr: result.spreadFee,
+      processing_fee_omr: result.exitFee,
+      estimated_final_omr: result.netReturn,
+      status: 'pending'
+    })
+    .select('id,status')
+    .single();
+  setBusy(btn, false);
+  if (error) { showToast(t('requestFailed') + ': ' + error.message, 'error'); return; }
+  showToast(t('sellSubmitted'), 'success');
+  showRequestSuccess({
+    number: redeemId(data),
+    status: data?.status || 'pending',
+    message: t('requestUnderReview')
+  });
+  document.getElementById('sellAmount').value = '';
+  updateSellPreview();
+  currentRedeemRequests = await loadRedeemRequests(currentUser);
 }
 
 function renderPurchaseRequests() {
@@ -1296,16 +2011,19 @@ function renderPurchaseRequests() {
   if (!ordersList) return;
   if (!currentPurchaseRequests.length) {
     ordersList.innerHTML = `
-      <div class="legal-notice" style="margin-bottom:14px">عند تغيير حالة الطلب إلى approved من Supabase، سيتم تحديث رصيد المستخدم تلقائيًا.</div>
-      <div class="empty-orders">لا توجد طلبات شراء حتى الآن.</div>
+      <div class="legal-notice" style="margin-bottom:14px" data-i18n="approvedBalanceNotice">${t('approvedBalanceNotice')}</div>
+      <div class="empty-orders" data-i18n="noPurchaseRequests">${t('noPurchaseRequests')}</div>
     `;
+    setLanguage(currentLang);
     return;
   }
   const recent = currentPurchaseRequests.slice(0, 5);
   ordersList.innerHTML = `
-    <div class="legal-notice" style="margin-bottom:14px">عند تغيير حالة الطلب إلى approved من Supabase، سيتم تحديث رصيد المستخدم تلقائيًا.</div>
+    <div class="legal-notice" style="margin-bottom:14px" data-i18n="approvedBalanceNotice">${t('approvedBalanceNotice')}</div>
     ${renderOrdersTable(recent, false)}
   `;
+  bindOrderDetailButtons(ordersList);
+  setLanguage(currentLang);
 }
 
 function renderOrdersTable(orders, showNote = true) {
@@ -1315,21 +2033,21 @@ function renderOrdersTable(orders, showNote = true) {
       <table class="orders-table">
         <thead>
           <tr>
-            <th>رقم الطلب</th>
-            <th>المبلغ</th>
-            <th>طريقة الدفع</th>
-            <th>الكمية المقدرة</th>
-            <th>الحالة</th>
-            <th>التاريخ</th>
-            ${showProcessedAt ? '<th>تاريخ المعالجة</th>' : ''}
-            ${showNote ? '<th>الملاحظة</th>' : ''}
+            <th>${currentLang === 'ar' ? 'رقم الطلب' : 'Request ID'}</th>
+            <th>${currentLang === 'ar' ? 'المبلغ' : 'Amount'}</th>
+            <th>${t('paymentMethod')}</th>
+            <th>${currentLang === 'ar' ? 'الكمية المقدرة' : 'Estimated amount'}</th>
+            <th>${currentLang === 'ar' ? 'الحالة' : 'Status'}</th>
+            <th>${currentLang === 'ar' ? 'التاريخ' : 'Date'}</th>
+            ${showProcessedAt ? `<th>${currentLang === 'ar' ? 'تاريخ المعالجة' : 'Processed date'}</th>` : ''}
+            ${showNote ? `<th>${currentLang === 'ar' ? 'الملاحظة' : 'Note'}</th>` : ''}
           </tr>
         </thead>
         <tbody>
           ${orders.map(order => `
             <tr>
-              <td class="req-id">${requestId(order)}</td>
-              <td>${formatNumber(requestAmount(order), 'OMR')}</td>
+              <td class="req-id"><button class="order-link" type="button" data-order-detail="${order.id}">${requestId(order)}</button></td>
+              <td>${formatNumber(requestAmount(order), ARBR_CONFIG.entryCurrency)}</td>
               <td>${order.payment_method || '-'}</td>
               <td>${formatNumber(requestEstimated(order), 'ARBR')}</td>
               <td><span class="status-pill ${statusClass(order.status)}">${statusLabel(order.status)}</span></td>
@@ -1344,6 +2062,40 @@ function renderOrdersTable(orders, showNote = true) {
   `;
 }
 
+function bindOrderDetailButtons(scope = document) {
+  scope.querySelectorAll('[data-order-detail]').forEach(btn => {
+    btn.addEventListener('click', () => openOrderDetails(btn.dataset.orderDetail));
+  });
+}
+
+function detailItem(label, value, wide = false) {
+  return `<div class="detail-item ${wide ? 'wide' : ''}"><small>${label}</small><b>${value || '-'}</b></div>`;
+}
+
+function openOrderDetails(orderId) {
+  const order = currentPurchaseRequests.find(item => String(item.id) === String(orderId));
+  if (!order) return;
+  const content = document.getElementById('orderDetailsContent');
+  const reviewedDate = order.reviewed_at || order.processed_at || order.updated_at;
+  content.innerHTML = [
+    detailItem(t('requestNumber'), requestId(order)),
+    detailItem(t('paymentMethod'), order.payment_method || '-'),
+    detailItem(currentLang === 'ar' ? 'المبلغ' : 'Amount', formatNumber(requestAmount(order), ARBR_CONFIG.entryCurrency)),
+    detailItem(currentLang === 'ar' ? 'كمية ARBR' : 'ARBR quantity', formatNumber(requestEstimated(order), 'ARBR')),
+    detailItem(currentLang === 'ar' ? 'رقم المرجع' : 'Reference number', order.payment_reference || order.reference_number || '-'),
+    detailItem(t('walletAddress'), order.wallet_address || order.note || '-'),
+    detailItem(currentLang === 'ar' ? 'الحالة' : 'Status', statusLabel(order.status)),
+    detailItem(t('createdDate'), requestDate(order)),
+    detailItem(t('reviewedDate'), reviewedDate ? new Date(reviewedDate).toLocaleDateString(currentLang === 'ar' ? 'ar' : 'en-US') : '-'),
+    detailItem(t('adminNote'), order.admin_notes || order.admin_note || '-', true)
+  ].join('');
+  document.getElementById('orderDetailsModal').classList.add('open');
+}
+
+function closeOrderDetailsModal() {
+  document.getElementById('orderDetailsModal').classList.remove('open');
+}
+
 function renderAllOrders(filter = activeOrdersFilter) {
   activeOrdersFilter = filter;
   document.querySelectorAll('.orders-tab').forEach(btn => {
@@ -1355,10 +2107,13 @@ function renderAllOrders(filter = activeOrdersFilter) {
     ? currentPurchaseRequests
     : currentPurchaseRequests.filter(order => order.status === filter);
   if (!filtered.length) {
-    allOrdersList.innerHTML = '<div class="empty-orders">لا توجد طلبات في هذا القسم.</div>';
+    allOrdersList.innerHTML = `<div class="empty-orders" data-i18n="noOrdersHere">${t('noOrdersHere')}</div>`;
+    setLanguage(currentLang);
     return;
   }
   allOrdersList.innerHTML = renderOrdersTable(filtered, true);
+  bindOrderDetailButtons(allOrdersList);
+  setLanguage(currentLang);
 }
 
 function updateAuthUI() {
@@ -1388,18 +2143,20 @@ function updateAuthUI() {
   const pendingRequests = currentPurchaseRequests.filter(order => order.status === 'pending').length;
   const name = profileDisplayName();
 
-  document.getElementById('navUserName').textContent = 'مرحبًا، ' + name;
-  document.getElementById('navUserBalance').textContent = 'الرصيد: ' + formatNumber(balance, 'ARBR');
+  document.getElementById('navUserName').textContent = t('greeting', { name });
+  document.getElementById('navUserBalance').textContent = t('balanceLabel', { amount: formatNumber(balance, 'ARBR') });
   document.getElementById('dashAvatar').textContent = (name || 'A').trim().charAt(0).toUpperCase();
   document.getElementById('dashFullName').textContent = currentProfile?.full_name || currentUser.email?.split('@')[0] || '-';
   document.getElementById('dashEmail').textContent = email;
   document.getElementById('dashPhone').textContent = currentProfile?.phone || '-';
   document.getElementById('dashArbrBalance').textContent = formatNumber(balance, 'ARBR');
   document.getElementById('dashLockedArbr').textContent = formatNumber(locked, 'ARBR');
-  document.getElementById('dashTotalDeposit').textContent = formatNumber(totalDeposit, 'OMR');
+  document.getElementById('dashTotalDeposit').textContent = formatNumber(totalDeposit, ARBR_CONFIG.entryCurrency);
   document.getElementById('dashTotalRequests').textContent = currentPurchaseRequests.length;
   document.getElementById('dashPendingRequests').textContent = pendingRequests;
-  document.getElementById('dashAccountStatus').textContent = profileHasColumn('account_status') ? (currentProfile.account_status || 'نشط') : 'نشط';
+  document.getElementById('dashAccountStatus').textContent = profileHasColumn('account_status') ? accountStatusLabel(currentProfile.account_status) : t('activeStatus');
+  document.getElementById('dashVerificationStatus').innerHTML = `<span class="verification-badge ${verificationClass()}">${verificationLabel()}</span>`;
+  updateVerificationRestrictions();
   renderPurchaseRequests();
   renderAllOrders(activeOrdersFilter);
   renderPilotDeposits();
@@ -1413,30 +2170,34 @@ async function refreshUserState() {
     currentWallet = null;
     currentPurchaseRequests = [];
     currentPilotDeposits = [];
+    currentRedeemRequests = [];
     updateAuthUI();
     return;
   }
-  const [profile, wallet, requests, pilots] = await Promise.all([
+  const [profile, wallet, requests, pilots, redeems] = await Promise.all([
     loadUserProfile(currentUser),
     loadUserWallet(currentUser),
     loadPurchaseRequests(currentUser),
-    loadPilotDeposits(currentUser)
+    loadPilotDeposits(currentUser),
+    loadRedeemRequests(currentUser)
   ]);
   currentProfile = profile;
   currentWallet = wallet;
   currentPurchaseRequests = requests;
   currentPilotDeposits = pilots;
+  currentRedeemRequests = redeems;
   updateAuthUI();
 }
 
 function openSettings() {
   if (!currentUser) {
     openModal();
-    showToast('يجب تسجيل الدخول أولًا');
+    showToast(t('loginRequired'), 'warning');
     return;
   }
   document.getElementById('settingsFullName').value = currentProfile?.full_name || '';
   document.getElementById('settingsPhone').value = currentProfile?.phone || '';
+  document.getElementById('settingsPhone').readOnly = true;
   const countrySupported = profileHasColumn('country');
   document.getElementById('settingsCountryGroup').classList.toggle('hidden', !countrySupported);
   document.getElementById('settingsCountry').value = countrySupported ? (currentProfile?.country || '') : '';
@@ -1451,10 +2212,9 @@ function closeSettings() {
 async function saveSettings() {
   if (!currentUser) return;
   const btn = document.getElementById('saveSettingsBtn');
-  setBusy(btn, true, 'جار الحفظ...');
+  setBusy(btn, true, t('saving'));
   const updates = {
-    full_name: document.getElementById('settingsFullName').value.trim(),
-    phone: document.getElementById('settingsPhone').value.trim()
+    full_name: document.getElementById('settingsFullName').value.trim()
   };
   if (profileHasColumn('country')) {
     updates.country = document.getElementById('settingsCountry').value.trim();
@@ -1465,10 +2225,10 @@ async function saveSettings() {
     .eq('id', currentUser.id);
   setBusy(btn, false);
   if (error) {
-    showToast('تعذر حفظ الإعدادات: ' + error.message, 'error');
+    showToast(t('settingsSaveFailed') + ': ' + error.message, 'error');
     return;
   }
-  showToast('✓ تم حفظ التغييرات بنجاح', 'success');
+  showToast(t('settingsSaved'), 'success');
   closeSettings();
   await refreshUserState();
 }
@@ -1481,15 +2241,16 @@ async function logoutUser() {
   currentWallet = null;
   currentPurchaseRequests = [];
   currentPilotDeposits = [];
+  currentRedeemRequests = [];
   updateAuthUI();
   document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
-  showToast('تم تسجيل الخروج');
+  showToast(t('logoutSuccess'));
 }
 
 function requireLoginBeforePurchase() {
   if (currentUser) return true;
   openModal();
-  showToast('يجب تسجيل الدخول أولًا قبل إرسال طلب الشراء', 'warning');
+  showToast(t('loginBeforePurchase'), 'warning');
   return false;
 }
 
@@ -1521,21 +2282,21 @@ document.getElementById('doLogin').onclick = async () => {
   const btn = document.getElementById('doLogin');
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPass').value;
-  if (!email) { showToast('⚠️ أدخل البريد الإلكتروني'); return; }
-  if (!password) { showToast('⚠️ أدخل كلمة المرور'); return; }
-  setBusy(btn, true, 'جار تسجيل الدخول...');
+  if (!email) { showToast(t('enterEmail'), 'warning'); return; }
+  if (!password) { showToast(t('enterPassword'), 'warning'); return; }
+  setBusy(btn, true, t('loggingIn'));
   try {
     const { error } = await withTimeout(
       supabaseClient.auth.signInWithPassword({ email, password }),
       15000,
-      'انتهت مهلة الاتصال أثناء تسجيل الدخول'
+      t('loginTimeout')
     );
-    if (error) { showToast('تعذر تسجيل الدخول: ' + error.message, 'error'); return; }
+    if (error) { showToast(t('loginFailed') + ': ' + error.message, 'error'); return; }
     closeModal();
     await refreshUserState();
-    showToast('✓ تم تسجيل الدخول بنجاح');
+    showToast(t('loginSuccess'));
   } catch (error) {
-    showToast(error.message || 'تعذر تسجيل الدخول. حاول مرة أخرى.', 'error');
+    showToast(error.message || t('loginRetry'), 'error');
   } finally {
     setBusy(btn, false);
   }
@@ -1549,11 +2310,11 @@ document.getElementById('doSignup').onclick = async () => {
   const phone = document.getElementById('sPhone').value.trim();
   const email = document.getElementById('sEmail').value.trim();
   const password = document.getElementById('sPass').value;
-  if (!fullName) { showToast('⚠️ أدخل الاسم الكامل'); return; }
-  if (!phone) { showToast('⚠️ أدخل رقم الهاتف'); return; }
-  if (!email) { showToast('⚠️ أدخل البريد الإلكتروني'); return; }
-  if (password.length < 6) { showToast('⚠️ كلمة المرور يجب ألا تقل عن 6 أحرف'); return; }
-  setBusy(btn, true, 'جار إنشاء الحساب...');
+  if (!fullName) { showToast(t('enterFullName'), 'warning'); return; }
+  if (!phone) { showToast(t('enterPhone'), 'warning'); return; }
+  if (!email) { showToast(t('enterEmail'), 'warning'); return; }
+  if (password.length < 6) { showToast(t('shortPassword'), 'warning'); return; }
+  setBusy(btn, true, t('creatingAccount'));
   const { data, error } = await supabaseClient.auth.signUp({
     email,
     password,
@@ -1566,13 +2327,13 @@ document.getElementById('doSignup').onclick = async () => {
     }
   });
   setBusy(btn, false);
-  if (error) { showToast('تعذر إنشاء الحساب: ' + error.message, 'error'); return; }
+  if (error) { showToast(t('signupFailed') + ': ' + error.message, 'error'); return; }
   if (data?.session) {
     await supabaseClient.auth.signOut();
   }
   closeModal();
   await refreshUserState();
-  showToast('تم إنشاء الحساب. يرجى فتح بريدك الإلكتروني لتأكيد الحساب.');
+  showToast(t('accountCreated'));
 };
 
 /* Calculator */
@@ -1580,7 +2341,7 @@ const amtInput = document.getElementById('amt');
 const arbResult = document.getElementById('arbResult');
 function calc() {
   const v = Math.max(0, Number(amtInput.value || 0));
-  arbResult.textContent = formatNumber(v * 1000, 'ARBR');
+  arbResult.textContent = formatNumber(v * ARBR_CONFIG.entryTokenRate, 'ARBR');
 }
 amtInput.addEventListener('input', calc);
 calc();
@@ -1593,35 +2354,38 @@ document.getElementById('submitBuy').addEventListener('click', async () => {
   const note = document.getElementById('wallet').value.trim();
   const amount = Number(amtInput.value);
   const paymentMethod = document.getElementById('payM').value;
-  if (!note) { showToast('⚠️ أدخل محفظة الاستلام أو ملاحظة الطلب', 'warning'); return; }
-  if (amount < 10) { showToast('⚠️ الحد الأدنى للشراء 10 OMR', 'warning'); return; }
-  if (amount > 5000) { showToast('⚠️ الحد الأقصى للطلب 5,000 OMR', 'warning'); return; }
-  setBusy(btn, true, 'جار إرسال الطلب...');
+  if (!note) { showToast(t('enterWallet'), 'warning'); return; }
+  if (amount < 10) { showToast(t('minPurchase'), 'warning'); return; }
+  if (amount >= ARBR_CONFIG.largeBuyVerificationAmount && !requireVerifiedService()) return;
+  setBusy(btn, true, t('submittingRequest'));
   const { data, error } = await supabaseClient
     .from('purchase_requests')
     .insert({
       user_id: currentUser.id,
       amount_omr: amount,
       amount_usd: amount,
-      estimated_arbr: amount * 1000,
+      estimated_arbr: amount * ARBR_CONFIG.entryTokenRate,
       payment_method: paymentMethod,
       wallet_address: note,
       note,
       status: 'pending'
     })
-    .select('id')
+    .select('id,status')
     .single();
   setBusy(btn, false);
-  if (error) { showToast('تعذر تسجيل الطلب: ' + error.message, 'error'); return; }
-  showToast('تم إرسال طلب الشراء وسيتم مراجعته يدويًا', 'success');
+  if (error) { showToast(t('requestFailed') + ': ' + error.message, 'error'); return; }
+  showToast(t('requestSubmitted'), 'success');
+  showRequestSuccess({
+    number: requestId(data),
+    status: data?.status || 'pending',
+    message: t('requestUnderReview')
+  });
   currentPurchaseRequests = await loadPurchaseRequests(currentUser);
   updateAuthUI();
   document.getElementById('wallet').value = '';
-  document.getElementById('myOrders')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
-/* Float btn */
-document.getElementById('floatBtn').onclick = () => showToast('📞 سيتم التواصل معك قريبًا');
+/* Floating call button removed (no-op) */
 
 /* Account menu */
 document.getElementById('userBox').addEventListener('click', () => {
@@ -1653,6 +2417,13 @@ document.getElementById('pilotForm').addEventListener('submit', submitPilotDepos
 document.getElementById('closeRefund').addEventListener('click', closeRefundInstructions);
 document.getElementById('refundOk').addEventListener('click', closeRefundInstructions);
 document.getElementById('refundModal').addEventListener('click', e => { if (e.target.id === 'refundModal') closeRefundInstructions(); });
+document.getElementById('closeSuccessModal').addEventListener('click', closeRequestSuccess);
+document.getElementById('successCloseBtn').addEventListener('click', closeRequestSuccess);
+document.getElementById('successViewOrders').addEventListener('click', viewOrdersFromSuccess);
+document.getElementById('requestSuccessModal').addEventListener('click', e => { if (e.target.id === 'requestSuccessModal') closeRequestSuccess(); });
+document.getElementById('closeOrderDetails').addEventListener('click', closeOrderDetailsModal);
+document.getElementById('orderDetailsModal').addEventListener('click', e => { if (e.target.id === 'orderDetailsModal') closeOrderDetailsModal(); });
+document.querySelectorAll('[data-lang-toggle]').forEach(btn => btn.addEventListener('click', toggleLanguage));
 
 /* Nav active */
 document.querySelectorAll('.nav-links a').forEach(a => {
@@ -1662,6 +2433,7 @@ document.querySelectorAll('.nav-links a').forEach(a => {
   });
 });
 
+setLanguage(currentLang);
 refreshUserState();
 if (supabaseClient) {
   supabaseClient.auth.onAuthStateChange(() => {

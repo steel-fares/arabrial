@@ -21,26 +21,28 @@
      - `https://www.arab-rial.com/`
      - `https://steel-fares.github.io/arabrial/`
 
-## 3. Connect the website
+## 3. Security rules included
 
-In `arbr-website.html`, replace:
+The latest `supabase/schema.sql` adds:
 
-```js
-const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY';
-```
+- locked phone updates after registration
+- `verification_status`: `unverified`, `pending`, `verified`, `rejected`
+- verified-only policies for membership deposits and redeem requests
+- large purchase request verification checks
+- admin-only status/balance changes through RLS and column grants
+- `transaction_ledger` records for approved balance changes
 
-with the values from **Project Settings > API**.
-
-Use only the public `anon` or `publishable` key. Never put the `service_role` key in a GitHub Pages website.
+Use only the public `anon` or `publishable` key in GitHub Pages. Never put the `service_role` key in the website.
 
 ## 4. Test
 
 1. Open the page locally.
 2. Create a test account.
 3. Sign in.
-4. Submit a purchase request with amount between `10 OMR` and `5,000 OMR`.
+4. Submit a purchase request with amount of at least `10 OMR`.
 5. Confirm the row appears in **Table Editor > purchase_requests**.
+6. Set `profiles.verification_status = verified` for the test user from Supabase Dashboard.
+7. Test membership deposit and sell/redeem requests.
 
 Current purchase requests use:
 
