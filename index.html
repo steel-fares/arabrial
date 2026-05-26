@@ -48,6 +48,7 @@ nav{height:74px;padding:0 6%;display:flex;align-items:center;justify-content:spa
 .logo-mark img{width:100%;height:100%;object-fit:contain;display:block}
 .logo-text b{display:block;color:var(--gold-light);font-size:22px;line-height:1;font-weight:900;letter-spacing:1.5px}
 .logo-text small{display:block;color:var(--muted);font-size:8px;letter-spacing:2.5px;margin-top:3px;text-transform:uppercase}
+.logo-text small.auth-portal{text-transform:none;letter-spacing:.3px;font-size:10px}
 .nav-links{display:flex;align-items:center;gap:28px;list-style:none}
 .nav-links a{color:var(--light);font-size:14px;font-weight:700;opacity:.85;transition:.2s ease;white-space:nowrap}
 .nav-links a:hover,.nav-links a.active{color:var(--gold-light);opacity:1}
@@ -391,6 +392,9 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   font-family:inherit;font-weight:700;font-size:14px;
   color:var(--muted);background:transparent;cursor:pointer;transition:.2s}
 .tab.active{background:rgba(200,149,42,.2);color:var(--gold-light)}
+.forgot-link{display:block;margin:12px auto 0;border:none;background:transparent;color:var(--gold-light);
+  font-size:12px;font-weight:800;cursor:pointer;text-align:center}
+.forgot-link:hover{text-decoration:underline;text-underline-offset:4px}
 .hidden{display:none!important}
 
 /* Toast */
@@ -875,7 +879,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
     <button class="modal-close" id="closeModal">×</button>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
       <div class="logo-mark" style="width:40px;height:40px"><img src="logo.png" alt="Arab Rial ARBR logo" /></div>
-      <div class="logo-text"><b>ARBR</b><small data-i18n="investorAccess">Account Access</small></div>
+      <div class="logo-text"><b>ARBR</b><small class="auth-portal" data-i18n="investorAccess">بوابة المستثمر ARBR</small></div>
     </div>
     <div class="tabs">
       <button class="tab active" id="loginTab" data-i18n="login">تسجيل الدخول</button>
@@ -886,7 +890,8 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
     <div id="loginForm">
       <div class="fgroup"><label data-i18n="email">البريد الإلكتروني</label><input id="loginEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder" /></div>
       <div class="fgroup"><label data-i18n="password">كلمة المرور</label><input id="loginPass" type="password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder" /></div>
-      <button class="btn-primary" style="width:100%;padding:13px" id="doLogin" data-i18n="loginInvestor">دخول لوحة المستثمر ←</button>
+      <button class="btn-primary" style="width:100%;padding:13px" id="doLogin" data-i18n="loginInvestor">دخول الحساب</button>
+      <button class="forgot-link" type="button" data-i18n="forgotPassword">نسيت كلمة المرور؟</button>
     </div>
 
     <!-- Signup Form -->
@@ -895,7 +900,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
       <div class="fgroup"><label data-i18n="phone">رقم الهاتف</label><input id="sPhone" type="tel" placeholder="+..." data-i18n-placeholder="phonePlaceholder" /></div>
       <div class="fgroup"><label data-i18n="email">البريد الإلكتروني</label><input id="sEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder" /></div>
       <div class="fgroup"><label data-i18n="password">كلمة المرور</label><input id="sPass" type="password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder" /></div>
-      <button class="btn-primary" style="width:100%;padding:13px" id="doSignup" data-i18n="createAccount">إنشاء حساب 🚀</button>
+      <button class="btn-primary" style="width:100%;padding:13px" id="doSignup" data-i18n="createAccount">إنشاء حساب</button>
     </div>
 
     <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-top:18px;text-align:center;padding-top:14px;border-top:1px solid var(--border)">
@@ -1141,14 +1146,15 @@ const I18N = {
     ctaTitle: 'ابدأ رحلتك مع ARBR الآن 🚀',
     ctaDesc: 'انضم إلى مستخدمي المنصة واستفد من أسعار الدخول المبكر الحصرية.',
     loginNow: 'تسجيل الدخول الآن',
-    investorAccess: 'Account Access',
+    investorAccess: 'بوابة المستثمر ARBR',
     investorProfile: 'Account Profile',
-    loginInvestor: 'دخول لوحة المستخدم ←',
+    loginInvestor: 'دخول الحساب',
+    forgotPassword: 'نسيت كلمة المرور؟',
     email: 'البريد الإلكتروني',
     password: 'كلمة المرور',
     fullName: 'الاسم الكامل',
-    createAccount: 'إنشاء حساب 🚀',
-    loginFootnote: 'دخول آمن لحسابك ومتابعة الطلبات والأرصدة داخل منصة ARBR.',
+    createAccount: 'إنشاء حساب',
+    loginFootnote: 'إدارة الحساب والمحفظة والطلبات داخل منصة ARBR',
     country: 'الدولة',
     saveChanges: 'حفظ التغييرات',
     close: 'إغلاق',
@@ -1357,14 +1363,15 @@ const I18N = {
     ctaTitle: 'Start your ARBR journey now 🚀',
     ctaDesc: 'Join platform users and benefit from exclusive early access prices.',
     loginNow: 'Login now',
-    investorAccess: 'Account Access',
+    investorAccess: 'ARBR Investor Portal',
     investorProfile: 'Account Profile',
-    loginInvestor: 'Enter user dashboard →',
+    loginInvestor: 'Access Dashboard',
+    forgotPassword: 'Forgot Password?',
     email: 'Email',
     password: 'Password',
     fullName: 'Full name',
-    createAccount: 'Create account 🚀',
-    loginFootnote: 'Secure access to your account, requests, and balances inside ARBR.',
+    createAccount: 'Create Account',
+    loginFootnote: 'Manage your wallet, requests and account inside ARBR',
     country: 'Country',
     saveChanges: 'Save changes',
     close: 'Close',
