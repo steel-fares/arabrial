@@ -33,8 +33,8 @@ on conflict (user_id) do nothing;
 create table if not exists public.purchase_requests (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  amount_omr numeric(14, 3) not null check (amount_omr >= 10 and amount_omr <= 5000),
-  estimated_arbr numeric(18, 2) not null check (estimated_arbr >= 10000),
+  amount_omr numeric(14, 3) not null check (amount_omr >= 10),
+  estimated_arbr numeric(18, 2) not null check (estimated_arbr >= 100),
   amount_usd numeric(12, 2),
   token_amount numeric(18, 2) generated always as (estimated_arbr) stored,
   payment_method text not null check (payment_method in ('USDT (TRC20 / Polygon)', 'Visa / Mastercard')),
@@ -51,10 +51,14 @@ alter table public.purchase_requests add column if not exists estimated_arbr num
 alter table public.purchase_requests add column if not exists note text;
 alter table public.purchase_requests alter column amount_usd drop not null;
 alter table public.purchase_requests alter column wallet_address drop not null;
+alter table public.purchase_requests drop constraint if exists purchase_requests_amount_omr_check;
+alter table public.purchase_requests add constraint purchase_requests_amount_omr_check check (amount_omr >= 10);
+alter table public.purchase_requests drop constraint if exists purchase_requests_estimated_arbr_check;
+alter table public.purchase_requests add constraint purchase_requests_estimated_arbr_check check (estimated_arbr >= 100);
 
 update public.purchase_requests
 set amount_omr = coalesce(amount_omr, amount_usd),
-    estimated_arbr = coalesce(estimated_arbr, token_amount, amount_usd * 1000),
+    estimated_arbr = coalesce(estimated_arbr, token_amount, amount_usd * 10),
     note = coalesce(note, wallet_address, '')
 where amount_omr is null or estimated_arbr is null or note is null;
 

@@ -39,12 +39,12 @@ Use only the public `anon` or `publishable` key. Never put the `service_role` ke
 1. Open the page locally.
 2. Create a test account.
 3. Sign in.
-4. Submit a purchase request with amount between `10 OMR` and `5,000 OMR`.
+4. Submit a purchase request with amount of at least `10 USDT`.
 5. Confirm the row appears in **Table Editor > purchase_requests**.
 
 Current purchase requests use:
 
-- `amount_omr`
+- the amount field in the current database schema
 - `estimated_arbr`
 - `payment_method`
 - `note`
