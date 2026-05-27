@@ -802,7 +802,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
 <!-- ══════════ ADMIN DASHBOARD PHASE 1 ══════════ -->
 <section class="sec admin-sec" id="adminDashboard">
   <h2 class="sec-title" data-i18n="adminDashboardTitle">لوحة تحكم <span>الإدارة</span></h2>
-  <p class="sec-desc" data-i18n="adminDashboardDesc">عرض ومراجعة الطلبات المعلقة داخل Arab Rial. إجراءات الموافقة والرفض غير مفعلة في هذه المرحلة.</p>
+  <p class="sec-desc" data-i18n="adminDashboardDesc">عرض ومراجعة الطلبات المعلقة داخل Arab Rial وتنفيذ الموافقة أو الرفض عبر دوال Supabase الآمنة.</p>
   <div id="adminPermissionNotice" class="admin-state-card hidden" data-i18n="adminRlsRequired">تحتاج صلاحيات الإدارة إلى إعداد RLS في Supabase</div>
   <div id="adminDashboardContent">
     <div class="admin-summary-grid" id="adminSummaryCards"></div>
@@ -1031,9 +1031,38 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
     <h3 style="color:var(--gold-light);margin-bottom:16px" data-i18n="adminDetailsTitle">تفاصيل طلب الإدارة</h3>
     <div class="details-grid" id="adminDetailsContent"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
-      <button class="btn-primary" type="button" id="adminApproveDisabled" data-i18n="adminApprove">موافقة</button>
-      <button class="btn-secondary" type="button" id="adminRejectDisabled" data-i18n="adminReject">رفض</button>
+      <button class="btn-primary" type="button" id="adminApproveAction" data-i18n="adminApprove">موافقة</button>
+      <button class="btn-secondary" type="button" id="adminRejectAction" data-i18n="adminReject">رفض</button>
       <button class="btn-secondary" type="button" id="adminDetailsCloseBtn" data-i18n="close">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN CONFIRM MODAL ══════════ -->
+<div class="modal" id="adminConfirmModal">
+  <div class="modal-card">
+    <button class="modal-close" id="adminConfirmClose">×</button>
+    <h3 style="color:var(--gold-light);margin-bottom:14px" id="adminConfirmTitle">تأكيد الإجراء</h3>
+    <p style="color:var(--muted);font-size:14px;line-height:1.9" id="adminConfirmMessage"></p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px">
+      <button class="btn-primary" type="button" id="adminConfirmOk" style="flex:1;padding:12px" data-i18n="confirmAction">تأكيد</button>
+      <button class="btn-secondary" type="button" id="adminConfirmCancel" style="flex:1;padding:12px" data-i18n="cancel">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN REJECT MODAL ══════════ -->
+<div class="modal" id="adminRejectModal">
+  <div class="modal-card">
+    <button class="modal-close" id="adminRejectClose">×</button>
+    <h3 style="color:var(--gold-light);margin-bottom:14px" data-i18n="adminRejectReasonTitle">سبب الرفض</h3>
+    <div class="fgroup">
+      <label data-i18n="adminRejectReasonLabel">ملاحظة الإدارة</label>
+      <textarea id="adminRejectNote" class="form-textarea" rows="4" placeholder="اكتب سبب الرفض..." data-i18n-placeholder="adminRejectReasonPlaceholder"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px">
+      <button class="btn-primary" type="button" id="adminRejectSubmit" style="flex:1;padding:12px" data-i18n="adminReject">رفض</button>
+      <button class="btn-secondary" type="button" id="adminRejectCancel" style="flex:1;padding:12px" data-i18n="cancel">إلغاء</button>
     </div>
   </div>
 </div>
@@ -1082,6 +1111,10 @@ let adminPilotDeposits = [];
 let adminSummary = { pendingPurchases: 0, pendingDeposits: 0, totalPending: 0, todayRequests: 0 };
 let adminDashboardError = '';
 let adminRealtimeChannel = null;
+let currentAdminDetailsAction = null;
+let adminConfirmResolver = null;
+let adminRejectResolver = null;
+const adminProcessingActions = new Set();
 
 const ARBR_CONFIG = {
   totalSupply: 100000000,
@@ -1273,7 +1306,7 @@ const I18N = {
     reviewedDate: 'تاريخ المراجعة',
     adminNote: 'ملاحظة الإدارة',
     adminDashboardTitle: 'لوحة تحكم <span>الإدارة</span>',
-    adminDashboardDesc: 'عرض ومراجعة الطلبات المعلقة داخل Arab Rial. إجراءات الموافقة والرفض غير مفعلة في هذه المرحلة.',
+    adminDashboardDesc: 'عرض ومراجعة الطلبات المعلقة داخل Arab Rial وتنفيذ الموافقة أو الرفض عبر دوال Supabase الآمنة.',
     adminPendingPurchases: 'طلبات الشراء المعلقة',
     adminPendingDeposits: 'طلبات الإيداع المعلقة',
     adminTotalPending: 'إجمالي الطلبات المعلقة',
@@ -1307,6 +1340,22 @@ const I18N = {
     adminNewRequestReceived: 'وصل طلب جديد',
     adminRefundable: 'قابل للاسترداد',
     adminNotes: 'الملاحظات',
+    confirmAction: 'تأكيد',
+    cancel: 'إلغاء',
+    processing: 'جار التنفيذ...',
+    adminConfirmTitle: 'تأكيد الإجراء',
+    approvePurchaseConfirm: 'هل تريد الموافقة على هذا الطلب وإضافة الرصيد للمستخدم؟',
+    approveDepositConfirm: 'هل تريد تفعيل هذا الإيداع التجريبي؟',
+    adminRejectReasonTitle: 'سبب الرفض',
+    adminRejectReasonLabel: 'ملاحظة الإدارة',
+    adminRejectReasonPlaceholder: 'اكتب سبب الرفض...',
+    approvedWalletCredited: 'تمت الموافقة وإضافة الرصيد بنجاح',
+    purchaseRejectedSuccess: 'تم رفض طلب الشراء بنجاح',
+    pilotActivatedSuccess: 'تم تفعيل الإيداع التجريبي بنجاح',
+    pilotRejectedSuccess: 'تم رفض الإيداع بنجاح',
+    adminPermissionDenied: 'لا تملك صلاحية تنفيذ هذا الإجراء',
+    adminAlreadyProcessed: 'تم معالجة هذا الطلب مسبقًا',
+    adminActionFailed: 'تعذر تنفيذ الإجراء',
     okUnderstood: 'حسنًا، فهمت',
     emailPlaceholder: 'name@example.com',
     passwordPlaceholder: '••••••••',
@@ -1525,7 +1574,7 @@ const I18N = {
     reviewedDate: 'Reviewed date',
     adminNote: 'Admin note',
     adminDashboardTitle: 'Admin <span>Dashboard</span>',
-    adminDashboardDesc: 'Display and review pending requests inside Arab Rial. Approve and reject actions are not active in this phase.',
+    adminDashboardDesc: 'Display and review pending requests inside Arab Rial, then approve or reject them through secure Supabase functions.',
     adminPendingPurchases: 'Pending Purchase Requests',
     adminPendingDeposits: 'Pending Pilot Deposits',
     adminTotalPending: 'Total Pending Requests',
@@ -1559,6 +1608,22 @@ const I18N = {
     adminNewRequestReceived: 'New request received',
     adminRefundable: 'Refundable',
     adminNotes: 'Notes',
+    confirmAction: 'Confirm',
+    cancel: 'Cancel',
+    processing: 'Processing...',
+    adminConfirmTitle: 'Confirm action',
+    approvePurchaseConfirm: 'Approve this request and credit the user wallet?',
+    approveDepositConfirm: 'Activate this pilot deposit?',
+    adminRejectReasonTitle: 'Reject reason',
+    adminRejectReasonLabel: 'Admin note',
+    adminRejectReasonPlaceholder: 'Write the rejection reason...',
+    approvedWalletCredited: 'Approved and wallet credited successfully',
+    purchaseRejectedSuccess: 'Purchase request rejected successfully',
+    pilotActivatedSuccess: 'Pilot deposit activated successfully',
+    pilotRejectedSuccess: 'Pilot deposit rejected successfully',
+    adminPermissionDenied: 'You do not have permission to perform this action',
+    adminAlreadyProcessed: 'This request has already been processed',
+    adminActionFailed: 'Unable to perform this action',
     okUnderstood: 'OK, understood',
     emailPlaceholder: 'name@example.com',
     passwordPlaceholder: '••••••••',
@@ -2160,8 +2225,8 @@ function adminActionButtons(type, id) {
   return `
     <div class="admin-actions">
       <button class="admin-action-btn view" type="button" data-admin-view="${type}" data-admin-id="${id}">${t('adminViewDetails')}</button>
-      <button class="admin-action-btn disabled" type="button" data-admin-disabled>${t('adminApprove')}</button>
-      <button class="admin-action-btn disabled" type="button" data-admin-disabled>${t('adminReject')}</button>
+      <button class="admin-action-btn" type="button" data-admin-action="approve" data-admin-type="${type}" data-admin-id="${id}">${t('adminApprove')}</button>
+      <button class="admin-action-btn" type="button" data-admin-action="reject" data-admin-type="${type}" data-admin-id="${id}">${t('adminReject')}</button>
     </div>
   `;
 }
@@ -2177,14 +2242,23 @@ function bindAdminActionButtons(scope = document) {
       if (item) openAdminDetailsModal(type, item);
     });
   });
-  scope.querySelectorAll('[data-admin-disabled]').forEach(btn => {
-    btn.addEventListener('click', showAdminActionDisabledToast);
+  scope.querySelectorAll('[data-admin-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      runAdminAction(btn.dataset.adminType, btn.dataset.adminId, btn.dataset.adminAction, btn);
+    });
   });
+}
+
+function adminRowById(type, id) {
+  return type === 'purchase'
+    ? adminPurchaseRequests.find(row => String(row.id) === String(id))
+    : adminPilotDeposits.find(row => String(row.id) === String(id));
 }
 
 function openAdminDetailsModal(type, item) {
   const content = document.getElementById('adminDetailsContent');
   if (!content) return;
+  currentAdminDetailsAction = { type, id: item.id };
   const common = {
     userId: item.user_id || '-',
     name: adminFallbackText(item._profileName),
@@ -2221,15 +2295,154 @@ function openAdminDetailsModal(type, item) {
       detailItem(t('adminNotes'), item.notes || '-', true)
     ].join('');
   }
+  const approveBtn = document.getElementById('adminApproveAction');
+  const rejectBtn = document.getElementById('adminRejectAction');
+  [approveBtn, rejectBtn].forEach(btn => {
+    if (!btn) return;
+    btn.disabled = item.status !== 'pending';
+    btn.style.opacity = item.status !== 'pending' ? '.58' : '';
+    btn.style.cursor = item.status !== 'pending' ? 'not-allowed' : '';
+    delete btn.dataset.originalText;
+  });
   document.getElementById('adminDetailsModal').classList.add('open');
 }
 
 function closeAdminDetailsModal() {
   document.getElementById('adminDetailsModal').classList.remove('open');
+  currentAdminDetailsAction = null;
 }
 
 function showAdminActionDisabledToast() {
   showToast(t('adminApprovalSetupRequired'), 'warning');
+}
+
+function openAdminConfirmModal(message) {
+  const modal = document.getElementById('adminConfirmModal');
+  document.getElementById('adminConfirmTitle').textContent = t('adminConfirmTitle');
+  document.getElementById('adminConfirmMessage').textContent = message;
+  modal.classList.add('open');
+  return new Promise(resolve => {
+    adminConfirmResolver = resolve;
+  });
+}
+
+function closeAdminConfirmModal(result = false) {
+  document.getElementById('adminConfirmModal').classList.remove('open');
+  if (adminConfirmResolver) {
+    adminConfirmResolver(Boolean(result));
+    adminConfirmResolver = null;
+  }
+}
+
+function openAdminRejectModal() {
+  const modal = document.getElementById('adminRejectModal');
+  const noteInput = document.getElementById('adminRejectNote');
+  noteInput.value = '';
+  modal.classList.add('open');
+  noteInput.focus();
+  return new Promise(resolve => {
+    adminRejectResolver = resolve;
+  });
+}
+
+function closeAdminRejectModal(note = null) {
+  document.getElementById('adminRejectModal').classList.remove('open');
+  if (adminRejectResolver) {
+    adminRejectResolver(note);
+    adminRejectResolver = null;
+  }
+}
+
+function adminRpcErrorMessage(error) {
+  const code = String(error?.code || '').toLowerCase();
+  const message = String(error?.message || error?.details || '').toLowerCase();
+  if (code === '42501' || message.includes('permission') || message.includes('not authorized') || message.includes('not admin') || message.includes('rls')) {
+    return t('adminPermissionDenied');
+  }
+  if (message.includes('already') || message.includes('processed') || message.includes('not pending') || message.includes('status')) {
+    return t('adminAlreadyProcessed');
+  }
+  return t('adminActionFailed');
+}
+
+function adminActionConfig(type, action, id, note = '') {
+  if (type === 'purchase' && action === 'approve') {
+    return {
+      rpc: 'admin_approve_purchase_request',
+      params: { p_request_id: id },
+      confirm: t('approvePurchaseConfirm'),
+      success: t('approvedWalletCredited')
+    };
+  }
+  if (type === 'purchase' && action === 'reject') {
+    return {
+      rpc: 'admin_reject_purchase_request',
+      params: { p_request_id: id, p_admin_note: note },
+      success: t('purchaseRejectedSuccess')
+    };
+  }
+  if (type === 'deposit' && action === 'approve') {
+    return {
+      rpc: 'admin_activate_pilot_deposit',
+      params: { p_deposit_id: id },
+      confirm: t('approveDepositConfirm'),
+      success: t('pilotActivatedSuccess')
+    };
+  }
+  return {
+    rpc: 'admin_reject_pilot_deposit',
+    params: { p_deposit_id: id, p_admin_note: note },
+    success: t('pilotRejectedSuccess')
+  };
+}
+
+async function runAdminAction(type, id, action, button = null) {
+  if (!isAdminUser()) {
+    showToast(t('adminPermissionDenied'), 'error');
+    return;
+  }
+  if (adminConfirmResolver || adminRejectResolver) return;
+  const row = adminRowById(type, id);
+  if (row && row.status !== 'pending') {
+    showToast(t('adminAlreadyProcessed'), 'warning');
+    return;
+  }
+  const processingKey = `${type}:${id}:${action}`;
+  if (adminProcessingActions.has(processingKey)) return;
+  adminProcessingActions.add(processingKey);
+
+  let note = '';
+  if (action === 'reject') {
+    const rejectionNote = await openAdminRejectModal();
+    if (rejectionNote === null) {
+      adminProcessingActions.delete(processingKey);
+      return;
+    }
+    note = rejectionNote;
+  } else {
+    const confirmed = await openAdminConfirmModal(adminActionConfig(type, action, id).confirm);
+    if (!confirmed) {
+      adminProcessingActions.delete(processingKey);
+      return;
+    }
+  }
+
+  const config = adminActionConfig(type, action, id, note);
+  if (button) setBusy(button, true, t('processing'));
+
+  try {
+    const { error } = await supabaseClient.rpc(config.rpc, config.params);
+    if (error) throw error;
+    showToast(config.success, 'success');
+    closeAdminDetailsModal();
+    await loadAdminDashboard();
+  } catch (error) {
+    console.error('Admin RPC action failed:', error);
+    showToast(adminRpcErrorMessage(error), 'error');
+  } finally {
+    adminProcessingActions.delete(processingKey);
+    if (button) setBusy(button, false);
+  }
 }
 
 function setupAdminRealtime() {
@@ -2949,9 +3162,23 @@ document.getElementById('closeOrderDetails').addEventListener('click', closeOrde
 document.getElementById('orderDetailsModal').addEventListener('click', e => { if (e.target.id === 'orderDetailsModal') closeOrderDetailsModal(); });
 document.getElementById('closeAdminDetails').addEventListener('click', closeAdminDetailsModal);
 document.getElementById('adminDetailsCloseBtn').addEventListener('click', closeAdminDetailsModal);
-document.getElementById('adminApproveDisabled').addEventListener('click', showAdminActionDisabledToast);
-document.getElementById('adminRejectDisabled').addEventListener('click', showAdminActionDisabledToast);
+document.getElementById('adminApproveAction').addEventListener('click', function () {
+  if (!currentAdminDetailsAction) return;
+  runAdminAction(currentAdminDetailsAction.type, currentAdminDetailsAction.id, 'approve', this);
+});
+document.getElementById('adminRejectAction').addEventListener('click', function () {
+  if (!currentAdminDetailsAction) return;
+  runAdminAction(currentAdminDetailsAction.type, currentAdminDetailsAction.id, 'reject', this);
+});
 document.getElementById('adminDetailsModal').addEventListener('click', e => { if (e.target.id === 'adminDetailsModal') closeAdminDetailsModal(); });
+document.getElementById('adminConfirmOk').addEventListener('click', () => closeAdminConfirmModal(true));
+document.getElementById('adminConfirmCancel').addEventListener('click', () => closeAdminConfirmModal(false));
+document.getElementById('adminConfirmClose').addEventListener('click', () => closeAdminConfirmModal(false));
+document.getElementById('adminConfirmModal').addEventListener('click', e => { if (e.target.id === 'adminConfirmModal') closeAdminConfirmModal(false); });
+document.getElementById('adminRejectSubmit').addEventListener('click', () => closeAdminRejectModal(document.getElementById('adminRejectNote').value.trim()));
+document.getElementById('adminRejectCancel').addEventListener('click', () => closeAdminRejectModal(null));
+document.getElementById('adminRejectClose').addEventListener('click', () => closeAdminRejectModal(null));
+document.getElementById('adminRejectModal').addEventListener('click', e => { if (e.target.id === 'adminRejectModal') closeAdminRejectModal(null); });
 document.getElementById('adminNotificationBadge').addEventListener('click', () => {
   document.getElementById('adminDashboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
