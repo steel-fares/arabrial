@@ -6,9 +6,34 @@
 <title>ARBR | إيداع / تحويل</title>
 <meta name="description" content="Arab Rial (ARBR) — منصة أصول رقمية للمستثمرين والتجار المؤهلين." />
 <meta name="theme-color" content="#060910" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; upgrade-insecure-requests" />
+<meta http-equiv="X-Content-Type-Options" content="nosniff" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="robots" content="index, follow" />
+<meta name="keywords" content="Arab Rial, ARBR, عملة رقمية, عمان, OMR, USDT, منصة أصول رقمية" />
+<meta name="author" content="ARBR Network" />
+<link rel="canonical" href="https://arab-rial.com/deposit.html" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="apple-touch-icon" href="/logo.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="dns-prefetch" href="https://umxmwcwuwsvkvsbdhbdl.supabase.co" />
+<meta property="og:site_name" content="Arab Rial (ARBR)" />
+<meta property="og:locale" content="ar_OM" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="ARBR | إيداع / تحويل" />
+<meta property="og:description" content="إيداع عضوية ARBR وتحويلات المنصة." />
+<meta property="og:url" content="https://arab-rial.com/deposit.html" />
+<meta property="og:image" content="https://arab-rial.com/logo.svg" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="ARBR | إيداع / تحويل" />
+<meta name="twitter:description" content="إيداع عضوية ARBR وتحويلات المنصة." />
+<meta name="twitter:image" content="https://arab-rial.com/logo.svg" />
 <link rel="icon" href="logo.svg" type="image/svg+xml" />
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/arbr.css" />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<noscript><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet" /></noscript>
+<link rel="stylesheet" href="assets/css/arbr.css?v=20260530.1" />
+<link rel="preload" href="logo.svg" as="image" type="image/svg+xml" />
 </head>
 <body class="lang-ar" data-page="deposit">
 <div class="bg-layer"></div>
@@ -66,8 +91,15 @@
 </footer>
 <div id="shared-modals"></div>
 <div class="toast" id="toast"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/js/layout.js"></script>
-<script src="assets/js/arbr.js"></script>
+<div id="page-loader" class="page-loader" aria-hidden="true" role="status">
+  <div class="page-loader-spinner"></div>
+  <span class="sr-only">جاري التحميل…</span>
+</div>
+<script src="assets/js/config.public.js?v=20260530.1" defer></script>
+<script src="assets/js/security.js?v=20260530.1" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer crossorigin="anonymous"></script>
+<script src="assets/js/layout.js?v=20260530.1" defer></script>
+<script src="assets/js/arbr.js?v=20260530.1" defer></script>
+<script src="assets/js/pwa-register.js?v=20260530.1" defer></script>
 </body>
 </html>

@@ -23,7 +23,7 @@
       <div class="logo-mark"><img src="logo.svg" alt="Arab Rial ARBR logo" width="46" height="46" /></div>
       <div class="logo-text"><b>ARBR</b><small data-i18n="logoSub">The Digital Asset</small></div>
     </a>
-    <button class="nav-toggle" type="button" id="navToggle" aria-expanded="false" aria-controls="navLinks" title="Menu">☰</button>
+    <button class="nav-toggle" type="button" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="فتح القائمة" title="Menu">☰</button>
   </div>
   <ul class="nav-links" id="navLinks">
     ${navLinks}
