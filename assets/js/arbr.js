@@ -1973,6 +1973,25 @@ function bindOn(el, event, handler) {
   if (el) el.addEventListener(event, handler);
 }
 
+function bindFormValidation() {
+  document.querySelectorAll('input[type="email"]').forEach(el => {
+    el.addEventListener('blur', () => {
+      const val = el.value.trim();
+      const ok = !val || (sec()?.isValidEmail ? sec().isValidEmail(val) : true);
+      el.classList.toggle('field-invalid', !ok);
+      el.setAttribute('aria-invalid', ok ? 'false' : 'true');
+    });
+  });
+  document.querySelectorAll('input[type="tel"]').forEach(el => {
+    el.addEventListener('blur', () => {
+      const val = el.value.trim();
+      const ok = !val || (sec()?.isValidPhone ? sec().isValidPhone(val) : true);
+      el.classList.toggle('field-invalid', !ok);
+      el.setAttribute('aria-invalid', ok ? 'false' : 'true');
+    });
+  });
+}
+
 function bindCommonChrome() {
   document.querySelectorAll('[data-open-login]').forEach(btn => {
     btn.addEventListener('click', e => {
@@ -2125,6 +2144,7 @@ async function initArbrApp() {
     setPageLoading(true);
     await loadSharedModals();
     bindCommonChrome();
+    bindFormValidation();
     initPageBindings();
     setLanguage(currentLang);
     await refreshUserState();
