@@ -263,6 +263,78 @@ begin
 end;
 $$;
 
+create or replace function public.admin_review_purchase_request(
+  p_request_id uuid,
+  p_status text,
+  p_admin_notes text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_updated integer;
+begin
+  if not public.is_admin() then
+    raise exception 'Admin role required' using errcode = '42501';
+  end if;
+
+  if p_status not in ('approved', 'rejected') then
+    raise exception 'Invalid purchase request status' using errcode = '22023';
+  end if;
+
+  update public.purchase_requests
+  set status = p_status,
+      admin_notes = coalesce(nullif(trim(p_admin_notes), ''), admin_notes),
+      reviewed_at = now(),
+      updated_at = now()
+  where id = p_request_id
+    and status in ('pending', 'reviewing')
+  returning 1 into v_updated;
+
+  if v_updated is null then
+    raise exception 'Purchase request is not pending or does not exist' using errcode = 'P0002';
+  end if;
+end;
+$$;
+
+create or replace function public.admin_review_pilot_deposit(
+  p_deposit_id uuid,
+  p_status text,
+  p_admin_notes text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_updated integer;
+begin
+  if not public.is_admin() then
+    raise exception 'Admin role required' using errcode = '42501';
+  end if;
+
+  if p_status not in ('approved', 'rejected') then
+    raise exception 'Invalid pilot deposit status' using errcode = '22023';
+  end if;
+
+  update public.pilot_deposits
+  set status = p_status,
+      admin_notes = coalesce(nullif(trim(p_admin_notes), ''), admin_notes),
+      reviewed_at = now(),
+      updated_at = now()
+  where id = p_deposit_id
+    and status in ('pending', 'reviewing')
+  returning 1 into v_updated;
+
+  if v_updated is null then
+    raise exception 'Pilot deposit is not pending or does not exist' using errcode = 'P0002';
+  end if;
+end;
+$$;
+
 drop trigger if exists profiles_set_updated_at on public.profiles;
 create trigger profiles_set_updated_at
 before update on public.profiles
@@ -355,6 +427,13 @@ on public.purchase_requests for select
 to authenticated
 using (public.is_admin());
 
+drop policy if exists "Admins can update purchase request review status" on public.purchase_requests;
+create policy "Admins can update purchase request review status"
+on public.purchase_requests for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
 drop policy if exists "Users can create own purchase requests" on public.purchase_requests;
 create policy "Users can create own purchase requests"
 on public.purchase_requests for insert
@@ -382,6 +461,13 @@ create policy "Admins can read all pilot deposits"
 on public.pilot_deposits for select
 to authenticated
 using (public.is_admin());
+
+drop policy if exists "Admins can update pilot deposit review status" on public.pilot_deposits;
+create policy "Admins can update pilot deposit review status"
+on public.pilot_deposits for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
 
 drop policy if exists "Verified users can create own pilot deposits" on public.pilot_deposits;
 create policy "Verified users can create own pilot deposits"
@@ -455,6 +541,10 @@ grant select on public.transaction_ledger to authenticated;
 
 grant select on public.platform_state to anon, authenticated;
 grant execute on function public.is_admin() to authenticated;
+revoke all on function public.admin_review_purchase_request(uuid, text, text) from public;
+revoke all on function public.admin_review_pilot_deposit(uuid, text, text) from public;
+grant execute on function public.admin_review_purchase_request(uuid, text, text) to authenticated;
+grant execute on function public.admin_review_pilot_deposit(uuid, text, text) to authenticated;
 
 -- Set admin role only in Supabase Dashboard (SQL), never from the website:
 -- update public.profiles set role = 'admin' where email = 'you@example.com';
