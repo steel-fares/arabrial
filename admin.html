@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ARBR | لوحة الإدارة</title>
+<meta name="description" content="Arab Rial (ARBR) — منصة أصول رقمية للمستثمرين والتجار المؤهلين." />
+<meta name="theme-color" content="#060910" />
+<link rel="icon" href="logo.svg" type="image/svg+xml" />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/arbr.css" />
+</head>
+<body class="lang-ar" data-page="admin">
+<div class="bg-layer"></div>
+<div class="bg-grid"></div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+<div id="site-nav"></div>
+<main class="page-main app-page"><!-- ══════════ ADMIN DASHBOARD PHASE 1 ══════════ -->
+<section class="sec admin-sec" id="adminDashboard">
+  <h2 class="sec-title" data-i18n="adminDashboardTitle">لوحة تحكم <span>الإدارة</span></h2>
+  <p class="sec-desc" data-i18n="adminDashboardDesc">عرض ومراجعة الطلبات المعلقة داخل Arab Rial. إجراءات الموافقة والرفض غير مفعلة في هذه المرحلة.</p>
+  <div id="adminPermissionNotice" class="admin-state-card hidden" data-i18n="adminRlsRequired">تحتاج صلاحيات الإدارة إلى إعداد RLS في Supabase</div>
+  <div id="adminDashboardContent">
+    <div class="admin-summary-grid" id="adminSummaryCards"></div>
+    <div class="admin-panel">
+      <div class="admin-panel-head">
+        <h3 data-i18n="adminPendingPurchases">طلبات الشراء المعلقة</h3>
+        <span class="admin-count-badge" id="adminPurchaseCount">0</span>
+      </div>
+      <div id="adminPurchaseRequestsTable">
+        <div class="admin-state-card admin-loading" data-i18n="loadingAdmin">جار تحميل بيانات الإدارة...</div>
+      </div>
+    </div>
+    <div class="admin-panel">
+      <div class="admin-panel-head">
+        <h3 data-i18n="adminPendingDeposits">طلبات الإيداع المعلقة</h3>
+        <span class="admin-count-badge" id="adminDepositCount">0</span>
+      </div>
+      <div id="adminPilotDepositsTable">
+        <div class="admin-state-card admin-loading" data-i18n="loadingAdmin">جار تحميل بيانات الإدارة...</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer>
+  <div class="footer-logo">ARBR</div>
+  <div style="margin-bottom:8px;font-size:12px;letter-spacing:2px;color:var(--muted)">THE DIGITAL ASSET</div>
+  © 2026 ARBR Network.
+</footer>
+<div id="shared-modals"></div>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/layout.js"></script>
+<script src="assets/js/arbr.js"></script>
+</body>
+</html>

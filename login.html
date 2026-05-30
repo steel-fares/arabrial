@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ARBR | تسجيل الدخول</title>
+<meta name="description" content="Arab Rial (ARBR) — منصة أصول رقمية للمستثمرين والتجار المؤهلين." />
+<meta name="theme-color" content="#060910" />
+<link rel="icon" href="logo.svg" type="image/svg+xml" />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/arbr.css" />
+</head>
+<body class="lang-ar" data-page="login">
+<div class="bg-layer"></div>
+<div class="bg-grid"></div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+<div id="site-nav"></div>
+<main class="page-main"><div class="auth-page-wrap">
+  <div class="auth-panel">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.svg" alt="Arab Rial ARBR logo" /></div>
+      <div class="logo-text"><b>ARBR</b><small class="auth-portal" data-i18n="investorAccess">بوابة المستثمر ARBR</small></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" id="loginTab" type="button" data-i18n="login">تسجيل الدخول</button>
+      <button class="tab" id="signupTab" type="button" data-i18n="signup">إنشاء حساب</button>
+    </div>
+    <div id="loginForm">
+      <div class="fgroup"><label data-i18n="email">البريد الإلكتروني</label><input id="loginEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder" /></div>
+      <div class="fgroup"><label data-i18n="password">كلمة المرور</label><input id="loginPass" type="password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder" /></div>
+      <button class="btn-primary" style="width:100%;padding:13px" id="doLogin" type="button" data-i18n="loginInvestor">دخول الحساب</button>
+    </div>
+    <div id="signupForm" class="hidden">
+      <div class="fgroup"><label data-i18n="fullName">الاسم الكامل</label><input id="sName" placeholder="اكتب اسمك الكامل" data-i18n-placeholder="fullNamePlaceholder" /></div>
+      <div class="fgroup"><label data-i18n="phone">رقم الهاتف</label><input id="sPhone" type="tel" placeholder="+..." data-i18n-placeholder="phonePlaceholder" /></div>
+      <div class="fgroup"><label data-i18n="email">البريد الإلكتروني</label><input id="sEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder" /></div>
+      <div class="fgroup"><label data-i18n="password">كلمة المرور</label><input id="sPass" type="password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder" /></div>
+      <button class="btn-primary" style="width:100%;padding:13px" id="doSignup" type="button" data-i18n="createAccount">إنشاء حساب</button>
+    </div>
+    <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-top:18px;text-align:center;padding-top:14px;border-top:1px solid var(--border)">
+      <span data-i18n="loginFootnote">دخول آمن لحساب المستثمر ومتابعة الطلبات والأرصدة داخل منصة ARBR.</span>
+    </p>
+    <div class="quick-links">
+      <a class="quick-link" href="buy.html" data-i18n="navBuy">اشترِ</a>
+      <a class="quick-link" href="deposit.html" data-i18n="navDeposit">إيداع</a>
+      <a class="quick-link" href="dashboard.html" data-i18n="dashboardMenu">لوحة التحكم</a>
+    </div>
+  </div>
+</div>
+</main>
+<footer>
+  <div class="footer-logo">ARBR</div>
+  <div style="margin-bottom:8px;font-size:12px;letter-spacing:2px;color:var(--muted)">THE DIGITAL ASSET</div>
+  © 2026 ARBR Network.
+</footer>
+<div id="shared-modals"></div>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/layout.js"></script>
+<script src="assets/js/arbr.js"></script>
+</body>
+</html>
