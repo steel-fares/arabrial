@@ -1,8 +1,8 @@
-﻿/* Supabase config
-   ضع القيم من Supabase Dashboard > Project Settings > API.
-   استخدم anon/public key فقط هنا، ولا تضع أي مفتاح إداري داخل GitHub Pages. */
-const SUPABASE_URL = 'https://umxmwcwuwsvkvsbdhbdl.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVteG13Y3d1d3N2a3ZzYmRoYmRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NDYwNjcsImV4cCI6MjA5NTAyMjA2N30.qCwKT7EU21JJKS-_73_uuXdLrhoI3a9644Wk73O2uJY';
+﻿/* Supabase: keys loaded from assets/js/config.public.js (anon only). */
+const _arbrCfg = window.ARBR_PUBLIC_CONFIG || {};
+const SUPABASE_URL = String(_arbrCfg.supabaseUrl || '').trim();
+const SUPABASE_ANON_KEY = String(_arbrCfg.supabaseAnonKey || '').trim();
+const sec = () => window.ARBRSecurity;
 const isSupabaseConfigured =
   Boolean(window.supabase) &&
   SUPABASE_URL.startsWith('https://') &&
@@ -678,12 +678,17 @@ function formatNumber(value, suffix = '') {
 }
 
 function escapeHtml(value) {
-  return String(value ?? '')
+  const raw = sec()?.sanitizeText ? sec().sanitizeText(value, 2000) : String(value ?? '');
+  return raw
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function sanitizeInput(value, maxLen = 500) {
+  return sec()?.sanitizeText ? sec().sanitizeText(value, maxLen) : String(value ?? '').trim();
 }
 
 function profileDisplayName() {
@@ -987,8 +992,12 @@ async function loadAdminCounts() {
   };
 }
 
-async function loadAdminDashboard() {
+let adminDashboardLoading = false;
+
+async function loadAdminDashboard(force = false) {
   if (!isAdminUser() || !supabaseClient) return;
+  if (adminDashboardLoading && !force) return;
+  adminDashboardLoading = true;
   adminDashboardError = '';
   const content = document.getElementById('adminDashboardContent');
   const notice = document.getElementById('adminPermissionNotice');
@@ -1008,16 +1017,20 @@ async function loadAdminDashboard() {
     adminPilotDeposits = [];
     adminSummary = { pendingPurchases: 0, pendingDeposits: 0, totalPending: 0, todayRequests: 0 };
     if (notice) {
-      notice.textContent = t('adminRlsRequired');
+      notice.innerHTML = `<span data-i18n="adminRlsRequired">${t('adminRlsRequired')}</span>
+        <button type="button" class="btn-secondary admin-retry-btn" id="adminRetryBtn" style="margin-top:12px">${currentLang === 'ar' ? 'إعادة المحاولة' : 'Retry'}</button>`;
       notice.classList.remove('hidden');
+      document.getElementById('adminRetryBtn')?.addEventListener('click', () => loadAdminDashboard(true));
     }
     if (content) content.classList.add('hidden');
+    adminAuditLog('admin_dashboard_error', adminDashboardError);
   }
   renderAdminSummary();
   renderAdminPurchaseRequests();
   renderAdminPilotDeposits();
   renderAdminNotificationBadge();
   setLanguage(currentLang);
+  adminDashboardLoading = false;
 }
 
 function renderAdminSummary() {
@@ -1214,7 +1227,19 @@ function closeAdminDetailsModal() {
   document.getElementById('adminDetailsModal').classList.remove('open');
 }
 
+const ADMIN_AUDIT_KEY = 'arbr_admin_audit_v1';
+
+function adminAuditLog(action, detail) {
+  if (!isAdminUser()) return;
+  try {
+    const entries = JSON.parse(sessionStorage.getItem(ADMIN_AUDIT_KEY) || '[]');
+    entries.unshift({ at: new Date().toISOString(), action, detail: String(detail || '') });
+    sessionStorage.setItem(ADMIN_AUDIT_KEY, JSON.stringify(entries.slice(0, 100)));
+  } catch (_) { /* storage unavailable */ }
+}
+
 function showAdminActionDisabledToast() {
+  adminAuditLog('admin_action_blocked', 'approve/reject requires secure RPC');
   showToast(t('adminApprovalSetupRequired'), 'warning');
 }
 
@@ -1300,13 +1325,17 @@ async function submitPilotDeposit(event) {
   }
   if (!requireVerifiedService()) return;
   const amount = Number(document.getElementById('pilotAmount').value || 0);
-  const method = document.getElementById('pilotMethod').value;
-  const reference = document.getElementById('pilotReference').value.trim();
-  const note = document.getElementById('pilotNote').value.trim();
+  const method = sanitizeInput(document.getElementById('pilotMethod').value, 80);
+  const reference = sanitizeInput(document.getElementById('pilotReference').value, 120);
+  const note = sanitizeInput(document.getElementById('pilotNote').value, 500);
   const agreed = document.getElementById('pilotAgree').checked;
   if (amount <= 0) { showToast(t('invalidAmount'), 'warning'); return; }
   if (!method) { showToast(t('choosePaymentWarning'), 'warning'); return; }
   if (!agreed) { showToast(t('agreePilot'), 'warning'); return; }
+  if (sec() && !sec().guardDuplicateSubmit('pilot-deposit', 5000)) {
+    showToast(currentLang === 'ar' ? 'تم إرسال الطلب للتو.' : 'Please wait before submitting again.', 'warning');
+    return;
+  }
 
   const btn = document.getElementById('pilotSubmit');
   setBusy(btn, true, t('sending'));
@@ -1324,6 +1353,7 @@ async function submitPilotDeposit(event) {
     .select('id,status')
     .single();
   setBusy(btn, false);
+  sec()?.releaseSubmitLock?.('pilot-deposit');
   if (error) {
     showToast(t('pilotSubmitFailed') + ': ' + error.message, 'error');
     return;
@@ -1469,6 +1499,10 @@ async function submitSellRequest() {
   const available = Math.max(0, Number(currentWallet?.arbr_balance || 0) - Number(currentWallet?.locked_arbr || 0));
   if (amount <= 0) { showToast(t('invalidAmount'), 'warning'); return; }
   if (amount > available) { showToast(currentLang === 'ar' ? 'الكمية المطلوبة تتجاوز الرصيد المتاح.' : 'Requested amount exceeds available balance.', 'warning'); return; }
+  if (sec() && !sec().guardDuplicateSubmit('redeem', 5000)) {
+    showToast(currentLang === 'ar' ? 'تم إرسال الطلب للتو.' : 'Please wait before submitting again.', 'warning');
+    return;
+  }
   const result = calculateSellReturnByStages(estimatedSoldTokens, amount);
   const btn = document.getElementById('submitSellRequest');
   setBusy(btn, true, t('submittingRequest'));
@@ -1486,6 +1520,7 @@ async function submitSellRequest() {
     .select('id,status')
     .single();
   setBusy(btn, false);
+  sec()?.releaseSubmitLock?.('redeem');
   if (error) { showToast(t('requestFailed') + ': ' + error.message, 'error'); return; }
   showToast(t('sellSubmitted'), 'success');
   showRequestSuccess({
@@ -1734,10 +1769,10 @@ async function saveSettings() {
   const btn = document.getElementById('saveSettingsBtn');
   setBusy(btn, true, t('saving'));
   const updates = {
-    full_name: document.getElementById('settingsFullName').value.trim()
+    full_name: sanitizeInput(document.getElementById('settingsFullName').value, 120)
   };
   if (profileHasColumn('country')) {
-    updates.country = document.getElementById('settingsCountry').value.trim();
+    updates.country = sanitizeInput(document.getElementById('settingsCountry').value, 80);
   }
   const { error } = await supabaseClient
     .from('profiles')
@@ -1813,10 +1848,17 @@ function bindLoginPage() {
   document.getElementById('doLogin').onclick = async () => {
     if (!requireSupabase()) return;
     const btn = document.getElementById('doLogin');
-    const email = document.getElementById('loginEmail').value.trim();
+    const email = sanitizeInput(document.getElementById('loginEmail').value, 254);
     const password = document.getElementById('loginPass').value;
     if (!email) { showToast(t('enterEmail'), 'warning'); return; }
+    if (sec() && !sec().isValidEmail(email)) { showToast(t('invalidEmail') || 'بريد إلكتروني غير صالح', 'warning'); return; }
     if (!password) { showToast(t('enterPassword'), 'warning'); return; }
+    const rl = sec()?.checkLoginRateLimit?.(email);
+    if (rl && !rl.allowed) {
+      showToast((currentLang === 'ar' ? `محاولات كثيرة. أعد المحاولة بعد ${rl.retryAfterSec} ثانية.` : `Too many attempts. Retry in ${rl.retryAfterSec}s.`), 'warning');
+      return;
+    }
+    if (sec() && !sec().guardDuplicateSubmit('login', 2000)) return;
     setBusy(btn, true, t('loggingIn'));
     try {
       const { error } = await withTimeout(
@@ -1824,27 +1866,37 @@ function bindLoginPage() {
         15000,
         t('loginTimeout')
       );
-      if (error) { showToast(t('loginFailed') + ': ' + error.message, 'error'); return; }
+      if (error) {
+        sec()?.recordLoginFailure?.(email);
+        showToast(t('loginFailed') + ': ' + error.message, 'error');
+        return;
+      }
+      sec()?.clearLoginAttempts?.(email);
       await refreshUserState();
       showToast(t('loginSuccess'));
       afterAuthSuccess();
     } catch (error) {
+      sec()?.recordLoginFailure?.(email);
       showToast(error.message || t('loginRetry'), 'error');
     } finally {
+      sec()?.releaseSubmitLock?.('login');
       setBusy(btn, false);
     }
   };
   document.getElementById('doSignup').onclick = async () => {
     if (!requireSupabase()) return;
     const btn = document.getElementById('doSignup');
-    const fullName = document.getElementById('sName').value.trim();
-    const phone = document.getElementById('sPhone').value.trim();
-    const email = document.getElementById('sEmail').value.trim();
+    const fullName = sanitizeInput(document.getElementById('sName').value, 120);
+    const phone = sanitizeInput(document.getElementById('sPhone').value, 20);
+    const email = sanitizeInput(document.getElementById('sEmail').value, 254);
     const password = document.getElementById('sPass').value;
     if (!fullName) { showToast(t('enterFullName'), 'warning'); return; }
     if (!phone) { showToast(t('enterPhone'), 'warning'); return; }
+    if (sec() && !sec().isValidPhone(phone)) { showToast(t('invalidPhone') || 'رقم هاتف غير صالح', 'warning'); return; }
     if (!email) { showToast(t('enterEmail'), 'warning'); return; }
+    if (sec() && !sec().isValidEmail(email)) { showToast(t('invalidEmail') || 'بريد إلكتروني غير صالح', 'warning'); return; }
     if (password.length < 6) { showToast(t('shortPassword'), 'warning'); return; }
+    if (sec() && !sec().guardDuplicateSubmit('signup', 5000)) return;
     setBusy(btn, true, t('creatingAccount'));
     const { data, error } = await supabaseClient.auth.signUp({
       email,
@@ -1855,6 +1907,7 @@ function bindLoginPage() {
       }
     });
     setBusy(btn, false);
+    sec()?.releaseSubmitLock?.('signup');
     if (error) { showToast(t('signupFailed') + ': ' + error.message, 'error'); return; }
     if (data?.session) await supabaseClient.auth.signOut();
     await refreshUserState();
@@ -1876,12 +1929,16 @@ function bindBuyPage() {
     if (!requireSupabase()) return;
     if (!requireLoginBeforePurchase()) return;
     const btn = document.getElementById('submitBuy');
-    const note = document.getElementById('wallet').value.trim();
+    const note = sanitizeInput(document.getElementById('wallet').value, 500);
     const amount = Number(amtInput.value);
-    const paymentMethod = document.getElementById('payM').value;
+    const paymentMethod = sanitizeInput(document.getElementById('payM').value, 80);
     if (!note) { showToast(t('enterWallet'), 'warning'); return; }
     if (amount < 10) { showToast(t('minPurchase'), 'warning'); return; }
     if (amount >= ARBR_CONFIG.largeBuyVerificationAmount && !requireVerifiedService()) return;
+    if (sec() && !sec().guardDuplicateSubmit('purchase', 5000)) {
+      showToast(currentLang === 'ar' ? 'تم إرسال الطلب للتو. انتظر قليلًا.' : 'Please wait before submitting again.', 'warning');
+      return;
+    }
     setBusy(btn, true, t('submittingRequest'));
     const { data, error } = await supabaseClient
       .from('purchase_requests')
@@ -1898,6 +1955,7 @@ function bindBuyPage() {
       .select('id,status')
       .single();
     setBusy(btn, false);
+    sec()?.releaseSubmitLock?.('purchase');
     if (error) { showToast(t('requestFailed') + ': ' + error.message, 'error'); return; }
     showToast(t('requestSubmitted'), 'success');
     showRequestSuccess({
@@ -2055,8 +2113,16 @@ async function loadSharedModals() {
   host.innerHTML = (html && html.trim()) ? html : MODALS_FALLBACK_HTML;
 }
 
+function setPageLoading(active) {
+  const loader = document.getElementById('page-loader');
+  if (!loader) return;
+  loader.classList.toggle('active', Boolean(active));
+  loader.setAttribute('aria-hidden', active ? 'false' : 'true');
+}
+
 async function initArbrApp() {
   try {
+    setPageLoading(true);
     await loadSharedModals();
     bindCommonChrome();
     initPageBindings();
@@ -2068,6 +2134,8 @@ async function initArbrApp() {
   } catch (err) {
     console.error('ARBR init failed:', err);
     showToast?.('تعذر تحميل المنصة. حدّث الصفحة.', 'error');
+  } finally {
+    setPageLoading(false);
   }
 }
 

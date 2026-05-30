@@ -1,0 +1,13 @@
+{
+  "name": "arabrial",
+  "private": true,
+  "description": "Arab Rial (ARBR) static site build",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:min": "node scripts/build.mjs --minify"
+  },
+  "devDependencies": {
+    "clean-css": "^5.3.3",
+    "terser": "^5.39.0"
+  }
+}
