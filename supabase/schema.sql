@@ -14,9 +14,14 @@ create table if not exists public.profiles (
   account_status text not null default 'active' check (account_status in ('active', 'disabled', 'under_review')),
   kyc_status text not null default 'pending' check (kyc_status in ('pending', 'submitted', 'approved', 'rejected')),
   verification_status text not null default 'unverified' check (verification_status in ('unverified', 'pending', 'verified', 'rejected')),
+  role text not null default 'user' check (role in ('user', 'admin')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.profiles add column if not exists role text not null default 'user';
+alter table public.profiles drop constraint if exists profiles_role_check;
+alter table public.profiles add constraint profiles_role_check check (role in ('user', 'admin'));
 
 alter table public.profiles add column if not exists country text not null default '';
 alter table public.profiles add column if not exists account_status text not null default 'active';
@@ -132,6 +137,31 @@ create table if not exists public.transaction_ledger (
 create unique index if not exists transaction_ledger_source_unique
 on public.transaction_ledger (source_table, source_id, transaction_type);
 
+create table if not exists public.platform_state (
+  id smallint primary key default 1 check (id = 1),
+  sold_tokens numeric(18, 2) not null default 0 check (sold_tokens >= 0),
+  updated_at timestamptz not null default now()
+);
+
+insert into public.platform_state (id, sold_tokens)
+values (1, 0)
+on conflict (id) do nothing;
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.profiles p
+    where p.id = auth.uid()
+      and p.role = 'admin'
+  );
+$$;
+
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
@@ -149,13 +179,14 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, email, full_name, phone, verification_status)
+  insert into public.profiles (id, email, full_name, phone, verification_status, role)
   values (
     new.id,
     new.email,
     coalesce(new.raw_user_meta_data->>'full_name', ''),
     coalesce(new.raw_user_meta_data->>'phone', ''),
-    'unverified'
+    'unverified',
+    'user'
   )
   on conflict (id) do update set
     email = excluded.email,
@@ -193,6 +224,11 @@ begin
       new.estimated_arbr, new.amount_omr, 'Approved ARBR purchase request'
     )
     on conflict do nothing;
+
+    update public.platform_state
+    set sold_tokens = sold_tokens + new.estimated_arbr,
+        updated_at = now()
+    where id = 1;
   end if;
   return new;
 end;
@@ -273,12 +309,25 @@ alter table public.purchase_requests enable row level security;
 alter table public.pilot_deposits enable row level security;
 alter table public.redeem_requests enable row level security;
 alter table public.transaction_ledger enable row level security;
+alter table public.platform_state enable row level security;
+
+drop policy if exists "Public can read platform state" on public.platform_state;
+create policy "Public can read platform state"
+on public.platform_state for select
+to anon, authenticated
+using (true);
 
 drop policy if exists "Users can read own profile" on public.profiles;
 create policy "Users can read own profile"
 on public.profiles for select
 to authenticated
 using (auth.uid() = id);
+
+drop policy if exists "Admins can read all profiles" on public.profiles;
+create policy "Admins can read all profiles"
+on public.profiles for select
+to authenticated
+using (public.is_admin());
 
 drop policy if exists "Users can update own editable profile fields" on public.profiles;
 drop policy if exists "Users can update own profile" on public.profiles;
@@ -299,6 +348,12 @@ create policy "Users can read own purchase requests"
 on public.purchase_requests for select
 to authenticated
 using (auth.uid() = user_id);
+
+drop policy if exists "Admins can read all purchase requests" on public.purchase_requests;
+create policy "Admins can read all purchase requests"
+on public.purchase_requests for select
+to authenticated
+using (public.is_admin());
 
 drop policy if exists "Users can create own purchase requests" on public.purchase_requests;
 create policy "Users can create own purchase requests"
@@ -321,6 +376,12 @@ create policy "Users can read own pilot deposits"
 on public.pilot_deposits for select
 to authenticated
 using (auth.uid() = user_id);
+
+drop policy if exists "Admins can read all pilot deposits" on public.pilot_deposits;
+create policy "Admins can read all pilot deposits"
+on public.pilot_deposits for select
+to authenticated
+using (public.is_admin());
 
 drop policy if exists "Verified users can create own pilot deposits" on public.pilot_deposits;
 create policy "Verified users can create own pilot deposits"
@@ -391,3 +452,9 @@ grant insert (
 ) on public.redeem_requests to authenticated;
 
 grant select on public.transaction_ledger to authenticated;
+
+grant select on public.platform_state to anon, authenticated;
+grant execute on function public.is_admin() to authenticated;
+
+-- Set admin role only in Supabase Dashboard (SQL), never from the website:
+-- update public.profiles set role = 'admin' where email = 'you@example.com';

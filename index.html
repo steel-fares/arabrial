@@ -4,6 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>ARBR | العملة الرقمية الذكية</title>
+<meta name="description" content="Arab Rial (ARBR) — منصة أصول رقمية للمستثمرين والتجار المؤهلين. طلبات شراء وعضوية واسترداد تخضع لمراجعة الإدارة." />
+<meta name="theme-color" content="#060910" />
+<link rel="icon" href="logo.svg" type="image/svg+xml" />
+<meta property="og:title" content="ARBR | Arab Rial" />
+<meta property="og:description" content="Arab Rial digital asset platform for qualified investors and merchants." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://arab-rial.com/" />
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -148,8 +155,13 @@ p.hero-lead{font-size:15px;line-height:2.1;color:var(--light);max-width:460px;
   backdrop-filter:blur(24px);
   box-shadow:0 24px 70px rgba(0,0,0,.45),0 0 0 1px rgba(200,149,42,.08)}
 .pc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:12px;color:var(--muted)}
-.live{display:flex;align-items:center;gap:5px;color:var(--green);font-weight:700;font-size:11px}
-.live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite}
+.price-indicative{display:inline-flex;align-items:center;gap:5px;color:var(--gold-light);font-weight:700;font-size:11px;
+  background:rgba(200,149,42,.12);border:1px solid rgba(200,149,42,.28);border-radius:999px;padding:4px 10px}
+.pc-stage-note{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:14px}
+.stats-disclaimer{width:100%;padding:12px 26px;font-size:11px;color:var(--muted);text-align:center;line-height:1.8;border-top:1px solid var(--border)}
+.nav-start{display:flex;align-items:center;gap:12px;min-width:0}
+.nav-toggle{display:none;width:44px;height:44px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);color:var(--light);font-size:22px;line-height:1;cursor:pointer;flex-shrink:0}
 .pc-price{font-size:34px;font-weight:900;color:var(--gold-light);margin-bottom:4px}
 .pc-change{color:var(--green);font-size:14px;font-weight:700;margin-bottom:14px}
 .pc-chart svg{width:100%;height:50px}
@@ -443,7 +455,12 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   .buy-grid{grid-template-columns:1fr}
   .dashboard-shell{grid-template-columns:1fr}
   .part2-grid{grid-template-columns:1fr}
-  .nav-links{display:none}
+  .nav-toggle{display:grid;place-items:center}
+  .nav-links{display:none;position:fixed;top:74px;right:0;left:0;flex-direction:column;align-items:stretch;
+    background:rgba(6,9,16,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);
+    padding:16px 6% 24px;gap:6px;z-index:99;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+  body.nav-open .nav-links{display:flex}
+  .nav-links a{padding:12px 4px}
   .hero{padding:60px 5% 0}
   .sec{padding:60px 5%}
   .stats-bar{margin:0 4% 60px}
@@ -476,11 +493,14 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
 
 <!-- ══════════ NAV ══════════ -->
 <nav>
-  <div class="logo">
-    <div class="logo-mark"><img src="logo.png" alt="Arab Rial ARBR logo" /></div>
-    <div class="logo-text"><b>ARBR</b><small data-i18n="logoSub">The Digital Asset</small></div>
+  <div class="nav-start">
+    <div class="logo">
+      <div class="logo-mark"><img src="logo.svg" alt="Arab Rial ARBR logo" width="46" height="46" /></div>
+      <div class="logo-text"><b>ARBR</b><small data-i18n="logoSub">The Digital Asset</small></div>
+    </div>
+    <button class="nav-toggle" type="button" id="navToggle" aria-expanded="false" aria-controls="navLinks" title="Menu">☰</button>
   </div>
-  <ul class="nav-links">
+  <ul class="nav-links" id="navLinks">
     <li><a href="#home" class="active" data-i18n="navHome">الرئيسية</a></li>
     <li><a href="#about" data-i18n="navAbout">عن ARBR</a></li>
     <li><a href="#features" data-i18n="navFeatures">المزايا</a></li>
@@ -547,16 +567,16 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
     <div class="hero-visual">
       <div class="coin-wrap">
         <div class="coin-glow"></div>
-        <div class="coin"><img class="coin-img" src="logo.png" alt="Arab Rial ARBR coin" /></div>
+        <div class="coin"><img class="coin-img" src="logo.svg" alt="Arab Rial ARBR coin" width="260" height="260" /></div>
         <div class="coin-shadow"></div>
       </div>
       <div class="price-card">
         <div class="pc-top">
           <span data-i18n="foundingPrice">سعر ARBR التأسيسي</span>
-          <span class="live" data-i18n="live">مباشر</span>
+          <span class="price-indicative" data-i18n="priceIndicative">تقديري</span>
         </div>
         <div class="pc-price"><span class="ltr-token">0.001 OMR</span></div>
-        <div class="pc-change">+2.48% ↑</div>
+        <div class="pc-stage-note" data-i18n="priceStageNote">مرحلة Founders — للعرض التوضيحي فقط</div>
         <div class="pc-chart">
           <svg viewBox="0 0 240 60" preserveAspectRatio="none">
             <defs>
@@ -599,8 +619,9 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   </div>
   <div class="stat-item">
     <span class="s-ico">🛡️</span>
-    <div><b>Blockchain</b><small data-i18n="securityTransparency">أمان وشفافية</small></div>
+    <div><b data-i18n="statsSecurityValue">مراجعة يدوية</b><small data-i18n="securityTransparency">أمان وشفافية</small></div>
   </div>
+  <p class="stats-disclaimer" data-i18n="statsDisclaimer">الأرقام أعلاه تأسيسية/توضيحية وليست بيانات تداول مباشرة.</p>
 </div>
 
 <!-- ══════════ ABOUT ══════════ -->
@@ -802,7 +823,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
 <!-- ══════════ ADMIN DASHBOARD PHASE 1 ══════════ -->
 <section class="sec admin-sec" id="adminDashboard">
   <h2 class="sec-title" data-i18n="adminDashboardTitle">لوحة تحكم <span>الإدارة</span></h2>
-  <p class="sec-desc" data-i18n="adminDashboardDesc">عرض ومراجعة الطلبات المعلقة داخل Arab Rial وتنفيذ الموافقة أو الرفض عبر دوال Supabase الآمنة.</p>
+  <p class="sec-desc" data-i18n="adminDashboardDesc">عرض ومراجعة الطلبات المعلقة داخل Arab Rial. إجراءات الموافقة والرفض غير مفعلة في هذه المرحلة.</p>
   <div id="adminPermissionNotice" class="admin-state-card hidden" data-i18n="adminRlsRequired">تحتاج صلاحيات الإدارة إلى إعداد RLS في Supabase</div>
   <div id="adminDashboardContent">
     <div class="admin-summary-grid" id="adminSummaryCards"></div>
@@ -941,7 +962,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   <div class="modal-card">
     <button class="modal-close" id="closeModal">×</button>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
-      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.png" alt="Arab Rial ARBR logo" /></div>
+      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.svg" alt="Arab Rial ARBR logo" /></div>
       <div class="logo-text"><b>ARBR</b><small class="auth-portal" data-i18n="investorAccess">بوابة المستثمر ARBR</small></div>
     </div>
     <div class="tabs">
@@ -977,7 +998,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   <div class="modal-card">
     <button class="modal-close" id="closeSettings">×</button>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.png" alt="Arab Rial ARBR logo" /></div>
+      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.svg" alt="Arab Rial ARBR logo" /></div>
       <div class="logo-text"><b data-i18n="settings">الإعدادات</b><small data-i18n="investorProfile">Account Profile</small></div>
     </div>
     <div class="fgroup"><label data-i18n="fullName">الاسم الكامل</label><input id="settingsFullName" placeholder="اكتب اسمك الكامل" data-i18n-placeholder="fullNamePlaceholder" /></div>
@@ -999,7 +1020,7 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
   <div class="modal-card">
     <button class="modal-close" id="closeSuccessModal">×</button>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
-      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.png" alt="Arab Rial ARBR logo" /></div>
+      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.svg" alt="Arab Rial ARBR logo" /></div>
       <div class="logo-text"><b data-i18n="requestConfirmed">تم تأكيد الطلب</b><small>ARBR</small></div>
     </div>
     <div class="success-box">
@@ -1031,38 +1052,9 @@ footer{text-align:center;padding:34px 6%;border-top:1px solid var(--border);
     <h3 style="color:var(--gold-light);margin-bottom:16px" data-i18n="adminDetailsTitle">تفاصيل طلب الإدارة</h3>
     <div class="details-grid" id="adminDetailsContent"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
-      <button class="btn-primary" type="button" id="adminApproveAction" data-i18n="adminApprove">موافقة</button>
-      <button class="btn-secondary" type="button" id="adminRejectAction" data-i18n="adminReject">رفض</button>
+      <button class="btn-primary" type="button" id="adminApproveDisabled" data-i18n="adminApprove">موافقة</button>
+      <button class="btn-secondary" type="button" id="adminRejectDisabled" data-i18n="adminReject">رفض</button>
       <button class="btn-secondary" type="button" id="adminDetailsCloseBtn" data-i18n="close">إغلاق</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ ADMIN CONFIRM MODAL ══════════ -->
-<div class="modal" id="adminConfirmModal">
-  <div class="modal-card">
-    <button class="modal-close" id="adminConfirmClose">×</button>
-    <h3 style="color:var(--gold-light);margin-bottom:14px" id="adminConfirmTitle">تأكيد الإجراء</h3>
-    <p style="color:var(--muted);font-size:14px;line-height:1.9" id="adminConfirmMessage"></p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px">
-      <button class="btn-primary" type="button" id="adminConfirmOk" style="flex:1;padding:12px" data-i18n="confirmAction">تأكيد</button>
-      <button class="btn-secondary" type="button" id="adminConfirmCancel" style="flex:1;padding:12px" data-i18n="cancel">إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ ADMIN REJECT MODAL ══════════ -->
-<div class="modal" id="adminRejectModal">
-  <div class="modal-card">
-    <button class="modal-close" id="adminRejectClose">×</button>
-    <h3 style="color:var(--gold-light);margin-bottom:14px" data-i18n="adminRejectReasonTitle">سبب الرفض</h3>
-    <div class="fgroup">
-      <label data-i18n="adminRejectReasonLabel">ملاحظة الإدارة</label>
-      <textarea id="adminRejectNote" class="form-textarea" rows="4" placeholder="اكتب سبب الرفض..." data-i18n-placeholder="adminRejectReasonPlaceholder"></textarea>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px">
-      <button class="btn-primary" type="button" id="adminRejectSubmit" style="flex:1;padding:12px" data-i18n="adminReject">رفض</button>
-      <button class="btn-secondary" type="button" id="adminRejectCancel" style="flex:1;padding:12px" data-i18n="cancel">إلغاء</button>
     </div>
   </div>
 </div>
@@ -1111,10 +1103,6 @@ let adminPilotDeposits = [];
 let adminSummary = { pendingPurchases: 0, pendingDeposits: 0, totalPending: 0, todayRequests: 0 };
 let adminDashboardError = '';
 let adminRealtimeChannel = null;
-let currentAdminDetailsAction = null;
-let adminConfirmResolver = null;
-let adminRejectResolver = null;
-const adminProcessingActions = new Set();
 
 const ARBR_CONFIG = {
   totalSupply: 100000000,
@@ -1135,7 +1123,7 @@ const ARBR_CONFIG = {
     { name: 'Internal Cap', from: 90000000, to: 100000000, price: 0.100 }
   ]
 };
-const estimatedSoldTokens = 0; // TODO: replace with platform_state.sold_tokens later.
+let estimatedSoldTokens = 0;
 
 const I18N = {
   ar: {
@@ -1164,7 +1152,11 @@ const I18N = {
     buyNow: '🪙 اشترِ ARBR الآن',
     investorLogin: 'دخول المستخدم ←',
     foundingPrice: 'سعر ARBR التأسيسي',
-    live: 'مباشر',
+    priceIndicative: 'تقديري',
+    priceStageNote: 'مرحلة Founders — للعرض التوضيحي فقط',
+    statsDisclaimer: 'الأرقام أعلاه تأسيسية/توضيحية وليست بيانات تداول مباشرة.',
+    statsSecurityValue: 'مراجعة يدوية',
+    navMenuLabel: 'القائمة',
     totalSupply: 'إجمالي المعروض',
     qualifiedInvestors: 'مستخدم موثق',
     totalTransfers: 'إجمالي التحويلات',
@@ -1256,7 +1248,7 @@ const I18N = {
     manualNow: 'متاح الآن',
     securePaymentLink: 'عبر رابط دفع آمن ومشفر',
     readyToConnect: 'جاهز للربط',
-    buyProcessText: 'يعالج النظام طلب الشراء ويتحقق من بيانات الدفع تلقائيًا. بعد التأكيد يتم تحديث حالة الطلب وإضافة الرصيد المعتمد، وقد تُحال بعض الطلبات إلى مراجعة الإدارة التفصيلية.',
+    buyProcessText: 'بعد إرسال الطلب تتم مراجعة بيانات الدفع يدويًا من الإدارة. عند الموافقة يُحدَّث الطلب ويُضاف الرصيد المعتمد إلى محفظتك. قد تُحال بعض الطلبات إلى مراجعة إضافية لأسباب أمنية أو تنظيمية.',
     buyLimitText: 'الحد الأدنى للطلب <strong style="color:var(--gold-light)">10 OMR</strong>، ولا يوجد حد أقصى ثابت للطلبات.',
     ctaTitle: 'ابدأ رحلتك مع ARBR الآن 🚀',
     ctaDesc: 'انضم إلى مستخدمي المنصة واستفد من أسعار الدخول المبكر الحصرية.',
@@ -1306,7 +1298,7 @@ const I18N = {
     reviewedDate: 'تاريخ المراجعة',
     adminNote: 'ملاحظة الإدارة',
     adminDashboardTitle: 'لوحة تحكم <span>الإدارة</span>',
-    adminDashboardDesc: 'عرض ومراجعة الطلبات المعلقة داخل Arab Rial وتنفيذ الموافقة أو الرفض عبر دوال Supabase الآمنة.',
+    adminDashboardDesc: 'عرض ومراجعة الطلبات المعلقة داخل Arab Rial. إجراءات الموافقة والرفض غير مفعلة في هذه المرحلة.',
     adminPendingPurchases: 'طلبات الشراء المعلقة',
     adminPendingDeposits: 'طلبات الإيداع المعلقة',
     adminTotalPending: 'إجمالي الطلبات المعلقة',
@@ -1340,22 +1332,6 @@ const I18N = {
     adminNewRequestReceived: 'وصل طلب جديد',
     adminRefundable: 'قابل للاسترداد',
     adminNotes: 'الملاحظات',
-    confirmAction: 'تأكيد',
-    cancel: 'إلغاء',
-    processing: 'جار التنفيذ...',
-    adminConfirmTitle: 'تأكيد الإجراء',
-    approvePurchaseConfirm: 'هل تريد الموافقة على هذا الطلب وإضافة الرصيد للمستخدم؟',
-    approveDepositConfirm: 'هل تريد تفعيل هذا الإيداع التجريبي؟',
-    adminRejectReasonTitle: 'سبب الرفض',
-    adminRejectReasonLabel: 'ملاحظة الإدارة',
-    adminRejectReasonPlaceholder: 'اكتب سبب الرفض...',
-    approvedWalletCredited: 'تمت الموافقة وإضافة الرصيد بنجاح',
-    purchaseRejectedSuccess: 'تم رفض طلب الشراء بنجاح',
-    pilotActivatedSuccess: 'تم تفعيل الإيداع التجريبي بنجاح',
-    pilotRejectedSuccess: 'تم رفض الإيداع بنجاح',
-    adminPermissionDenied: 'لا تملك صلاحية تنفيذ هذا الإجراء',
-    adminAlreadyProcessed: 'تم معالجة هذا الطلب مسبقًا',
-    adminActionFailed: 'تعذر تنفيذ الإجراء',
     okUnderstood: 'حسنًا، فهمت',
     emailPlaceholder: 'name@example.com',
     passwordPlaceholder: '••••••••',
@@ -1432,7 +1408,11 @@ const I18N = {
     buyNow: '🪙 Buy ARBR now',
     investorLogin: 'Account login →',
     foundingPrice: 'ARBR founding price',
-    live: 'Live',
+    priceIndicative: 'Indicative',
+    priceStageNote: 'Founders stage — illustrative display only',
+    statsDisclaimer: 'Figures above are founding/illustrative metrics, not live market data.',
+    statsSecurityValue: 'Manual review',
+    navMenuLabel: 'Menu',
     totalSupply: 'Total supply',
     qualifiedInvestors: 'Verified users',
     totalTransfers: 'Total transfers',
@@ -1524,7 +1504,7 @@ const I18N = {
     manualNow: 'Available now',
     securePaymentLink: 'Through a secure encrypted payment link',
     readyToConnect: 'Ready to connect',
-    buyProcessText: 'The system processes the purchase request and verifies payment data automatically. After confirmation, the request status is updated and the approved balance is added. Some requests may be routed to detailed administration review.',
+    buyProcessText: 'After you submit, payment details are reviewed manually by administration. When approved, the request status is updated and credited ARBR is added to your wallet. Some requests may require additional compliance review.',
     buyLimitText: 'Minimum request amount is <strong style="color:var(--gold-light)">10 OMR</strong>, with no fixed maximum request limit.',
     ctaTitle: 'Start your ARBR journey now 🚀',
     ctaDesc: 'Join platform users and benefit from exclusive early access prices.',
@@ -1574,7 +1554,7 @@ const I18N = {
     reviewedDate: 'Reviewed date',
     adminNote: 'Admin note',
     adminDashboardTitle: 'Admin <span>Dashboard</span>',
-    adminDashboardDesc: 'Display and review pending requests inside Arab Rial, then approve or reject them through secure Supabase functions.',
+    adminDashboardDesc: 'Display and review pending requests inside Arab Rial. Approve and reject actions are not active in this phase.',
     adminPendingPurchases: 'Pending Purchase Requests',
     adminPendingDeposits: 'Pending Pilot Deposits',
     adminTotalPending: 'Total Pending Requests',
@@ -1608,22 +1588,6 @@ const I18N = {
     adminNewRequestReceived: 'New request received',
     adminRefundable: 'Refundable',
     adminNotes: 'Notes',
-    confirmAction: 'Confirm',
-    cancel: 'Cancel',
-    processing: 'Processing...',
-    adminConfirmTitle: 'Confirm action',
-    approvePurchaseConfirm: 'Approve this request and credit the user wallet?',
-    approveDepositConfirm: 'Activate this pilot deposit?',
-    adminRejectReasonTitle: 'Reject reason',
-    adminRejectReasonLabel: 'Admin note',
-    adminRejectReasonPlaceholder: 'Write the rejection reason...',
-    approvedWalletCredited: 'Approved and wallet credited successfully',
-    purchaseRejectedSuccess: 'Purchase request rejected successfully',
-    pilotActivatedSuccess: 'Pilot deposit activated successfully',
-    pilotRejectedSuccess: 'Pilot deposit rejected successfully',
-    adminPermissionDenied: 'You do not have permission to perform this action',
-    adminAlreadyProcessed: 'This request has already been processed',
-    adminActionFailed: 'Unable to perform this action',
     okUnderstood: 'OK, understood',
     emailPlaceholder: 'name@example.com',
     passwordPlaceholder: '••••••••',
@@ -1773,6 +1737,15 @@ function formatNumber(value, suffix = '') {
   const n = Number(value || 0);
   const formatted = n.toLocaleString('en-US', { maximumFractionDigits: 2 }) + (suffix ? ' ' + suffix : '');
   return suffix ? '\u2068' + formatted + '\u2069' : formatted;
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function profileDisplayName() {
@@ -1986,7 +1959,17 @@ async function loadRedeemRequests(user = currentUser) {
 }
 
 function isAdminUser() {
-  return currentProfile?.role === 'admin';
+  return profileHasColumn('role') && currentProfile?.role === 'admin';
+}
+
+async function loadPlatformState() {
+  if (!supabaseClient) return;
+  const { data, error } = await supabaseClient
+    .from('platform_state')
+    .select('sold_tokens')
+    .eq('id', 1)
+    .maybeSingle();
+  if (!error && data) estimatedSoldTokens = Number(data.sold_tokens || 0);
 }
 
 function adminFallbackText(value) {
@@ -2157,11 +2140,11 @@ function renderAdminPurchaseRequests() {
           ${adminPurchaseRequests.map(item => `
             <tr>
               <td class="req-id">${requestId(item)}</td>
-              <td>${adminFallbackText(item._profileName || item.user_id)}</td>
-              <td>${adminFallbackText(item._profileEmail)}</td>
+              <td>${escapeHtml(adminFallbackText(item._profileName || item.user_id))}</td>
+              <td>${escapeHtml(adminFallbackText(item._profileEmail))}</td>
               <td>${formatNumber(requestAmount(item), ARBR_CONFIG.entryCurrency)}</td>
               <td>${formatNumber(requestEstimated(item), 'ARBR')}</td>
-              <td>${item.payment_method || '-'}</td>
+              <td>${escapeHtml(item.payment_method || '-')}</td>
               <td>${adminDate(item.created_at)}</td>
               <td><span class="status-pill ${statusClass(item.status)}">${statusLabel(item.status)}</span></td>
               <td>${adminActionButtons('purchase', item.id)}</td>
@@ -2204,11 +2187,11 @@ function renderAdminPilotDeposits() {
           ${adminPilotDeposits.map(item => `
             <tr>
               <td class="req-id">${depositId(item)}</td>
-              <td>${adminFallbackText(item._profileName || item.user_id)}</td>
-              <td>${adminFallbackText(item._profileEmail)}</td>
+              <td>${escapeHtml(adminFallbackText(item._profileName || item.user_id))}</td>
+              <td>${escapeHtml(adminFallbackText(item._profileEmail))}</td>
               <td>${formatNumber(item.amount_omr, ARBR_CONFIG.entryCurrency)}</td>
-              <td>${item.payment_method || '-'}</td>
-              <td>${item.payment_reference || '-'}</td>
+              <td>${escapeHtml(item.payment_method || '-')}</td>
+              <td>${escapeHtml(item.payment_reference || '-')}</td>
               <td>${adminDate(item.created_at)}</td>
               <td><span class="status-pill ${statusClass(item.status)}">${pilotStatusLabel(item.status)}</span></td>
               <td>${adminActionButtons('deposit', item.id)}</td>
@@ -2225,8 +2208,8 @@ function adminActionButtons(type, id) {
   return `
     <div class="admin-actions">
       <button class="admin-action-btn view" type="button" data-admin-view="${type}" data-admin-id="${id}">${t('adminViewDetails')}</button>
-      <button class="admin-action-btn" type="button" data-admin-action="approve" data-admin-type="${type}" data-admin-id="${id}">${t('adminApprove')}</button>
-      <button class="admin-action-btn" type="button" data-admin-action="reject" data-admin-type="${type}" data-admin-id="${id}">${t('adminReject')}</button>
+      <button class="admin-action-btn disabled" type="button" data-admin-disabled>${t('adminApprove')}</button>
+      <button class="admin-action-btn disabled" type="button" data-admin-disabled>${t('adminReject')}</button>
     </div>
   `;
 }
@@ -2242,23 +2225,14 @@ function bindAdminActionButtons(scope = document) {
       if (item) openAdminDetailsModal(type, item);
     });
   });
-  scope.querySelectorAll('[data-admin-action]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      runAdminAction(btn.dataset.adminType, btn.dataset.adminId, btn.dataset.adminAction, btn);
-    });
+  scope.querySelectorAll('[data-admin-disabled]').forEach(btn => {
+    btn.addEventListener('click', showAdminActionDisabledToast);
   });
-}
-
-function adminRowById(type, id) {
-  return type === 'purchase'
-    ? adminPurchaseRequests.find(row => String(row.id) === String(id))
-    : adminPilotDeposits.find(row => String(row.id) === String(id));
 }
 
 function openAdminDetailsModal(type, item) {
   const content = document.getElementById('adminDetailsContent');
   if (!content) return;
-  currentAdminDetailsAction = { type, id: item.id };
   const common = {
     userId: item.user_id || '-',
     name: adminFallbackText(item._profileName),
@@ -2295,154 +2269,15 @@ function openAdminDetailsModal(type, item) {
       detailItem(t('adminNotes'), item.notes || '-', true)
     ].join('');
   }
-  const approveBtn = document.getElementById('adminApproveAction');
-  const rejectBtn = document.getElementById('adminRejectAction');
-  [approveBtn, rejectBtn].forEach(btn => {
-    if (!btn) return;
-    btn.disabled = item.status !== 'pending';
-    btn.style.opacity = item.status !== 'pending' ? '.58' : '';
-    btn.style.cursor = item.status !== 'pending' ? 'not-allowed' : '';
-    delete btn.dataset.originalText;
-  });
   document.getElementById('adminDetailsModal').classList.add('open');
 }
 
 function closeAdminDetailsModal() {
   document.getElementById('adminDetailsModal').classList.remove('open');
-  currentAdminDetailsAction = null;
 }
 
 function showAdminActionDisabledToast() {
   showToast(t('adminApprovalSetupRequired'), 'warning');
-}
-
-function openAdminConfirmModal(message) {
-  const modal = document.getElementById('adminConfirmModal');
-  document.getElementById('adminConfirmTitle').textContent = t('adminConfirmTitle');
-  document.getElementById('adminConfirmMessage').textContent = message;
-  modal.classList.add('open');
-  return new Promise(resolve => {
-    adminConfirmResolver = resolve;
-  });
-}
-
-function closeAdminConfirmModal(result = false) {
-  document.getElementById('adminConfirmModal').classList.remove('open');
-  if (adminConfirmResolver) {
-    adminConfirmResolver(Boolean(result));
-    adminConfirmResolver = null;
-  }
-}
-
-function openAdminRejectModal() {
-  const modal = document.getElementById('adminRejectModal');
-  const noteInput = document.getElementById('adminRejectNote');
-  noteInput.value = '';
-  modal.classList.add('open');
-  noteInput.focus();
-  return new Promise(resolve => {
-    adminRejectResolver = resolve;
-  });
-}
-
-function closeAdminRejectModal(note = null) {
-  document.getElementById('adminRejectModal').classList.remove('open');
-  if (adminRejectResolver) {
-    adminRejectResolver(note);
-    adminRejectResolver = null;
-  }
-}
-
-function adminRpcErrorMessage(error) {
-  const code = String(error?.code || '').toLowerCase();
-  const message = String(error?.message || error?.details || '').toLowerCase();
-  if (code === '42501' || message.includes('permission') || message.includes('not authorized') || message.includes('not admin') || message.includes('rls')) {
-    return t('adminPermissionDenied');
-  }
-  if (message.includes('already') || message.includes('processed') || message.includes('not pending') || message.includes('status')) {
-    return t('adminAlreadyProcessed');
-  }
-  return t('adminActionFailed');
-}
-
-function adminActionConfig(type, action, id, note = '') {
-  if (type === 'purchase' && action === 'approve') {
-    return {
-      rpc: 'admin_approve_purchase_request',
-      params: { p_request_id: id },
-      confirm: t('approvePurchaseConfirm'),
-      success: t('approvedWalletCredited')
-    };
-  }
-  if (type === 'purchase' && action === 'reject') {
-    return {
-      rpc: 'admin_reject_purchase_request',
-      params: { p_request_id: id, p_admin_note: note },
-      success: t('purchaseRejectedSuccess')
-    };
-  }
-  if (type === 'deposit' && action === 'approve') {
-    return {
-      rpc: 'admin_activate_pilot_deposit',
-      params: { p_deposit_id: id },
-      confirm: t('approveDepositConfirm'),
-      success: t('pilotActivatedSuccess')
-    };
-  }
-  return {
-    rpc: 'admin_reject_pilot_deposit',
-    params: { p_deposit_id: id, p_admin_note: note },
-    success: t('pilotRejectedSuccess')
-  };
-}
-
-async function runAdminAction(type, id, action, button = null) {
-  if (!isAdminUser()) {
-    showToast(t('adminPermissionDenied'), 'error');
-    return;
-  }
-  if (adminConfirmResolver || adminRejectResolver) return;
-  const row = adminRowById(type, id);
-  if (row && row.status !== 'pending') {
-    showToast(t('adminAlreadyProcessed'), 'warning');
-    return;
-  }
-  const processingKey = `${type}:${id}:${action}`;
-  if (adminProcessingActions.has(processingKey)) return;
-  adminProcessingActions.add(processingKey);
-
-  let note = '';
-  if (action === 'reject') {
-    const rejectionNote = await openAdminRejectModal();
-    if (rejectionNote === null) {
-      adminProcessingActions.delete(processingKey);
-      return;
-    }
-    note = rejectionNote;
-  } else {
-    const confirmed = await openAdminConfirmModal(adminActionConfig(type, action, id).confirm);
-    if (!confirmed) {
-      adminProcessingActions.delete(processingKey);
-      return;
-    }
-  }
-
-  const config = adminActionConfig(type, action, id, note);
-  if (button) setBusy(button, true, t('processing'));
-
-  try {
-    const { error } = await supabaseClient.rpc(config.rpc, config.params);
-    if (error) throw error;
-    showToast(config.success, 'success');
-    closeAdminDetailsModal();
-    await loadAdminDashboard();
-  } catch (error) {
-    console.error('Admin RPC action failed:', error);
-    showToast(adminRpcErrorMessage(error), 'error');
-  } finally {
-    adminProcessingActions.delete(processingKey);
-    if (button) setBusy(button, false);
-  }
 }
 
 function setupAdminRealtime() {
@@ -2501,7 +2336,7 @@ function renderPilotDeposits() {
             <tr>
               <td class="req-id">#DEP-${String(deposit.id || '').slice(-6).toUpperCase()}</td>
               <td>${formatNumber(deposit.amount_omr, ARBR_CONFIG.entryCurrency)}</td>
-              <td>${deposit.payment_method || '-'}</td>
+              <td>${escapeHtml(deposit.payment_method || '-')}</td>
               <td>${deposit.is_refundable ? (currentLang === 'ar' ? 'نعم' : 'Yes') : (currentLang === 'ar' ? 'لا' : 'No')}</td>
               <td><span class="status-pill ${statusClass(deposit.status)}">${pilotStatusLabel(deposit.status)}</span></td>
               <td>${deposit.created_at ? new Date(deposit.created_at).toLocaleDateString(currentLang === 'ar' ? 'ar' : 'en-US') : '-'}</td>
@@ -2682,7 +2517,7 @@ function updateSellPreview() {
   const items = [];
   if (amount > available) items.push(currentLang === 'ar' ? 'الكمية المطلوبة تتجاوز الرصيد المتاح للبيع.' : 'Requested amount exceeds the available sell balance.');
   if (result.netReturn > ARBR_CONFIG.maxSellPerDay) items.push(currentLang === 'ar' ? 'سيتم توجيه هذا الطلب إلى مسار مراجعة الإدارة التفصيلي.' : 'This request will be routed to the detailed admin review flow.');
-  warnings.innerHTML = items.map(item => `<div class="sell-warning">${item}</div>`).join('');
+  warnings.innerHTML = items.map(item => `<div class="sell-warning">${escapeHtml(item)}</div>`).join('');
 }
 
 async function submitSellRequest() {
@@ -2767,12 +2602,12 @@ function renderOrdersTable(orders, showNote = true) {
             <tr>
               <td class="req-id"><button class="order-link" type="button" data-order-detail="${order.id}">${requestId(order)}</button></td>
               <td>${formatNumber(requestAmount(order), ARBR_CONFIG.entryCurrency)}</td>
-              <td>${order.payment_method || '-'}</td>
+              <td>${escapeHtml(order.payment_method || '-')}</td>
               <td>${formatNumber(requestEstimated(order), 'ARBR')}</td>
               <td><span class="status-pill ${statusClass(order.status)}">${statusLabel(order.status)}</span></td>
               <td>${requestDate(order)}</td>
               ${showProcessedAt ? `<td>${requestProcessedDate(order)}</td>` : ''}
-              ${showNote ? `<td>${order.note || order.admin_note || '-'}</td>` : ''}
+              ${showNote ? `<td>${escapeHtml(order.note || order.admin_notes || order.admin_note || '-')}</td>` : ''}
             </tr>
           `).join('')}
         </tbody>
@@ -2788,7 +2623,9 @@ function bindOrderDetailButtons(scope = document) {
 }
 
 function detailItem(label, value, wide = false) {
-  return `<div class="detail-item ${wide ? 'wide' : ''}"><small>${label}</small><b>${value || '-'}</b></div>`;
+  const safeLabel = escapeHtml(label);
+  const safeValue = escapeHtml(value || '-');
+  return `<div class="detail-item ${wide ? 'wide' : ''}"><small>${safeLabel}</small><b>${safeValue}</b></div>`;
 }
 
 function openOrderDetails(orderId) {
@@ -2897,6 +2734,7 @@ function updateAuthUI() {
 }
 
 async function refreshUserState() {
+  await loadPlatformState();
   currentUser = await getCurrentUser();
   if (!currentUser) {
     currentProfile = null;
@@ -3162,33 +3000,32 @@ document.getElementById('closeOrderDetails').addEventListener('click', closeOrde
 document.getElementById('orderDetailsModal').addEventListener('click', e => { if (e.target.id === 'orderDetailsModal') closeOrderDetailsModal(); });
 document.getElementById('closeAdminDetails').addEventListener('click', closeAdminDetailsModal);
 document.getElementById('adminDetailsCloseBtn').addEventListener('click', closeAdminDetailsModal);
-document.getElementById('adminApproveAction').addEventListener('click', function () {
-  if (!currentAdminDetailsAction) return;
-  runAdminAction(currentAdminDetailsAction.type, currentAdminDetailsAction.id, 'approve', this);
-});
-document.getElementById('adminRejectAction').addEventListener('click', function () {
-  if (!currentAdminDetailsAction) return;
-  runAdminAction(currentAdminDetailsAction.type, currentAdminDetailsAction.id, 'reject', this);
-});
+document.getElementById('adminApproveDisabled').addEventListener('click', showAdminActionDisabledToast);
+document.getElementById('adminRejectDisabled').addEventListener('click', showAdminActionDisabledToast);
 document.getElementById('adminDetailsModal').addEventListener('click', e => { if (e.target.id === 'adminDetailsModal') closeAdminDetailsModal(); });
-document.getElementById('adminConfirmOk').addEventListener('click', () => closeAdminConfirmModal(true));
-document.getElementById('adminConfirmCancel').addEventListener('click', () => closeAdminConfirmModal(false));
-document.getElementById('adminConfirmClose').addEventListener('click', () => closeAdminConfirmModal(false));
-document.getElementById('adminConfirmModal').addEventListener('click', e => { if (e.target.id === 'adminConfirmModal') closeAdminConfirmModal(false); });
-document.getElementById('adminRejectSubmit').addEventListener('click', () => closeAdminRejectModal(document.getElementById('adminRejectNote').value.trim()));
-document.getElementById('adminRejectCancel').addEventListener('click', () => closeAdminRejectModal(null));
-document.getElementById('adminRejectClose').addEventListener('click', () => closeAdminRejectModal(null));
-document.getElementById('adminRejectModal').addEventListener('click', e => { if (e.target.id === 'adminRejectModal') closeAdminRejectModal(null); });
 document.getElementById('adminNotificationBadge').addEventListener('click', () => {
   document.getElementById('adminDashboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 document.querySelectorAll('[data-lang-toggle]').forEach(btn => btn.addEventListener('click', toggleLanguage));
+
+function closeMobileNav() {
+  document.body.classList.remove('nav-open');
+  const toggle = document.getElementById('navToggle');
+  if (toggle) toggle.setAttribute('aria-expanded', 'false');
+}
+
+document.getElementById('navToggle')?.addEventListener('click', () => {
+  const open = document.body.classList.toggle('nav-open');
+  const toggle = document.getElementById('navToggle');
+  if (toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+});
 
 /* Nav active */
 document.querySelectorAll('.nav-links a').forEach(a => {
   a.addEventListener('click', function () {
     document.querySelectorAll('.nav-links a').forEach(x => x.classList.remove('active'));
     this.classList.add('active');
+    closeMobileNav();
   });
 });
 

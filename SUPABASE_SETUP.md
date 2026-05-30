@@ -25,26 +25,42 @@
 
 The latest `supabase/schema.sql` adds:
 
-- locked phone updates after registration
+- locked phone updates after registration (only `full_name` and `country` are client-editable)
 - `verification_status`: `unverified`, `pending`, `verified`, `rejected`
+- `profiles.role`: `user` or `admin` (admin is set only in the Dashboard, never from the website)
+- `public.is_admin()` and RLS policies so admins can read all pending requests and user profiles
+- `platform_state.sold_tokens` for sell-preview pricing (updated when purchases are approved)
 - verified-only policies for membership deposits and redeem requests
-- large purchase request verification checks
+- large purchase request verification checks (≥ 5000 OMR)
 - admin-only status/balance changes through RLS and column grants
 - `transaction_ledger` records for approved balance changes
 
 Use only the public `anon` or `publishable` key in GitHub Pages. Never put the `service_role` key in the website.
 
+### Promote an admin user
+
+In **SQL Editor** (service role), run once for your operator account:
+
+```sql
+update public.profiles
+set role = 'admin'
+where email = 'you@example.com';
+```
+
+Re-run `supabase/schema.sql` if the `role` column or admin policies are missing.
+
 ## 4. Test
 
-1. Open the page locally.
-2. Create a test account.
+1. Open the page locally or on GitHub Pages.
+2. Create a test account and confirm email if required.
 3. Sign in.
-4. Submit a purchase request with amount of at least `10 OMR`.
+4. Submit a purchase request with amount of at least **10 OMR**.
 5. Confirm the row appears in **Table Editor > purchase_requests**.
 6. Set `profiles.verification_status = verified` for the test user from Supabase Dashboard.
 7. Test membership deposit and sell/redeem requests.
+8. As admin, open the admin dashboard section and confirm pending rows load.
 
-Current purchase requests use:
+Purchase requests use:
 
 - `amount_omr`
 - `estimated_arbr`
@@ -52,13 +68,12 @@ Current purchase requests use:
 - `note`
 - `status = pending`
 
-Run the latest `supabase/schema.sql` before testing the live form.
-
 ## 5. GitHub Pages custom domain
 
 The repository should include:
 
 - `index.html`: the homepage GitHub Pages serves at `/`.
+- `logo.svg`: site logo and favicon.
 - `CNAME`: contains `arab-rial.com`.
 
 In GitHub repository settings, go to **Settings > Pages** and set:
