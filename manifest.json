@@ -1,0 +1,21 @@
+{
+  "name": "Arab Rial (ARBR)",
+  "short_name": "ARBR",
+  "description": "منصة Arab Rial للأصول الرقمية",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#060910",
+  "theme_color": "#060910",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
