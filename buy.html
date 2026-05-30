@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ARBR | شراء ARBR</title>
+<meta name="description" content="Arab Rial (ARBR) — منصة أصول رقمية للمستثمرين والتجار المؤهلين." />
+<meta name="theme-color" content="#060910" />
+<link rel="icon" href="logo.svg" type="image/svg+xml" />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/arbr.css" />
+</head>
+<body class="lang-ar" data-page="buy">
+<div class="bg-layer"></div>
+<div class="bg-grid"></div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+<div id="site-nav"></div>
+<main class="page-main app-page"><!-- ══════════ BUY ══════════ -->
+<section class="sec" id="buy">
+  <h2 class="sec-title" data-i18n="buyTitle">اشترِ <span>ARBR</span></h2>
+  <p class="sec-desc" data-i18n="buyDesc">سعر الدخول المبكر: <span class="ltr-token">1 OMR = 1,000 ARBR</span>. اختر المبلغ وطريقة الدفع وأرسل طلبك.</p>
+  <div class="buy-grid">
+
+    <div class="panel">
+      <h3 data-i18n="buyFormTitle">طلب شراء ARBR</h3>
+      <div class="price-info">
+        <div class="price-line"><span data-i18n="earlyPriceLabel">سعر الدخول المبكر</span><b><span class="ltr-token">1 OMR = 1,000 ARBR</span></b></div>
+        <div class="price-line"><span data-i18n="currentStage">المرحلة الحالية</span><b>Founders</b></div>
+      </div>
+      <div class="fgroup">
+        <label data-i18n="amountOmani">المبلغ بالريال العماني (OMR)</label>
+        <input id="amt" type="number" min="1" value="100" placeholder="مثال: 100" data-i18n-placeholder="amountPlaceholder" />
+      </div>
+      <div class="fgroup">
+        <label data-i18n="paymentMethod">طريقة الدفع</label>
+        <select id="payM">
+          <option>USDT (TRC20 / Polygon)</option>
+          <option>Visa / Mastercard</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label data-i18n="walletNote">ملاحظة / محفظة استلام ARBR</label>
+        <input id="wallet" placeholder="0x... أو أي ملاحظة للطلب" data-i18n-placeholder="walletPlaceholder" />
+      </div>
+      <div class="calc-result">
+        <small data-i18n="estimatedAmount">الكمية المتوقعة</small>
+        <b id="arbResult"><span class="ltr-token">100,000 ARBR</span></b>
+        <small style="display:block;margin-top:4px" data-i18n="estimatedNote">الكمية تقديرية ويتم اعتماد الطلب بعد تأكيد بيانات العملية.</small>
+      </div>
+      <button class="btn-primary" style="width:100%;padding:15px;font-size:15px" id="submitBuy" data-i18n="submitBuy">🪙 إرسال طلب الشراء</button>
+    </div>
+
+    <div class="panel">
+      <h3 data-i18n="paymentMethods">طرق الدفع المتاحة</h3>
+      <div class="pay-methods">
+        <div class="pay-method">
+          <div>
+            <b>₮ USDT</b>
+            <small data-i18n="usdtNetwork">TRC20 / Polygon / حسب الشبكة المعتمدة</small>
+          </div>
+          <span class="badge" data-i18n="manualNow">متاح الآن</span>
+        </div>
+        <div class="pay-method">
+          <div>
+            <b>💳 Visa / Mastercard</b>
+            <small data-i18n="securePaymentLink">عبر رابط دفع آمن ومشفر</small>
+          </div>
+          <span class="badge" data-i18n="readyToConnect">جاهز للربط</span>
+        </div>
+      </div>
+      <div style="margin-top:20px;padding:18px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px">
+        <p style="color:var(--muted);font-size:13px;line-height:2">
+          <span data-i18n="buyProcessText">يعالج النظام طلب الشراء ويتحقق من بيانات الدفع تلقائيًا. بعد التأكيد يتم تحديث حالة الطلب وإضافة الرصيد المعتمد، وقد تخضع بعض الطلبات لمراجعة إضافية لأسباب أمنية أو تنظيمية.</span>
+          <span data-i18n="buyLimitText">الحد الأدنى للطلب <strong style="color:var(--gold-light)">10 OMR</strong>، ولا يوجد حد أقصى ثابت للطلبات.</span>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+</main>
+<footer>
+  <div class="footer-logo">ARBR</div>
+  <div style="margin-bottom:8px;font-size:12px;letter-spacing:2px;color:var(--muted)">THE DIGITAL ASSET</div>
+  © 2026 ARBR Network.
+</footer>
+<div id="shared-modals"></div>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/layout.js"></script>
+<script src="assets/js/arbr.js"></script>
+</body>
+</html>

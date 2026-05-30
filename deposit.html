@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ARBR | إيداع / تحويل</title>
+<meta name="description" content="Arab Rial (ARBR) — منصة أصول رقمية للمستثمرين والتجار المؤهلين." />
+<meta name="theme-color" content="#060910" />
+<link rel="icon" href="logo.svg" type="image/svg+xml" />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/arbr.css" />
+</head>
+<body class="lang-ar" data-page="deposit">
+<div class="bg-layer"></div>
+<div class="bg-grid"></div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+<div id="site-nav"></div>
+<main class="page-main app-page"><!-- ══════════ MEMBERSHIP DEPOSITS ══════════ -->
+<section class="sec dashboard-sec" id="pilotSection">
+  <h2 class="sec-title" data-i18n="pilotTitle">عضوية <span>ARBR</span></h2>
+  <p class="sec-desc" data-i18n="pilotDesc">إرسال طلب إيداع عضوية قابل للاسترداد داخل منصة Arab Rial.</p>
+  <div class="part2-grid">
+    <form class="part2-card" id="pilotForm">
+      <h3 data-i18n="pilotFormTitle">طلب إيداع عضوية</h3>
+      <div class="fgroup">
+        <label data-i18n="pilotAmount">مبلغ الإيداع (OMR)</label>
+        <input id="pilotAmount" type="number" min="1" step="0.001" placeholder="مثال: 100" data-i18n-placeholder="amountPlaceholder" />
+      </div>
+      <div class="fgroup">
+        <label data-i18n="paymentMethod">طريقة الدفع</label>
+        <select id="pilotMethod">
+          <option value="" data-i18n="choosePayment">اختر طريقة الدفع</option>
+          <option value="manual" data-i18n="platformAdminMethod">إدارة المنصة</option>
+          <option value="usdt">USDT</option>
+          <option value="bank_later" data-i18n="bankTransfer">تحويل بنكي</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label data-i18n="paymentReference">رقم مرجع الدفع</label>
+        <input id="pilotReference" placeholder="رقم التحويل أو المرجع" dir="ltr" data-i18n-placeholder="paymentReferencePlaceholder" />
+      </div>
+      <div class="fgroup">
+        <label data-i18n="optionalNote">ملاحظة (اختيارية)</label>
+        <textarea id="pilotNote" class="form-textarea" placeholder="أي تفاصيل إضافية..." data-i18n-placeholder="extraDetailsPlaceholder"></textarea>
+      </div>
+      <label class="checkbox-row">
+        <input id="pilotAgree" type="checkbox" />
+        <span data-i18n="pilotAgreement">أفهم أن هذا الطلب خاص بإيداع عضوية داخل منصة Arab Rial، ويتم اعتماده بعد مراجعة بيانات العملية من الإدارة.</span>
+      </label>
+      <div class="service-locked hidden" id="pilotLockedNotice" data-i18n="verificationRequired">يرجى إكمال التحقق من الحساب لاستخدام هذه الخدمة.</div>
+      <button class="btn-primary" type="submit" style="width:100%;padding:14px;margin-top:14px" id="pilotSubmit" data-i18n="submitPilot">✦ إرسال طلب إيداع العضوية</button>
+    </form>
+    <div class="part2-card">
+      <h3 data-i18n="pilotRequests">طلبات إيداع العضوية</h3>
+      <div id="pilotList">
+        <div class="empty-orders" data-i18n="noPilotDeposits">لا توجد طلبات إيداع عضوية حتى الآن.</div>
+      </div>
+    </div>
+  </div>
+</main>
+<footer>
+  <div class="footer-logo">ARBR</div>
+  <div style="margin-bottom:8px;font-size:12px;letter-spacing:2px;color:var(--muted)">THE DIGITAL ASSET</div>
+  © 2026 ARBR Network.
+</footer>
+<div id="shared-modals"></div>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/layout.js"></script>
+<script src="assets/js/arbr.js"></script>
+</body>
+</html>
