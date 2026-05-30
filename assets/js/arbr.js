@@ -1,5 +1,4 @@
-﻿<script>
-/* Supabase config
+﻿/* Supabase config
    ضع القيم من Supabase Dashboard > Project Settings > API.
    استخدم anon/public key فقط هنا، ولا تضع أي مفتاح إداري داخل GitHub Pages. */
 const SUPABASE_URL = 'https://umxmwcwuwsvkvsbdhbdl.supabase.co';
@@ -1974,23 +1973,101 @@ function initPageBindings() {
   }
 }
 
+const MODALS_FALLBACK_HTML = `<!-- ══════════ SETTINGS MODAL ══════════ -->
+<div class="modal" id="settingsModal">
+  <div class="modal-card">
+    <button class="modal-close" id="closeSettings">×</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.svg" alt="Arab Rial ARBR logo" /></div>
+      <div class="logo-text"><b data-i18n="settings">الإعدادات</b><small data-i18n="investorProfile">Account Profile</small></div>
+    </div>
+    <div class="fgroup"><label data-i18n="fullName">الاسم الكامل</label><input id="settingsFullName" placeholder="اكتب اسمك الكامل" data-i18n-placeholder="fullNamePlaceholder" /></div>
+    <div class="fgroup">
+      <label data-i18n="phone">رقم الهاتف</label>
+      <input id="settingsPhone" type="tel" placeholder="+..." data-i18n-placeholder="phonePlaceholder" readonly />
+      <small class="helper-text" data-i18n="phoneLockedHelp">رقم الهاتف مرتبط بحسابك ولا يمكن تغييره من لوحة المستخدم. لتحديث رقم الهاتف، يرجى التواصل مع إدارة المنصة.</small>
+    </div>
+    <div class="fgroup hidden" id="settingsCountryGroup"><label data-i18n="country">الدولة</label><input id="settingsCountry" placeholder="مثال: Oman" data-i18n-placeholder="countryPlaceholder" /></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-primary" style="flex:1;padding:13px" id="saveSettingsBtn" data-i18n="saveChanges">حفظ التغييرات</button>
+      <button class="btn-secondary" style="flex:1;padding:13px" id="settingsCloseBtn" data-i18n="close">إغلاق</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="requestSuccessModal">
+  <div class="modal-card">
+    <button class="modal-close" id="closeSuccessModal">×</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.svg" alt="Arab Rial ARBR logo" /></div>
+      <div class="logo-text"><b data-i18n="requestConfirmed">تم تأكيد الطلب</b><small>ARBR</small></div>
+    </div>
+    <div class="success-box">
+      <small data-i18n="requestNumber">رقم الطلب</small>
+      <b id="successRequestNumber">-</b>
+      <span class="status-pill pending" id="successRequestStatus">-</span>
+    </div>
+    <p class="success-copy" id="successRequestMessage" data-i18n="requestUnderReview">تم إرسال طلبك بنجاح وهو الآن قيد المراجعة.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px">
+      <button class="btn-primary" style="flex:1;padding:13px" id="successViewOrders" data-i18n="viewMyOrders">عرض طلباتي</button>
+      <button class="btn-secondary" style="flex:1;padding:13px" id="successCloseBtn" data-i18n="close">إغلاق</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="orderDetailsModal">
+  <div class="modal-card modal-wide">
+    <button class="modal-close" id="closeOrderDetails">×</button>
+    <h3 style="color:var(--gold-light);margin-bottom:16px" data-i18n="orderDetails">تفاصيل الطلب</h3>
+    <div class="details-grid" id="orderDetailsContent"></div>
+  </div>
+</div>
+<div class="modal" id="adminDetailsModal">
+  <div class="modal-card modal-wide">
+    <button class="modal-close" id="closeAdminDetails">×</button>
+    <h3 style="color:var(--gold-light);margin-bottom:16px" data-i18n="adminDetailsTitle">تفاصيل طلب الإدارة</h3>
+    <div class="details-grid" id="adminDetailsContent"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+      <button class="btn-primary" type="button" id="adminApproveDisabled" data-i18n="adminApprove">موافقة</button>
+      <button class="btn-secondary" type="button" id="adminRejectDisabled" data-i18n="adminReject">رفض</button>
+      <button class="btn-secondary" type="button" id="adminDetailsCloseBtn" data-i18n="close">إغلاق</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="refundModal">
+  <div class="refund-modal-card">
+    <button class="modal-close" id="closeRefund">×</button>
+    <h3 style="color:var(--gold-light);margin-bottom:12px" data-i18n="refundTitle">طلب استرداد إيداع العضوية</h3>
+    <p style="color:var(--muted);font-size:14px;line-height:1.9" data-i18n="refundDesc">لطلب الاسترداد، تواصل مع الإدارة واذكر رقم الطلب.</p>
+    <div class="refund-id" id="refundDepositId">-</div>
+    <p style="color:var(--muted);font-size:12px;line-height:1.8" data-i18n="refundNote">تتم مراجعة طلبات الاسترداد من الإدارة، وسيتم التواصل معك عبر بيانات الحساب المسجلة.</p>
+    <button class="btn-primary" id="refundOk" style="width:100%;padding:12px;margin-top:18px" data-i18n="okUnderstood">حسنًا، فهمت</button>
+  </div>
+</div>`;
+
 async function loadSharedModals() {
   const host = document.getElementById('shared-modals');
-  if (!host) return;
+  if (!host || host.querySelector('#settingsModal')) return;
+  let html = '';
   try {
-    const res = await fetch('assets/partials/modals.html');
-    if (res.ok) host.innerHTML = await res.text();
-  } catch (_) { /* offline file:// */ }
+    const url = new URL('assets/partials/modals.html', window.location.href);
+    const res = await fetch(url);
+    if (res.ok) html = await res.text();
+  } catch (_) { /* file:// or network */ }
+  host.innerHTML = (html && html.trim()) ? html : MODALS_FALLBACK_HTML;
 }
 
 async function initArbrApp() {
-  await loadSharedModals();
-  bindCommonChrome();
-  initPageBindings();
-  setLanguage(currentLang);
-  await refreshUserState();
-  if (supabaseClient) {
-    supabaseClient.auth.onAuthStateChange(() => setTimeout(() => refreshUserState(), 0));
+  try {
+    await loadSharedModals();
+    bindCommonChrome();
+    initPageBindings();
+    setLanguage(currentLang);
+    await refreshUserState();
+    if (supabaseClient) {
+      supabaseClient.auth.onAuthStateChange(() => setTimeout(() => refreshUserState(), 0));
+    }
+  } catch (err) {
+    console.error('ARBR init failed:', err);
+    showToast?.('تعذر تحميل المنصة. حدّث الصفحة.', 'error');
   }
 }
 
