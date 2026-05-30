@@ -36,6 +36,83 @@ create trigger profiles_protect_sensitive
 before update on public.profiles
 for each row execute function public.protect_profile_sensitive_columns();
 
+create or replace function public.admin_review_purchase_request(
+  p_request_id uuid,
+  p_status text,
+  p_admin_notes text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_updated integer;
+begin
+  if not public.is_admin() then
+    raise exception 'Admin role required' using errcode = '42501';
+  end if;
+
+  if p_status not in ('approved', 'rejected') then
+    raise exception 'Invalid purchase request status' using errcode = '22023';
+  end if;
+
+  update public.purchase_requests
+  set status = p_status,
+      admin_notes = coalesce(nullif(trim(p_admin_notes), ''), admin_notes),
+      reviewed_at = now(),
+      updated_at = now()
+  where id = p_request_id
+    and status in ('pending', 'reviewing')
+  returning 1 into v_updated;
+
+  if v_updated is null then
+    raise exception 'Purchase request is not pending or does not exist' using errcode = 'P0002';
+  end if;
+end;
+$$;
+
+create or replace function public.admin_review_pilot_deposit(
+  p_deposit_id uuid,
+  p_status text,
+  p_admin_notes text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_updated integer;
+begin
+  if not public.is_admin() then
+    raise exception 'Admin role required' using errcode = '42501';
+  end if;
+
+  if p_status not in ('approved', 'rejected') then
+    raise exception 'Invalid pilot deposit status' using errcode = '22023';
+  end if;
+
+  update public.pilot_deposits
+  set status = p_status,
+      admin_notes = coalesce(nullif(trim(p_admin_notes), ''), admin_notes),
+      reviewed_at = now(),
+      updated_at = now()
+  where id = p_deposit_id
+    and status in ('pending', 'reviewing')
+  returning 1 into v_updated;
+
+  if v_updated is null then
+    raise exception 'Pilot deposit is not pending or does not exist' using errcode = 'P0002';
+  end if;
+end;
+$$;
+
+revoke all on function public.admin_review_purchase_request(uuid, text, text) from public;
+revoke all on function public.admin_review_pilot_deposit(uuid, text, text) from public;
+grant execute on function public.admin_review_purchase_request(uuid, text, text) to authenticated;
+grant execute on function public.admin_review_pilot_deposit(uuid, text, text) to authenticated;
+
 -- Explicit deny: no anonymous reads on user tables (RLS already blocks; grants reinforce).
 drop policy if exists "Deny anon profiles" on public.profiles;
 create policy "Deny anon profiles"
@@ -85,6 +162,20 @@ create policy "Admins can read all redeem requests"
 on public.redeem_requests for select
 to authenticated
 using (public.is_admin());
+
+drop policy if exists "Admins can update purchase request review status" on public.purchase_requests;
+create policy "Admins can update purchase request review status"
+on public.purchase_requests for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "Admins can update pilot deposit review status" on public.pilot_deposits;
+create policy "Admins can update pilot deposit review status"
+on public.pilot_deposits for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
 
 -- Audit: RLS must stay enabled.
 alter table public.profiles force row level security;

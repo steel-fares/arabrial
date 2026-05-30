@@ -34,6 +34,7 @@ The latest `supabase/schema.sql` adds:
 - verified-only policies for membership deposits and redeem requests
 - large purchase request verification checks (≥ 5000 OMR)
 - admin-only status/balance changes through RLS and column grants
+- admin approval/rejection RPC functions: `admin_review_purchase_request()` and `admin_review_pilot_deposit()`
 - `transaction_ledger` records for approved balance changes
 
 Use only the public `anon` or `publishable` key in `assets/js/config.public.js`. Never put the `service_role` key in the website. Copy `assets/js/config.example.js` to `config.js` for local overrides (gitignored).
@@ -60,6 +61,7 @@ Re-run `supabase/schema.sql` if the `role` column or admin policies are missing.
 6. Set `profiles.verification_status = verified` for the test user from Supabase Dashboard.
 7. Test membership deposit and sell/redeem requests.
 8. As admin, open the admin dashboard section and confirm pending rows load.
+9. Click approve/reject on a pending request and confirm the status updates. Purchase approvals should also update the user's wallet balance through the trigger.
 
 Purchase requests use:
 

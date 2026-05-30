@@ -233,7 +233,7 @@ const I18N = {
     reviewedDate: 'تاريخ المراجعة',
     adminNote: 'ملاحظة الإدارة',
     adminDashboardTitle: 'لوحة تحكم <span>الإدارة</span>',
-    adminDashboardDesc: 'عرض ومراجعة الطلبات المعلقة داخل Arab Rial. إجراءات الموافقة والرفض غير مفعلة في هذه المرحلة.',
+    adminDashboardDesc: 'عرض ومراجعة الطلبات المعلقة داخل Arab Rial مع إجراءات موافقة ورفض آمنة عبر Supabase.',
     adminPendingPurchases: 'طلبات الشراء المعلقة',
     adminPendingDeposits: 'طلبات الإيداع المعلقة',
     adminTotalPending: 'إجمالي الطلبات المعلقة',
@@ -264,6 +264,8 @@ const I18N = {
     adminCreatedAt: 'تاريخ الإنشاء',
     adminNotAvailable: 'غير متوفر',
     adminApprovalSetupRequired: 'الموافقة تحتاج إعداد دوال آمنة في Supabase',
+    adminActionSuccess: 'تم تحديث الطلب بنجاح',
+    adminActionFailed: 'تعذر تحديث الطلب. تأكد من تطبيق دوال Supabase الآمنة.',
     adminNewRequestReceived: 'وصل طلب جديد',
     adminRefundable: 'قابل للاسترداد',
     adminNotes: 'الملاحظات',
@@ -492,7 +494,7 @@ const I18N = {
     reviewedDate: 'Reviewed date',
     adminNote: 'Admin note',
     adminDashboardTitle: 'Admin <span>Dashboard</span>',
-    adminDashboardDesc: 'Display and review pending requests inside Arab Rial. Approve and reject actions are not active in this phase.',
+    adminDashboardDesc: 'Display and review pending requests inside Arab Rial with secure Supabase approve and reject actions.',
     adminPendingPurchases: 'Pending Purchase Requests',
     adminPendingDeposits: 'Pending Pilot Deposits',
     adminTotalPending: 'Total Pending Requests',
@@ -523,6 +525,8 @@ const I18N = {
     adminCreatedAt: 'Created At',
     adminNotAvailable: 'Not available',
     adminApprovalSetupRequired: 'Approval requires secure Supabase functions setup',
+    adminActionSuccess: 'Request updated successfully',
+    adminActionFailed: 'Could not update the request. Confirm the secure Supabase functions are installed.',
     adminNewRequestReceived: 'New request received',
     adminRefundable: 'Refundable',
     adminNotes: 'Notes',
@@ -1159,8 +1163,8 @@ function adminActionButtons(type, id) {
   return `
     <div class="admin-actions">
       <button class="admin-action-btn view" type="button" data-admin-view="${type}" data-admin-id="${id}">${t('adminViewDetails')}</button>
-      <button class="admin-action-btn disabled" type="button" data-admin-disabled>${t('adminApprove')}</button>
-      <button class="admin-action-btn disabled" type="button" data-admin-disabled>${t('adminReject')}</button>
+      <button class="admin-action-btn approve" type="button" data-admin-action="approve" data-admin-type="${type}" data-admin-id="${id}">${t('adminApprove')}</button>
+      <button class="admin-action-btn reject" type="button" data-admin-action="reject" data-admin-type="${type}" data-admin-id="${id}">${t('adminReject')}</button>
     </div>
   `;
 }
@@ -1178,6 +1182,20 @@ function bindAdminActionButtons(scope = document) {
   });
   scope.querySelectorAll('[data-admin-disabled]').forEach(btn => {
     btn.addEventListener('click', showAdminActionDisabledToast);
+  });
+  scope.querySelectorAll('[data-admin-action]').forEach(btn => {
+    btn.addEventListener('click', () => handleAdminReviewAction(btn));
+  });
+}
+
+function setAdminModalAction(type, item) {
+  const approveBtn = document.getElementById('adminApproveAction');
+  const rejectBtn = document.getElementById('adminRejectAction');
+  [approveBtn, rejectBtn].forEach(btn => {
+    if (!btn) return;
+    btn.dataset.adminType = type;
+    btn.dataset.adminId = item.id;
+    btn.disabled = false;
   });
 }
 
@@ -1220,6 +1238,7 @@ function openAdminDetailsModal(type, item) {
       detailItem(t('adminNotes'), item.notes || '-', true)
     ].join('');
   }
+  setAdminModalAction(type, item);
   document.getElementById('adminDetailsModal').classList.add('open');
 }
 
@@ -1242,6 +1261,52 @@ function showAdminActionDisabledToast() {
   adminAuditLog('admin_action_blocked', 'approve/reject requires secure RPC');
   showToast(t('adminApprovalSetupRequired'), 'warning');
 }
+
+function adminReviewRpcName(type) {
+  return type === 'purchase' ? 'admin_review_purchase_request' : 'admin_review_pilot_deposit';
+}
+
+function adminReviewParams(type, id, action) {
+  if (type === 'purchase') {
+    return {
+      p_request_id: id,
+      p_status: action === 'approve' ? 'approved' : 'rejected',
+      p_admin_notes: null
+    };
+  }
+  return {
+    p_deposit_id: id,
+    p_status: action === 'approve' ? 'approved' : 'rejected',
+    p_admin_notes: null
+  };
+}
+
+async function handleAdminReviewAction(btn) {
+  if (!btn || btn.disabled || !supabaseClient || !isAdminUser()) return;
+  const type = btn.dataset.adminType;
+  const id = btn.dataset.adminId;
+  const action = btn.dataset.adminAction;
+  if (!type || !id || !['approve', 'reject'].includes(action)) return;
+
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = currentLang === 'ar' ? 'جار التنفيذ...' : 'Working...';
+  try {
+    const { error } = await supabaseClient.rpc(adminReviewRpcName(type), adminReviewParams(type, id, action));
+    if (error) throw error;
+    adminAuditLog('admin_review_action', `${type}:${id}:${action}`);
+    showToast(t('adminActionSuccess'), 'success');
+    closeAdminDetailsModal();
+    await loadAdminDashboard(true);
+  } catch (error) {
+    adminAuditLog('admin_review_action_failed', error?.message || `${type}:${id}:${action}`);
+    showToast(t('adminActionFailed'), 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = label;
+  }
+}
+
 
 function setupAdminRealtime() {
   if (!supabaseClient) return;
@@ -2024,8 +2089,8 @@ function bindCommonChrome() {
   bindOn(document.getElementById('orderDetailsModal'), 'click', e => { if (e.target.id === 'orderDetailsModal') closeOrderDetailsModal(); });
   bindOn(document.getElementById('closeAdminDetails'), 'click', closeAdminDetailsModal);
   bindOn(document.getElementById('adminDetailsCloseBtn'), 'click', closeAdminDetailsModal);
-  bindOn(document.getElementById('adminApproveDisabled'), 'click', showAdminActionDisabledToast);
-  bindOn(document.getElementById('adminRejectDisabled'), 'click', showAdminActionDisabledToast);
+  bindOn(document.getElementById('adminApproveAction'), 'click', e => handleAdminReviewAction(e.currentTarget));
+  bindOn(document.getElementById('adminRejectAction'), 'click', e => handleAdminReviewAction(e.currentTarget));
   bindOn(document.getElementById('adminDetailsModal'), 'click', e => { if (e.target.id === 'adminDetailsModal') closeAdminDetailsModal(); });
   bindOn(document.getElementById('adminNotificationBadge'), 'click', () => { window.location.href = 'admin.html'; });
   bindOn(document.getElementById('closeRefund'), 'click', closeRefundInstructions);
@@ -2103,8 +2168,8 @@ const MODALS_FALLBACK_HTML = `<!-- ══════════ SETTINGS MODAL
     <h3 style="color:var(--gold-light);margin-bottom:16px" data-i18n="adminDetailsTitle">تفاصيل طلب الإدارة</h3>
     <div class="details-grid" id="adminDetailsContent"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
-      <button class="btn-primary" type="button" id="adminApproveDisabled" data-i18n="adminApprove">موافقة</button>
-      <button class="btn-secondary" type="button" id="adminRejectDisabled" data-i18n="adminReject">رفض</button>
+      <button class="btn-primary" type="button" id="adminApproveAction" data-admin-action="approve" data-i18n="adminApprove">موافقة</button>
+      <button class="btn-secondary" type="button" id="adminRejectAction" data-admin-action="reject" data-i18n="adminReject">رفض</button>
       <button class="btn-secondary" type="button" id="adminDetailsCloseBtn" data-i18n="close">إغلاق</button>
     </div>
   </div>

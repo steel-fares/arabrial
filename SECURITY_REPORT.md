@@ -17,7 +17,7 @@ Production hardening adds defense-in-depth on the client, HTTP security headers 
 | Duplicate form submits | Double orders / deposits | `guardDuplicateSubmit` on login, signup, buy, pilot, redeem | `security.js`, `arbr.js` |
 | User text not sanitized before DB | XSS / HTML injection in stored fields | `sanitizeInput` + `escapeHtml` hardening | `arbr.js`, `security.js` |
 | Anon could theoretically access user tables if grants misconfigured | Data leak | `security-hardening.sql`: revoke anon, explicit deny policies, profile column protection trigger | `supabase/security-hardening.sql` |
-| Admin approve/reject from browser | Privilege abuse | Still disabled in UI; audit log in `sessionStorage`; server approval via Dashboard/RPC only | `arbr.js` |
+| Admin approve/reject from browser | Privilege abuse | Enabled through admin-only Supabase RPC functions; direct table updates remain blocked for clients | `arbr.js`, `supabase/schema.sql`, `supabase/security-hardening.sql` |
 
 ## RLS Audit (tables)
 
@@ -50,4 +50,4 @@ GitHub Pages does **not** serve custom `_headers`. Use Cloudflare in front of th
 
 - Anon key remains public (required for static Supabase client).
 - Client rate limits can be bypassed; enforce Auth rate limits in Supabase Dashboard.
-- Admin approvals must use service role / Dashboard until secure RPC is deployed.
+- Admin approvals require running the latest `supabase/security-hardening.sql` so the secure RPC functions and grants exist in Supabase.
