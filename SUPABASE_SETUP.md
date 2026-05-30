@@ -6,7 +6,8 @@
 2. Create a new project.
 3. Go to **SQL Editor**.
 4. Paste and run `supabase/schema.sql`.
-5. Re-run the same file after future schema changes. It is written to be safe for existing tables.
+5. Paste and run `supabase/security-hardening.sql` (anon lockdown + profile protection).
+6. Re-run the same files after future schema changes. They are written to be safe for existing tables.
 
 ## 2. Configure Auth
 
@@ -35,7 +36,7 @@ The latest `supabase/schema.sql` adds:
 - admin-only status/balance changes through RLS and column grants
 - `transaction_ledger` records for approved balance changes
 
-Use only the public `anon` or `publishable` key in GitHub Pages. Never put the `service_role` key in the website.
+Use only the public `anon` or `publishable` key in `assets/js/config.public.js`. Never put the `service_role` key in the website. Copy `assets/js/config.example.js` to `config.js` for local overrides (gitignored).
 
 ### Promote an admin user
 
