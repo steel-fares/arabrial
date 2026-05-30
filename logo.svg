@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="ARBR">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD986"/>
+      <stop offset="100%" stop-color="#C8952A"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="#0a0e18" stroke="url(#g)" stroke-width="4"/>
+  <circle cx="60" cy="60" r="44" fill="none" stroke="url(#g)" stroke-width="2" opacity=".45"/>
+  <text x="60" y="68" text-anchor="middle" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="url(#g)">ARBR</text>
+</svg>
