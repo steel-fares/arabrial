@@ -3,7 +3,7 @@
   <div class="modal-card">
     <button class="modal-close" id="closeSettings">×</button>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.svg" alt="Arab Rial ARBR logo" /></div>
+      <div class="logo-mark" style="width:40px;height:40px"><img src="logo-aa.png" alt="Arab Rial ARBR logo" /></div>
       <div class="logo-text"><b data-i18n="settings">الإعدادات</b><small data-i18n="investorProfile">Account Profile</small></div>
     </div>
     <div class="fgroup"><label data-i18n="fullName">الاسم الكامل</label><input id="settingsFullName" placeholder="اكتب اسمك الكامل" data-i18n-placeholder="fullNamePlaceholder" /></div>
@@ -25,7 +25,7 @@
   <div class="modal-card">
     <button class="modal-close" id="closeSuccessModal">×</button>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
-      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.svg" alt="Arab Rial ARBR logo" /></div>
+      <div class="logo-mark" style="width:40px;height:40px"><img src="logo-aa.png" alt="Arab Rial ARBR logo" /></div>
       <div class="logo-text"><b data-i18n="requestConfirmed">تم تأكيد الطلب</b><small>ARBR</small></div>
     </div>
     <div class="success-box">
@@ -57,8 +57,8 @@
     <h3 style="color:var(--gold-light);margin-bottom:16px" data-i18n="adminDetailsTitle">تفاصيل طلب الإدارة</h3>
     <div class="details-grid" id="adminDetailsContent"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
-      <button class="btn-primary" type="button" id="adminApproveDisabled" data-i18n="adminApprove">موافقة</button>
-      <button class="btn-secondary" type="button" id="adminRejectDisabled" data-i18n="adminReject">رفض</button>
+      <button class="btn-primary" type="button" id="adminApproveAction" data-admin-action="approve" data-i18n="adminApprove">موافقة</button>
+      <button class="btn-secondary" type="button" id="adminRejectAction" data-admin-action="reject" data-i18n="adminReject">رفض</button>
       <button class="btn-secondary" type="button" id="adminDetailsCloseBtn" data-i18n="close">إغلاق</button>
     </div>
   </div>
@@ -75,3 +75,5 @@
     <button class="btn-primary" id="refundOk" style="width:100%;padding:12px;margin-top:18px" data-i18n="okUnderstood">حسنًا، فهمت</button>
   </div>
 </div>
+
+

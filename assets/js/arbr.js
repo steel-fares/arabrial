@@ -10,9 +10,11 @@ const isSupabaseConfigured =
 const supabaseClient = isSupabaseConfigured
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
+window.ARBR_SUPABASE_CLIENT = supabaseClient;
+window.ARBR_PUBLIC_CONFIG = { supabaseUrl: SUPABASE_URL, supabaseAnonKey: SUPABASE_ANON_KEY };
 
 const ARBR_PAGE = document.body.dataset.page || 'home';
-const AUTH_REQUIRED_PAGES = new Set(['buy', 'deposit', 'sell', 'dashboard', 'orders', 'admin']);
+const AUTH_REQUIRED_PAGES = new Set(['buy', 'deposit', 'sell', 'dashboard', 'orders', 'wallet', 'admin']);
 
 function loginUrl(nextPage) {
   const next = nextPage || (location.pathname.split('/').pop() || 'dashboard.html');
@@ -64,10 +66,12 @@ const I18N = {
     navAbout: 'عن ARBR',
     navFeatures: 'المزايا',
     navHow: 'كيف تبدأ',
+    navHowItWorks: 'كيف يعمل؟',
     navPolicy: 'سياسة المنصة',
     navBuy: 'اشترِ',
     navDeposit: 'إيداع / تحويل',
     navSell: 'بيع / استرداد',
+    navWallet: 'المحفظة',
     navAdmin: 'الإدارة',
     login: 'تسجيل الدخول',
     signup: 'إنشاء حساب',
@@ -76,10 +80,16 @@ const I18N = {
     balanceLabel: 'الرصيد: {amount}',
     dashboardMenu: 'لوحة التحكم',
     myOrdersMenu: 'طلباتي',
+    footerHowItWorks: 'كيف يعمل ريال عربي؟',
+    footerTerms: 'الشروط والأحكام',
+    footerPrivacy: 'سياسة الخصوصية',
+    footerRefund: 'سياسة الاسترداد',
+    footerKyc: 'سياسة التحقق KYC',
+    footerSupport: 'الدعم والتواصل',
     settings: 'الإعدادات',
     logout: 'تسجيل الخروج',
     heroKicker: '<span class="ltr-token">ARBR</span> للاستخدام اليومي والتجاري',
-    heroSub: 'عملة رقمية عربية <span>موثوقة</span>',
+    heroSub: 'رصيد رقمي عربي <span>متكامل</span>',
     heroLead: 'لاستخدام الأشخاص والتجار في مدفوعات رقمية واضحة وسهلة داخل شبكة <span class="ltr-token">ARBR</span>.',
     visaPay: 'دفع بالبطاقة',
     digitalTransfer: 'تحويل رقمي',
@@ -97,7 +107,7 @@ const I18N = {
     totalTransfers: 'إجمالي التحويلات',
     totalInvestments: 'إجمالي الطلبات',
     aboutTitle: 'عن <span>ARBR</span>',
-    aboutDesc: 'Arab Rial منصة أصول رقمية رسمية لإدارة رصيد ARBR داخل النظام، وتوفير تجربة منظمة للأشخاص والتجار لمتابعة الطلبات والأرصدة والمدفوعات.',
+    aboutDesc: 'Arab Rial منصة رقمية لإدارة رصيد ARBR داخل النظام، وتوفير تجربة منظمة للأشخاص والتجار لمتابعة الطلبات والأرصدة والمدفوعات.',
     realToken: 'رصيد رقمي داخل المنصة',
     realTokenDesc: 'يظهر رصيد ARBR داخل لوحة المستخدم ويتم تحديثه من خلال عمليات معتمدة ومسجلة داخل النظام.',
     complianceSecurity: 'توثيق وحماية الحساب',
@@ -125,7 +135,7 @@ const I18N = {
     stepVerify: 'تحقق بسيط',
     stepVerifyDesc: 'أدخل الاسم والهاتف والبريد ومحفظة الاستلام بطريقة آمنة وسريعة.',
     stepPay: 'اختر الدفع',
-    stepPayDesc: 'ادفع عبر USDT أو Visa/Mastercard بطريقة مشفرة وموثوقة.',
+    stepPayDesc: 'تُستخدم طرق الدفع عند تفعيلها، ويخضع كل طلب لتأكيد الدفع والمراجعة الداخلية.',
     stepReceive: 'استلم ARBR',
     stepReceiveDesc: 'بعد مراجعة الدفع يُصدر ARBR فورًا إلى محفظتك أو حسابك داخل المنصة.',
     dashboardTitle: 'لوحة <span>المستثمر</span>',
@@ -169,7 +179,7 @@ const I18N = {
     sellDesc: 'معاينة تقديرية وفق نموذج البيع العكسي ورسوم المنصة، ويتم اعتماد الطلب بعد مراجعة الإدارة وتأكيد بيانات العملية.',
     loadingSell: 'جار تحميل معاينة البيع...',
     buyTitle: 'اشترِ <span>ARBR</span>',
-    buyDesc: 'سعر الدخول المبكر: <span class="ltr-token">1 OMR = 1,000 ARBR</span>. اختر المبلغ وطريقة الدفع وأرسل طلبك.',
+    buyDesc: 'سعر الدخول المبكر التقديري: <span class="ltr-token">1 OMR = 1,000 ARBR</span>. بوابات الدفع غير مفعلة حاليًا، وتخضع الطلبات للمراجعة الداخلية.',
     buyFormTitle: 'طلب شراء ARBR',
     earlyPriceLabel: 'سعر الدخول المبكر',
     currentStage: 'المرحلة الحالية',
@@ -178,12 +188,12 @@ const I18N = {
     estimatedAmount: 'الكمية المتوقعة',
     estimatedNote: 'الكمية تقديرية ويتم اعتماد الطلب بعد تأكيد بيانات العملية.',
     submitBuy: '🪙 إرسال طلب الشراء',
-    paymentMethods: 'طرق الدفع المتاحة',
+    paymentMethods: 'طرق الدفع عند التفعيل',
     usdtNetwork: 'TRC20 / Polygon / حسب الشبكة المعتمدة',
-    manualNow: 'متاح الآن',
-    securePaymentLink: 'عبر رابط دفع آمن ومشفر',
-    readyToConnect: 'جاهز للربط',
-    buyProcessText: 'بعد إرسال الطلب تتم مراجعة بيانات الدفع يدويًا من الإدارة. عند الموافقة يُحدَّث الطلب ويُضاف الرصيد المعتمد إلى محفظتك. قد تُحال بعض الطلبات إلى مراجعة إضافية لأسباب أمنية أو تنظيمية.',
+    manualNow: 'غير مفعل حاليًا',
+    securePaymentLink: 'سيتم الإعلان عن روابط الدفع عند تفعيلها',
+    readyToConnect: 'غير مفعل حاليًا',
+    buyProcessText: 'بعد إرسال الطلب تتم مراجعة بيانات الدفع يدويًا من الإدارة. عند الموافقة يُحدَّث الطلب ويُضاف الرصيد المعتمد إلى محفظتك. قد تُحال بعض الطلبات إلى مراجعة إضافية لأسباب أمنية أو تشغيلية.',
     buyLimitText: 'الحد الأدنى للطلب <strong style="color:var(--gold-light)">10 OMR</strong>، ولا يوجد حد أقصى ثابت للطلبات.',
     ctaTitle: 'ابدأ رحلتك مع ARBR الآن 🚀',
     ctaDesc: 'انضم إلى مستخدمي المنصة واستفد من أسعار الدخول المبكر الحصرية.',
@@ -209,8 +219,8 @@ const I18N = {
     viewMyOrders: 'عرض طلباتي',
     orderDetails: 'تفاصيل الطلب',
     policyTitle: 'سياسة المنصة <span>والشفافية</span>',
-    policyDesc: 'Arab Rial منصة أصول رقمية رسمية لإدارة رصيد ARBR داخل النظام، مع لوحة متابعة واضحة لكل مستخدم.',
-    policyPoint1: 'Arab Rial منصة أصول رقمية رسمية لإدارة رصيد ARBR داخل النظام.',
+    policyDesc: 'Arab Rial منصة رقمية لإدارة رصيد ARBR داخل النظام، مع لوحة متابعة واضحة لكل مستخدم.',
+    policyPoint1: 'Arab Rial منصة رقمية لإدارة رصيد ARBR داخل النظام.',
     policyPoint2: 'تتم مراجعة جميع طلبات الشراء والبيع والاسترداد من إدارة المنصة.',
     policyPoint3: 'يتم تحديث أرصدة المستخدمين فقط من خلال عمليات معتمدة ومسجلة.',
     policyPoint4: 'كل طلب يمتلك رقمًا مرجعيًا وحالة واضحة يمكن متابعتها.',
@@ -233,7 +243,7 @@ const I18N = {
     reviewedDate: 'تاريخ المراجعة',
     adminNote: 'ملاحظة الإدارة',
     adminDashboardTitle: 'لوحة تحكم <span>الإدارة</span>',
-    adminDashboardDesc: 'عرض ومراجعة الطلبات المعلقة داخل Arab Rial. إجراءات الموافقة والرفض غير مفعلة في هذه المرحلة.',
+    adminDashboardDesc: 'عرض ومراجعة الطلبات المعلقة داخل Arab Rial مع إجراءات موافقة ورفض آمنة عبر Supabase.',
     adminPendingPurchases: 'طلبات الشراء المعلقة',
     adminPendingDeposits: 'طلبات الإيداع المعلقة',
     adminTotalPending: 'إجمالي الطلبات المعلقة',
@@ -264,6 +274,8 @@ const I18N = {
     adminCreatedAt: 'تاريخ الإنشاء',
     adminNotAvailable: 'غير متوفر',
     adminApprovalSetupRequired: 'الموافقة تحتاج إعداد دوال آمنة في Supabase',
+    adminActionSuccess: 'تم تحديث الطلب بنجاح',
+    adminActionFailed: 'تعذر تحديث الطلب. تأكد من تطبيق دوال Supabase الآمنة.',
     adminNewRequestReceived: 'وصل طلب جديد',
     adminRefundable: 'قابل للاسترداد',
     adminNotes: 'الملاحظات',
@@ -284,11 +296,17 @@ const I18N = {
     logoutSuccess: 'تم تسجيل الخروج',
     loginSuccess: '✓ تم تسجيل الدخول بنجاح',
     accountCreated: 'تم إنشاء الحساب. يرجى فتح بريدك الإلكتروني لتأكيد الحساب.',
+    emailNotConfirmed: 'يرجى فتح بريدك الإلكتروني وتأكيد الحساب قبل تسجيل الدخول.',
+    resendConfirmation: 'إعادة إرسال رابط التأكيد',
+    confirmationSent: 'تم إرسال رابط التأكيد مرة أخرى. افحص بريدك الإلكتروني.',
+    passwordResetSent: 'تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.',
+    weakPassword: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل وتحتوي على حرف كبير وحرف صغير ورقم ورمز.',
+    invalidPhone: 'أدخل رقم هاتف صحيح يبدأ بـ + ويتكون من 8 إلى 15 رقمًا.',
     enterEmail: '⚠️ أدخل البريد الإلكتروني',
     enterPassword: '⚠️ أدخل كلمة المرور',
     enterFullName: '⚠️ أدخل الاسم الكامل',
     enterPhone: '⚠️ أدخل رقم الهاتف',
-    shortPassword: '⚠️ كلمة المرور يجب ألا تقل عن 6 أحرف',
+    shortPassword: '⚠️ كلمة المرور يجب ألا تقل عن 8 أحرف',
     enterWallet: '⚠️ أدخل محفظة الاستلام أو ملاحظة الطلب',
     minPurchase: '⚠️ الحد الأدنى للشراء 10 OMR',
     invalidAmount: 'يرجى إدخال مبلغ صحيح',
@@ -323,10 +341,12 @@ const I18N = {
     navAbout: 'About ARBR',
     navFeatures: 'Features',
     navHow: 'How to Start',
+    navHowItWorks: 'How It Works',
     navPolicy: 'Platform Policy',
     navBuy: 'Buy',
     navDeposit: 'Deposit / Transfer',
     navSell: 'Sell / Redeem',
+    navWallet: 'Wallet',
     navAdmin: 'Admin',
     login: 'Login',
     signup: 'Create Account',
@@ -335,10 +355,16 @@ const I18N = {
     balanceLabel: 'Balance: {amount}',
     dashboardMenu: 'Dashboard',
     myOrdersMenu: 'My Orders',
+    footerHowItWorks: 'How It Works',
+    footerTerms: 'Terms',
+    footerPrivacy: 'Privacy Policy',
+    footerRefund: 'Refund Policy',
+    footerKyc: 'KYC Policy',
+    footerSupport: 'Support',
     settings: 'Settings',
     logout: 'Logout',
     heroKicker: '<span class="ltr-token">ARBR</span> for everyday and merchant use',
-    heroSub: 'A trusted <span>Arabic digital currency</span>',
+    heroSub: 'An integrated Arabic <span>digital balance platform</span>',
     heroLead: 'For people and merchants who need clear, simple digital payments inside the <span class="ltr-token">ARBR</span> network.',
     visaPay: 'Card payment',
     digitalTransfer: 'Digital transfer',
@@ -356,7 +382,7 @@ const I18N = {
     totalTransfers: 'Total transfers',
     totalInvestments: 'Total requests',
     aboutTitle: 'About <span>ARBR</span>',
-    aboutDesc: 'Arab Rial is an official digital asset platform for managing ARBR balance inside the system, with an organized experience for users and merchants to track requests, balances, and payments.',
+    aboutDesc: 'Arab Rial is a digital platform for managing ARBR balance inside the system, with an organized experience for users and merchants to track requests, balances, and payments.',
     realToken: 'Digital balance inside the platform',
     realTokenDesc: 'ARBR balance appears inside the user dashboard and is updated through approved and recorded transactions.',
     complianceSecurity: 'Account verification and protection',
@@ -384,7 +410,7 @@ const I18N = {
     stepVerify: 'Simple verification',
     stepVerifyDesc: 'Enter your name, phone, email, and receiving wallet securely and quickly.',
     stepPay: 'Choose payment',
-    stepPayDesc: 'Pay through USDT or Visa/Mastercard in a secure and reliable way.',
+    stepPayDesc: 'Payment methods are used once activated, and every request is subject to payment confirmation and internal review.',
     stepReceive: 'Receive ARBR',
     stepReceiveDesc: 'After payment review, ARBR is issued to your wallet or account inside the platform.',
     dashboardTitle: '<span>Investor</span> Dashboard',
@@ -428,7 +454,7 @@ const I18N = {
     sellDesc: 'Estimated preview based on the reverse sale model and platform fees. Requests are approved after admin review and transaction verification.',
     loadingSell: 'Loading sell preview...',
     buyTitle: 'Buy <span>ARBR</span>',
-    buyDesc: 'Early access price: <span class="ltr-token">1 OMR = 1,000 ARBR</span>. Choose the amount, payment method, and submit your request.',
+    buyDesc: 'Indicative early access price: <span class="ltr-token">1 OMR = 1,000 ARBR</span>. Payment gateways are not active yet, and requests are subject to internal review.',
     buyFormTitle: 'ARBR purchase request',
     earlyPriceLabel: 'Early access price',
     currentStage: 'Current stage',
@@ -437,11 +463,11 @@ const I18N = {
     estimatedAmount: 'Estimated amount',
     estimatedNote: 'The amount is estimated and the request is approved after transaction verification.',
     submitBuy: '🪙 Submit purchase request',
-    paymentMethods: 'Available payment methods',
+    paymentMethods: 'Payment methods when activated',
     usdtNetwork: 'TRC20 / Polygon / according to the approved network',
-    manualNow: 'Available now',
-    securePaymentLink: 'Through a secure encrypted payment link',
-    readyToConnect: 'Ready to connect',
+    manualNow: 'Not active yet',
+    securePaymentLink: 'Payment links will be announced once activated',
+    readyToConnect: 'Not active yet',
     buyProcessText: 'After you submit, payment details are reviewed manually by administration. When approved, the request status is updated and credited ARBR is added to your wallet. Some requests may require additional compliance review.',
     buyLimitText: 'Minimum request amount is <strong style="color:var(--gold-light)">10 OMR</strong>, with no fixed maximum request limit.',
     ctaTitle: 'Start your ARBR journey now 🚀',
@@ -468,8 +494,8 @@ const I18N = {
     viewMyOrders: 'View my orders',
     orderDetails: 'Order details',
     policyTitle: 'Platform Policy <span>& Transparency</span>',
-    policyDesc: 'Arab Rial is an official digital asset platform for managing ARBR balance inside the system, with a clear dashboard for every user.',
-    policyPoint1: 'Arab Rial is an official digital asset platform for managing ARBR balance inside the system.',
+    policyDesc: 'Arab Rial is a digital platform for managing ARBR balance inside the system, with a clear dashboard for every user.',
+    policyPoint1: 'Arab Rial is a digital platform for managing ARBR balance inside the system.',
     policyPoint2: 'All buy, sell, and redeem requests are reviewed by platform administration.',
     policyPoint3: 'User balances are updated only through approved and recorded transactions.',
     policyPoint4: 'Every request has a reference number and clear status for tracking.',
@@ -492,7 +518,7 @@ const I18N = {
     reviewedDate: 'Reviewed date',
     adminNote: 'Admin note',
     adminDashboardTitle: 'Admin <span>Dashboard</span>',
-    adminDashboardDesc: 'Display and review pending requests inside Arab Rial. Approve and reject actions are not active in this phase.',
+    adminDashboardDesc: 'Display and review pending requests inside Arab Rial with secure Supabase approve and reject actions.',
     adminPendingPurchases: 'Pending Purchase Requests',
     adminPendingDeposits: 'Pending Pilot Deposits',
     adminTotalPending: 'Total Pending Requests',
@@ -523,6 +549,8 @@ const I18N = {
     adminCreatedAt: 'Created At',
     adminNotAvailable: 'Not available',
     adminApprovalSetupRequired: 'Approval requires secure Supabase functions setup',
+    adminActionSuccess: 'Request updated successfully',
+    adminActionFailed: 'Could not update the request. Confirm the secure Supabase functions are installed.',
     adminNewRequestReceived: 'New request received',
     adminRefundable: 'Refundable',
     adminNotes: 'Notes',
@@ -543,11 +571,17 @@ const I18N = {
     logoutSuccess: 'Logged out',
     loginSuccess: '✓ Logged in successfully',
     accountCreated: 'Account created. Please open your email to confirm the account.',
+    emailNotConfirmed: 'Please open your email and confirm the account before signing in.',
+    resendConfirmation: 'Resend confirmation link',
+    confirmationSent: 'Confirmation link sent again. Please check your email.',
+    passwordResetSent: 'Password reset link sent to your email.',
+    weakPassword: 'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol.',
+    invalidPhone: 'Enter a valid phone number starting with + and 8 to 15 digits.',
     enterEmail: '⚠️ Enter your email',
     enterPassword: '⚠️ Enter your password',
     enterFullName: '⚠️ Enter your full name',
     enterPhone: '⚠️ Enter your phone number',
-    shortPassword: '⚠️ Password must be at least 6 characters',
+    shortPassword: '⚠️ Password must be at least 8 characters',
     enterWallet: '⚠️ Enter the receiving wallet or request note',
     minPurchase: '⚠️ Minimum purchase is 10 OMR',
     invalidAmount: 'Please enter a valid amount',
@@ -642,11 +676,11 @@ function updateLocalizedUserText() {
 
 /* Toast */
 const toast = document.getElementById('toast');
-function showToast(msg, type = 'success') {
+function showToast(msg, type = 'success', duration = 3200) {
   toast.textContent = msg;
   toast.className = 'toast ' + type;
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3200);
+  setTimeout(() => toast.classList.remove('show'), duration);
 }
 
 function requireSupabase() {
@@ -758,6 +792,19 @@ function requireVerifiedService() {
   if (isVerified()) return true;
   showToast(t('verificationRequired'), 'warning');
   return false;
+}
+
+function isStrongPassword(password) {
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(password || '');
+}
+
+function isValidPhone(phone) {
+  return /^\+[1-9]\d{7,14}$/.test(String(phone || '').trim());
+}
+
+function isValidWalletOrNote(value) {
+  const text = String(value || '').trim();
+  return /^0x[a-fA-F0-9]{40}$/.test(text) || /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(text) || text.length >= 8;
 }
 
 function updateVerificationRestrictions() {
@@ -1146,8 +1193,8 @@ function adminActionButtons(type, id) {
   return `
     <div class="admin-actions">
       <button class="admin-action-btn view" type="button" data-admin-view="${type}" data-admin-id="${id}">${t('adminViewDetails')}</button>
-      <button class="admin-action-btn disabled" type="button" data-admin-disabled>${t('adminApprove')}</button>
-      <button class="admin-action-btn disabled" type="button" data-admin-disabled>${t('adminReject')}</button>
+      <button class="admin-action-btn approve" type="button" data-admin-action="approve" data-admin-type="${type}" data-admin-id="${id}">${t('adminApprove')}</button>
+      <button class="admin-action-btn reject" type="button" data-admin-action="reject" data-admin-type="${type}" data-admin-id="${id}">${t('adminReject')}</button>
     </div>
   `;
 }
@@ -1165,6 +1212,20 @@ function bindAdminActionButtons(scope = document) {
   });
   scope.querySelectorAll('[data-admin-disabled]').forEach(btn => {
     btn.addEventListener('click', showAdminActionDisabledToast);
+  });
+  scope.querySelectorAll('[data-admin-action]').forEach(btn => {
+    btn.addEventListener('click', () => handleAdminReviewAction(btn));
+  });
+}
+
+function setAdminModalAction(type, item) {
+  const approveBtn = document.getElementById('adminApproveAction');
+  const rejectBtn = document.getElementById('adminRejectAction');
+  [approveBtn, rejectBtn].forEach(btn => {
+    if (!btn) return;
+    btn.dataset.adminType = type;
+    btn.dataset.adminId = item.id;
+    btn.disabled = false;
   });
 }
 
@@ -1207,6 +1268,7 @@ function openAdminDetailsModal(type, item) {
       detailItem(t('adminNotes'), item.notes || '-', true)
     ].join('');
   }
+  setAdminModalAction(type, item);
   document.getElementById('adminDetailsModal').classList.add('open');
 }
 
@@ -1217,6 +1279,52 @@ function closeAdminDetailsModal() {
 function showAdminActionDisabledToast() {
   showToast(t('adminApprovalSetupRequired'), 'warning');
 }
+
+function adminReviewRpcName(type) {
+  return type === 'purchase' ? 'admin_review_purchase_request' : 'admin_review_pilot_deposit';
+}
+
+function adminReviewParams(type, id, action) {
+  if (type === 'purchase') {
+    return {
+      p_request_id: id,
+      p_status: action === 'approve' ? 'approved' : 'rejected',
+      p_admin_notes: null
+    };
+  }
+  return {
+    p_deposit_id: id,
+    p_status: action === 'approve' ? 'approved' : 'rejected',
+    p_admin_notes: null
+  };
+}
+
+async function handleAdminReviewAction(btn) {
+  if (!btn || btn.disabled || !supabaseClient || !isAdminUser()) return;
+  const type = btn.dataset.adminType;
+  const id = btn.dataset.adminId;
+  const action = btn.dataset.adminAction;
+  if (!type || !id || !['approve', 'reject'].includes(action)) return;
+
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = currentLang === 'ar' ? 'جار التنفيذ...' : 'Working...';
+  try {
+    const { error } = await supabaseClient.rpc(adminReviewRpcName(type), adminReviewParams(type, id, action));
+    if (error) throw error;
+    adminAuditLog('admin_review_action', `${type}:${id}:${action}`);
+    showToast(t('adminActionSuccess'), 'success');
+    closeAdminDetailsModal();
+    await loadAdminDashboard(true);
+  } catch (error) {
+    adminAuditLog('admin_review_action_failed', error?.message || `${type}:${id}:${action}`);
+    showToast(t('adminActionFailed'), 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = label;
+  }
+}
+
 
 function setupAdminRealtime() {
   if (!supabaseClient) return;
@@ -1717,7 +1825,7 @@ function openSettings() {
   }
   document.getElementById('settingsFullName').value = currentProfile?.full_name || '';
   document.getElementById('settingsPhone').value = currentProfile?.phone || '';
-  document.getElementById('settingsPhone').readOnly = true;
+  document.getElementById('settingsPhone').readOnly = false;
   const countrySupported = profileHasColumn('country');
   document.getElementById('settingsCountryGroup').classList.toggle('hidden', !countrySupported);
   document.getElementById('settingsCountry').value = countrySupported ? (currentProfile?.country || '') : '';
@@ -1734,8 +1842,14 @@ async function saveSettings() {
   const btn = document.getElementById('saveSettingsBtn');
   setBusy(btn, true, t('saving'));
   const updates = {
-    full_name: document.getElementById('settingsFullName').value.trim()
+    full_name: document.getElementById('settingsFullName').value.trim(),
+    phone: document.getElementById('settingsPhone').value.trim()
   };
+  if (!isValidPhone(updates.phone)) {
+    setBusy(btn, false);
+    showToast(t('invalidPhone'), 'warning');
+    return;
+  }
   if (profileHasColumn('country')) {
     updates.country = document.getElementById('settingsCountry').value.trim();
   }
@@ -1810,6 +1924,7 @@ function bindLoginPage() {
     signupTab.classList.add('active'); loginTab.classList.remove('active');
     signupForm.classList.remove('hidden'); loginForm.classList.add('hidden');
   };
+  if (new URLSearchParams(location.search).get('mode') === 'signup') signupTab.onclick();
   document.getElementById('doLogin').onclick = async () => {
     if (!requireSupabase()) return;
     const btn = document.getElementById('doLogin');
@@ -1824,7 +1939,11 @@ function bindLoginPage() {
         15000,
         t('loginTimeout')
       );
-      if (error) { showToast(t('loginFailed') + ': ' + error.message, 'error'); return; }
+      if (error) {
+        const isEmailUnconfirmed = error.code === 'email_not_confirmed' || /email.*confirm/i.test(error.message || '');
+        showToast(isEmailUnconfirmed ? t('emailNotConfirmed') : t('loginFailed') + ': ' + error.message, isEmailUnconfirmed ? 'warning' : 'error', 8000);
+        return;
+      }
       await refreshUserState();
       showToast(t('loginSuccess'));
       afterAuthSuccess();
@@ -1843,8 +1962,10 @@ function bindLoginPage() {
     const password = document.getElementById('sPass').value;
     if (!fullName) { showToast(t('enterFullName'), 'warning'); return; }
     if (!phone) { showToast(t('enterPhone'), 'warning'); return; }
+    if (!isValidPhone(phone)) { showToast(t('invalidPhone'), 'warning'); return; }
     if (!email) { showToast(t('enterEmail'), 'warning'); return; }
-    if (password.length < 6) { showToast(t('shortPassword'), 'warning'); return; }
+    if (password.length < 8) { showToast(t('shortPassword'), 'warning'); return; }
+    if (!isStrongPassword(password)) { showToast(t('weakPassword'), 'warning', 8000); return; }
     setBusy(btn, true, t('creatingAccount'));
     const { data, error } = await supabaseClient.auth.signUp({
       email,
@@ -1858,8 +1979,34 @@ function bindLoginPage() {
     if (error) { showToast(t('signupFailed') + ': ' + error.message, 'error'); return; }
     if (data?.session) await supabaseClient.auth.signOut();
     await refreshUserState();
-    showToast(t('accountCreated'));
+    showToast(t('accountCreated'), 'success', 8000);
   };
+  document.getElementById('resendConfirm')?.addEventListener('click', async () => {
+    if (!requireSupabase()) return;
+    const email = (document.getElementById('loginEmail').value || document.getElementById('sEmail').value || '').trim();
+    if (!email) { showToast(t('enterEmail'), 'warning'); return; }
+    const btn = document.getElementById('resendConfirm');
+    setBusy(btn, true, t('sending'));
+    const { error } = await supabaseClient.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: 'https://arab-rial.com/login.html' }
+    });
+    setBusy(btn, false);
+    showToast(error ? t('signupFailed') + ': ' + error.message : t('confirmationSent'), error ? 'error' : 'success', 8000);
+  });
+  document.getElementById('forgotPasswordBtn')?.addEventListener('click', async () => {
+    if (!requireSupabase()) return;
+    const email = document.getElementById('loginEmail').value.trim();
+    if (!email) { showToast(t('enterEmail'), 'warning'); return; }
+    const btn = document.getElementById('forgotPasswordBtn');
+    setBusy(btn, true, t('sending'));
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://arab-rial.com/login.html'
+    });
+    setBusy(btn, false);
+    showToast(error ? t('loginFailed') + ': ' + error.message : t('passwordResetSent'), error ? 'error' : 'success', 8000);
+  });
 }
 
 function bindBuyPage() {
@@ -1947,8 +2094,8 @@ function bindCommonChrome() {
   bindOn(document.getElementById('orderDetailsModal'), 'click', e => { if (e.target.id === 'orderDetailsModal') closeOrderDetailsModal(); });
   bindOn(document.getElementById('closeAdminDetails'), 'click', closeAdminDetailsModal);
   bindOn(document.getElementById('adminDetailsCloseBtn'), 'click', closeAdminDetailsModal);
-  bindOn(document.getElementById('adminApproveDisabled'), 'click', showAdminActionDisabledToast);
-  bindOn(document.getElementById('adminRejectDisabled'), 'click', showAdminActionDisabledToast);
+  bindOn(document.getElementById('adminApproveAction'), 'click', e => handleAdminReviewAction(e.currentTarget));
+  bindOn(document.getElementById('adminRejectAction'), 'click', e => handleAdminReviewAction(e.currentTarget));
   bindOn(document.getElementById('adminDetailsModal'), 'click', e => { if (e.target.id === 'adminDetailsModal') closeAdminDetailsModal(); });
   bindOn(document.getElementById('adminNotificationBadge'), 'click', () => { window.location.href = 'admin.html'; });
   bindOn(document.getElementById('closeRefund'), 'click', closeRefundInstructions);
@@ -1978,7 +2125,7 @@ const MODALS_FALLBACK_HTML = `<!-- ══════════ SETTINGS MODAL
   <div class="modal-card">
     <button class="modal-close" id="closeSettings">×</button>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.svg" alt="Arab Rial ARBR logo" /></div>
+      <div class="logo-mark" style="width:40px;height:40px"><img src="logo-aa.png" alt="Arab Rial ARBR logo" /></div>
       <div class="logo-text"><b data-i18n="settings">الإعدادات</b><small data-i18n="investorProfile">Account Profile</small></div>
     </div>
     <div class="fgroup"><label data-i18n="fullName">الاسم الكامل</label><input id="settingsFullName" placeholder="اكتب اسمك الكامل" data-i18n-placeholder="fullNamePlaceholder" /></div>
@@ -1998,7 +2145,7 @@ const MODALS_FALLBACK_HTML = `<!-- ══════════ SETTINGS MODAL
   <div class="modal-card">
     <button class="modal-close" id="closeSuccessModal">×</button>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
-      <div class="logo-mark" style="width:40px;height:40px"><img src="logo.svg" alt="Arab Rial ARBR logo" /></div>
+      <div class="logo-mark" style="width:40px;height:40px"><img src="logo-aa.png" alt="Arab Rial ARBR logo" /></div>
       <div class="logo-text"><b data-i18n="requestConfirmed">تم تأكيد الطلب</b><small>ARBR</small></div>
     </div>
     <div class="success-box">
@@ -2026,8 +2173,8 @@ const MODALS_FALLBACK_HTML = `<!-- ══════════ SETTINGS MODAL
     <h3 style="color:var(--gold-light);margin-bottom:16px" data-i18n="adminDetailsTitle">تفاصيل طلب الإدارة</h3>
     <div class="details-grid" id="adminDetailsContent"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
-      <button class="btn-primary" type="button" id="adminApproveDisabled" data-i18n="adminApprove">موافقة</button>
-      <button class="btn-secondary" type="button" id="adminRejectDisabled" data-i18n="adminReject">رفض</button>
+      <button class="btn-primary" type="button" id="adminApproveAction" data-admin-action="approve" data-i18n="adminApprove">موافقة</button>
+      <button class="btn-secondary" type="button" id="adminRejectAction" data-admin-action="reject" data-i18n="adminReject">رفض</button>
       <button class="btn-secondary" type="button" id="adminDetailsCloseBtn" data-i18n="close">إغلاق</button>
     </div>
   </div>
@@ -2072,3 +2219,5 @@ async function initArbrApp() {
 }
 
 initArbrApp();
+
+

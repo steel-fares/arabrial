@@ -143,6 +143,24 @@ create table if not exists public.platform_state (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.price_history (
+  id bigserial primary key,
+  recorded_at timestamptz not null default now(),
+  price_omr numeric(18, 9) not null check (price_omr > 0),
+  source text not null default 'admin',
+  note text
+);
+
+create table if not exists public.market_snapshots (
+  id uuid primary key default gen_random_uuid(),
+  current_price_omr numeric(18, 9) not null check (current_price_omr > 0),
+  price_change_percent numeric(9, 4) not null default 0,
+  notes text,
+  update_interval text not null default '60 دقيقة',
+  created_by uuid references auth.users(id),
+  created_at timestamptz not null default now()
+);
+
 insert into public.platform_state (id, sold_tokens)
 values (1, 0)
 on conflict (id) do nothing;
@@ -263,6 +281,118 @@ begin
 end;
 $$;
 
+create or replace function public.enforce_request_rate_limit()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  recent_count integer;
+  pending_count integer;
+begin
+  if auth.uid() is null or new.user_id <> auth.uid() then
+    raise exception 'Request user mismatch' using errcode = '42501';
+  end if;
+
+  execute format(
+    'select count(*) from public.%I where user_id = $1 and created_at > now() - interval ''1 hour''',
+    tg_table_name
+  )
+  into recent_count
+  using new.user_id;
+
+  execute format(
+    'select count(*) from public.%I where user_id = $1 and status in (''pending'', ''reviewing'')',
+    tg_table_name
+  )
+  into pending_count
+  using new.user_id;
+
+  if recent_count >= 5 then
+    raise exception 'Too many requests in one hour' using errcode = 'P0001';
+  end if;
+
+  if pending_count >= 5 then
+    raise exception 'Too many pending requests' using errcode = 'P0001';
+  end if;
+
+  return new;
+end;
+$$;
+
+create or replace function public.admin_review_purchase_request(
+  p_request_id uuid,
+  p_status text,
+  p_admin_notes text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_updated integer;
+begin
+  if not public.is_admin() then
+    raise exception 'Admin role required' using errcode = '42501';
+  end if;
+
+  if p_status not in ('approved', 'rejected') then
+    raise exception 'Invalid purchase request status' using errcode = '22023';
+  end if;
+
+  update public.purchase_requests
+  set status = p_status,
+      admin_notes = coalesce(nullif(trim(p_admin_notes), ''), admin_notes),
+      reviewed_at = now(),
+      updated_at = now()
+  where id = p_request_id
+    and status in ('pending', 'reviewing')
+  returning 1 into v_updated;
+
+  if v_updated is null then
+    raise exception 'Purchase request is not pending or does not exist' using errcode = 'P0002';
+  end if;
+end;
+$$;
+
+create or replace function public.admin_review_pilot_deposit(
+  p_deposit_id uuid,
+  p_status text,
+  p_admin_notes text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_updated integer;
+begin
+  if not public.is_admin() then
+    raise exception 'Admin role required' using errcode = '42501';
+  end if;
+
+  if p_status not in ('approved', 'rejected') then
+    raise exception 'Invalid pilot deposit status' using errcode = '22023';
+  end if;
+
+  update public.pilot_deposits
+  set status = p_status,
+      admin_notes = coalesce(nullif(trim(p_admin_notes), ''), admin_notes),
+      reviewed_at = now(),
+      updated_at = now()
+  where id = p_deposit_id
+    and status in ('pending', 'reviewing')
+  returning 1 into v_updated;
+
+  if v_updated is null then
+    raise exception 'Pilot deposit is not pending or does not exist' using errcode = 'P0002';
+  end if;
+end;
+$$;
+
 drop trigger if exists profiles_set_updated_at on public.profiles;
 create trigger profiles_set_updated_at
 before update on public.profiles
@@ -278,6 +408,11 @@ create trigger purchase_requests_apply_approval
 before update of status on public.purchase_requests
 for each row execute function public.apply_purchase_approval();
 
+drop trigger if exists purchase_requests_rate_limit on public.purchase_requests;
+create trigger purchase_requests_rate_limit
+before insert on public.purchase_requests
+for each row execute function public.enforce_request_rate_limit();
+
 drop trigger if exists wallets_set_updated_at on public.wallets;
 create trigger wallets_set_updated_at
 before update on public.wallets
@@ -288,6 +423,11 @@ create trigger pilot_deposits_set_updated_at
 before update on public.pilot_deposits
 for each row execute function public.set_updated_at();
 
+drop trigger if exists pilot_deposits_rate_limit on public.pilot_deposits;
+create trigger pilot_deposits_rate_limit
+before insert on public.pilot_deposits
+for each row execute function public.enforce_request_rate_limit();
+
 drop trigger if exists redeem_requests_set_updated_at on public.redeem_requests;
 create trigger redeem_requests_set_updated_at
 before update on public.redeem_requests
@@ -297,6 +437,11 @@ drop trigger if exists redeem_requests_apply_approval on public.redeem_requests;
 create trigger redeem_requests_apply_approval
 before update of status on public.redeem_requests
 for each row execute function public.apply_redeem_approval();
+
+drop trigger if exists redeem_requests_rate_limit on public.redeem_requests;
+create trigger redeem_requests_rate_limit
+before insert on public.redeem_requests
+for each row execute function public.enforce_request_rate_limit();
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
@@ -310,12 +455,64 @@ alter table public.pilot_deposits enable row level security;
 alter table public.redeem_requests enable row level security;
 alter table public.transaction_ledger enable row level security;
 alter table public.platform_state enable row level security;
+alter table public.price_history enable row level security;
+alter table public.market_snapshots enable row level security;
 
 drop policy if exists "Public can read platform state" on public.platform_state;
 create policy "Public can read platform state"
 on public.platform_state for select
 to anon, authenticated
 using (true);
+
+drop policy if exists "Public can read price history" on public.price_history;
+create policy "Public can read price history"
+on public.price_history for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "Public can read market snapshots" on public.market_snapshots;
+create policy "Public can read market snapshots"
+on public.market_snapshots for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "Admins can insert price history" on public.price_history;
+create policy "Admins can insert price history"
+on public.price_history for insert
+to authenticated
+with check (public.is_admin());
+
+drop policy if exists "Admins can update price history" on public.price_history;
+create policy "Admins can update price history"
+on public.price_history for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "Admins can delete price history" on public.price_history;
+create policy "Admins can delete price history"
+on public.price_history for delete
+to authenticated
+using (public.is_admin());
+
+drop policy if exists "Admins can insert market snapshots" on public.market_snapshots;
+create policy "Admins can insert market snapshots"
+on public.market_snapshots for insert
+to authenticated
+with check (public.is_admin());
+
+drop policy if exists "Admins can update market snapshots" on public.market_snapshots;
+create policy "Admins can update market snapshots"
+on public.market_snapshots for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "Admins can delete market snapshots" on public.market_snapshots;
+create policy "Admins can delete market snapshots"
+on public.market_snapshots for delete
+to authenticated
+using (public.is_admin());
 
 drop policy if exists "Users can read own profile" on public.profiles;
 create policy "Users can read own profile"
@@ -335,7 +532,13 @@ create policy "Users can update own editable profile fields"
 on public.profiles for update
 to authenticated
 using (auth.uid() = id)
-with check (auth.uid() = id);
+with check (
+  auth.uid() = id
+  and role = (select role from public.profiles where id = auth.uid())
+  and verification_status = (select verification_status from public.profiles where id = auth.uid())
+  and kyc_status = (select kyc_status from public.profiles where id = auth.uid())
+  and account_status = (select account_status from public.profiles where id = auth.uid())
+);
 
 drop policy if exists "Users can read own wallet" on public.wallets;
 create policy "Users can read own wallet"
@@ -355,6 +558,13 @@ on public.purchase_requests for select
 to authenticated
 using (public.is_admin());
 
+drop policy if exists "Admins can update purchase request review status" on public.purchase_requests;
+create policy "Admins can update purchase request review status"
+on public.purchase_requests for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
 drop policy if exists "Users can create own purchase requests" on public.purchase_requests;
 create policy "Users can create own purchase requests"
 on public.purchase_requests for insert
@@ -371,6 +581,12 @@ with check (
   )
 );
 
+drop policy if exists "Users can delete own pending purchase requests" on public.purchase_requests;
+create policy "Users can delete own pending purchase requests"
+on public.purchase_requests for delete
+to authenticated
+using (auth.uid() = user_id and status = 'pending');
+
 drop policy if exists "Users can read own pilot deposits" on public.pilot_deposits;
 create policy "Users can read own pilot deposits"
 on public.pilot_deposits for select
@@ -382,6 +598,13 @@ create policy "Admins can read all pilot deposits"
 on public.pilot_deposits for select
 to authenticated
 using (public.is_admin());
+
+drop policy if exists "Admins can update pilot deposit review status" on public.pilot_deposits;
+create policy "Admins can update pilot deposit review status"
+on public.pilot_deposits for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
 
 drop policy if exists "Verified users can create own pilot deposits" on public.pilot_deposits;
 create policy "Verified users can create own pilot deposits"
@@ -429,9 +652,11 @@ revoke insert, update, delete on public.purchase_requests from authenticated;
 revoke insert, update, delete on public.pilot_deposits from authenticated;
 revoke insert, update, delete on public.redeem_requests from authenticated;
 revoke insert, update, delete on public.transaction_ledger from authenticated;
+revoke insert, update, delete on public.price_history from anon;
+revoke insert, update, delete on public.market_snapshots from anon;
 
 grant select on public.profiles to authenticated;
-grant update (full_name, country) on public.profiles to authenticated;
+grant update (full_name, phone, country) on public.profiles to authenticated;
 grant select on public.wallets to authenticated;
 
 grant select on public.purchase_requests to authenticated;
@@ -439,6 +664,7 @@ grant insert (
   user_id, amount_omr, amount_usd, estimated_arbr, payment_method,
   payment_reference, note, wallet_address, status
 ) on public.purchase_requests to authenticated;
+grant delete on public.purchase_requests to authenticated;
 
 grant select on public.pilot_deposits to authenticated;
 grant insert (
@@ -454,7 +680,17 @@ grant insert (
 grant select on public.transaction_ledger to authenticated;
 
 grant select on public.platform_state to anon, authenticated;
+grant select on public.price_history to anon, authenticated;
+grant select on public.market_snapshots to anon, authenticated;
+grant insert, update, delete on public.price_history to authenticated;
+grant insert, update, delete on public.market_snapshots to authenticated;
+grant usage, select on sequence public.price_history_id_seq to authenticated;
 grant execute on function public.is_admin() to authenticated;
+grant execute on function public.enforce_request_rate_limit() to authenticated;
+revoke all on function public.admin_review_purchase_request(uuid, text, text) from public;
+revoke all on function public.admin_review_pilot_deposit(uuid, text, text) from public;
+grant execute on function public.admin_review_purchase_request(uuid, text, text) to authenticated;
+grant execute on function public.admin_review_pilot_deposit(uuid, text, text) to authenticated;
 
 -- Set admin role only in Supabase Dashboard (SQL), never from the website:
 -- update public.profiles set role = 'admin' where email = 'you@example.com';
