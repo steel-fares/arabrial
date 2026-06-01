@@ -95,7 +95,7 @@ alter table public.purchase_requests add constraint purchase_requests_estimated_
 
 update public.purchase_requests
 set amount_omr = coalesce(amount_omr, amount_usd),
-    estimated_arbr = coalesce(estimated_arbr, token_amount, amount_usd * 1000),
+    estimated_arbr = coalesce(estimated_arbr, token_amount, amount_usd * 100),
     input_currency = coalesce(input_currency, 'OMR'),
     input_amount = coalesce(input_amount, amount_omr, amount_usd),
     exchange_rate_to_omr = coalesce(exchange_rate_to_omr, 1),

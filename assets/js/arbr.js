@@ -41,7 +41,9 @@ let adminRealtimeChannel = null;
 const ARBR_CONFIG = {
   totalSupply: 100000000,
   entryCurrency: 'OMR',
-  entryTokenRate: 1000,
+  entryPriceUsd: 0.01,
+  entryPriceOmr: 0.00385,
+  entryTokenRate: 1 / 0.00385,
   spreadRate: 0.05,
   exitFeeRate: 0.10,
   lockDays: 30,
@@ -70,13 +72,13 @@ const ARBR_CONFIG = {
     { code: 'TRY', ar: 'الليرة التركية', en: 'Turkish Lira', omrPerCurrency: 0.008386 }
   ],
   stages: [
-    { name: 'Founders', from: 0, to: 5000000, price: 0.001 },
-    { name: 'Early VIP', from: 5000000, to: 15000000, price: 0.002 },
-    { name: 'Private', from: 15000000, to: 30000000, price: 0.005 },
-    { name: 'Pre Launch', from: 30000000, to: 50000000, price: 0.010 },
-    { name: 'Launch', from: 50000000, to: 70000000, price: 0.025 },
-    { name: 'Growth', from: 70000000, to: 90000000, price: 0.050 },
-    { name: 'Internal Cap', from: 90000000, to: 100000000, price: 0.100 }
+    { name: 'Founders', from: 0, to: 5000000, price: 0.00385 },
+    { name: 'Early VIP', from: 5000000, to: 15000000, price: 0.005 },
+    { name: 'Private', from: 15000000, to: 30000000, price: 0.010 },
+    { name: 'Pre Launch', from: 30000000, to: 50000000, price: 0.020 },
+    { name: 'Launch', from: 50000000, to: 70000000, price: 0.050 },
+    { name: 'Growth', from: 70000000, to: 90000000, price: 0.100 },
+    { name: 'Internal Cap', from: 90000000, to: 100000000, price: 0.200 }
   ]
 };
 let estimatedSoldTokens = 0;
@@ -201,7 +203,7 @@ const I18N = {
     sellDesc: 'معاينة تقديرية وفق نموذج البيع العكسي ورسوم المنصة، ويتم اعتماد الطلب بعد مراجعة الإدارة وتأكيد بيانات العملية.',
     loadingSell: 'جار تحميل معاينة البيع...',
     buyTitle: 'اشترِ <span>ARBR</span>',
-    buyDesc: 'سعر الدخول المبكر التقديري: <span class="ltr-token">1 OMR = 1,000 ARBR</span>. بوابات الدفع غير مفعلة حاليًا، وتخضع الطلبات للمراجعة الداخلية.',
+    buyDesc: 'سعر الدخول المبكر التقديري: <span class="ltr-token">1 ARBR = $0.01 ≈ 0.00385 OMR</span>. بوابات الدفع غير مفعلة حاليًا، وتخضع الطلبات للمراجعة الداخلية.',
     buyFormTitle: 'طلب شراء ARBR',
     earlyPriceLabel: 'سعر الدخول المبكر',
     currentStage: 'المرحلة الحالية',
@@ -213,7 +215,7 @@ const I18N = {
     exchangeUpdated: 'آخر تحديث',
     exchangeFallback: 'تعذر جلب السعر المباشر، تم استخدام آخر سعر احتياطي.',
     exchangeLoading: 'جار جلب سعر التحويل المباشر...',
-    priceFormula: 'المعادلة: مبلغ العملة × سعر التحويل إلى OMR × 1,000 = كمية ARBR',
+    priceFormula: 'المعادلة: القيمة المحولة إلى OMR ÷ 0.00385 = كمية ARBR',
     walletNote: 'ملاحظة / محفظة استلام ARBR',
     estimatedAmount: 'الكمية المتوقعة',
     estimatedNote: 'الكمية تقديرية ويتم اعتماد الطلب بعد تأكيد بيانات العملية.',
@@ -484,7 +486,7 @@ const I18N = {
     sellDesc: 'Estimated preview based on the reverse sale model and platform fees. Requests are approved after admin review and transaction verification.',
     loadingSell: 'Loading sell preview...',
     buyTitle: 'Buy <span>ARBR</span>',
-    buyDesc: 'Indicative early access price: <span class="ltr-token">1 OMR = 1,000 ARBR</span>. Payment gateways are not active yet, and requests are subject to internal review.',
+    buyDesc: 'Indicative early access price: <span class="ltr-token">1 ARBR = $0.01 ≈ 0.00385 OMR</span>. Payment gateways are not active yet, and requests are subject to internal review.',
     buyFormTitle: 'ARBR purchase request',
     earlyPriceLabel: 'Early access price',
     currentStage: 'Current stage',
@@ -496,7 +498,7 @@ const I18N = {
     exchangeUpdated: 'Last updated',
     exchangeFallback: 'Live rate could not be loaded, using the latest fallback rate.',
     exchangeLoading: 'Loading live exchange rate...',
-    priceFormula: 'Formula: currency amount × conversion rate to OMR × 1,000 = ARBR amount',
+    priceFormula: 'Formula: converted OMR value ÷ 0.00385 = ARBR amount',
     walletNote: 'Note / ARBR receiving wallet',
     estimatedAmount: 'Estimated amount',
     estimatedNote: 'The amount is estimated and the request is approved after transaction verification.',
@@ -682,7 +684,7 @@ function setLanguage(lang) {
     if (!btn.disabled) btn.dataset.originalText = btn.innerHTML;
   });
   updateLocalizedUserText();
-  if (typeof window.ARBR_UPDATE_BUY_PREVIEW === 'function') window.ARBR_UPDATE_BUY_PREVIEW();
+  refreshCurrencyWidgets();
 }
 
 function toggleLanguage() {
@@ -1797,6 +1799,9 @@ function updateAuthUI() {
   const userMenuWrap = document.getElementById('userMenuWrap');
   const adminDashboard = document.getElementById('adminDashboard');
   if (headerLoginBtn) headerLoginBtn.style.display = loggedIn ? 'none' : '';
+  document.querySelectorAll('[data-auth-guest]').forEach(el => {
+    el.style.display = loggedIn ? 'none' : '';
+  });
   if (userMenuWrap) userMenuWrap.classList.toggle('show', loggedIn);
   if (adminDashboard) adminDashboard.classList.toggle('show', loggedIn && isAdminUser() && ARBR_PAGE === 'admin');
   const adminNavItem = document.querySelector('.admin-nav-item');
@@ -2131,14 +2136,21 @@ async function loadLiveCurrencyRates() {
   }
 }
 
-function populateCurrencySelect() {
-  const select = document.getElementById('currencySelect');
+function populateCurrencySelect(selectId = 'currencySelect') {
+  const select = document.getElementById(selectId);
   if (!select) return;
-  const preferred = localStorage.getItem('arbr_buy_currency') || 'OMR';
+  const preferred = select.value || localStorage.getItem('arbr_buy_currency') || 'OMR';
   select.innerHTML = ARBR_CONFIG.supportedCurrencies
     .map(item => `<option value="${item.code}">${item.code} - ${currentLang === 'ar' ? item.ar : item.en}</option>`)
     .join('');
   select.value = ARBR_CONFIG.supportedCurrencies.some(item => item.code === preferred) ? preferred : 'OMR';
+}
+
+function refreshCurrencyWidgets() {
+  populateCurrencySelect('currencySelect');
+  populateCurrencySelect('homeCurrencySelect');
+  updateBuyPreview();
+  updateHomeCurrencyPreview();
 }
 
 function currentBuyCalculation() {
@@ -2146,7 +2158,7 @@ function currentBuyCalculation() {
   const currency = selectedBuyCurrency();
   const rateToOmr = currencyToOmrRate(currency);
   const amountOmr = amount * rateToOmr;
-  const estimatedArbr = amountOmr * ARBR_CONFIG.entryTokenRate;
+  const estimatedArbr = amountOmr / ARBR_CONFIG.entryPriceOmr;
   const omrToUsd = omrToCurrencyRate('USD');
   return {
     inputAmount: amount,
@@ -2178,6 +2190,37 @@ function updateBuyPreview() {
     <span>${t('priceFormula')}</span>
     <span>${sourceLine}</span>
   `;
+}
+
+function updateHomeCurrencyPreview() {
+  const select = document.getElementById('homeCurrencySelect');
+  const priceEl = document.getElementById('homeCurrencyPrice');
+  const meta = document.getElementById('homeCurrencyMeta');
+  if (!select || !priceEl) return;
+  const currency = select.value || 'OMR';
+  const omrToSelected = omrToCurrencyRate(currency);
+  const priceInSelected = ARBR_CONFIG.entryPriceOmr * omrToSelected;
+  priceEl.textContent = formatRate(priceInSelected, currency);
+  if (!meta) return;
+  const sourceLine = latestCurrencySource === 'fallback'
+    ? `<span class="currency-error">${t('exchangeFallback')}</span>`
+    : `<span>${t('exchangeUpdated')}: <b>${escapeHtml(latestCurrencyDate || '-')}</b></span>`;
+  meta.innerHTML = `
+    <span>${t('exchangeRateLabel')}: <b>1 OMR = ${formatRate(omrToSelected, currency)}</b></span>
+    ${sourceLine}
+  `;
+}
+
+function bindHomeCurrencyWidget() {
+  const select = document.getElementById('homeCurrencySelect');
+  if (!select) return;
+  populateCurrencySelect('homeCurrencySelect');
+  select.addEventListener('change', event => {
+    localStorage.setItem('arbr_buy_currency', event.target.value);
+    updateHomeCurrencyPreview();
+  });
+  updateHomeCurrencyPreview();
+  loadLiveCurrencyRates().then(updateHomeCurrencyPreview);
 }
 
 async function insertPurchaseRequest(payload) {
@@ -2309,6 +2352,7 @@ function bindCommonChrome() {
 }
 
 function initPageBindings() {
+  if (ARBR_PAGE === 'home') bindHomeCurrencyWidget();
   if (ARBR_PAGE === 'login') bindLoginPage();
   if (ARBR_PAGE === 'buy') bindBuyPage();
   if (ARBR_PAGE === 'deposit' || ARBR_PAGE === 'sell' || ARBR_PAGE === 'dashboard') {

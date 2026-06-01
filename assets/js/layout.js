@@ -33,7 +33,8 @@
       <span class="admin-notify-count" id="adminNotificationCount">0</span>
       <span id="adminNotificationText">0</span>
     </button>
-    <a class="btn-primary" id="headerLoginBtn" href="login.html" data-i18n="login">تسجيل الدخول</a>
+    <a class="phone-icon-link" href="support.html" aria-label="Support" title="Support">☎</a>
+    <a class="btn-primary" id="headerLoginBtn" href="login.html" data-auth-guest data-i18n="login">تسجيل الدخول</a>
     <div class="user-menu-wrap" id="userMenuWrap">
       <button class="user-box" id="userBox" type="button">
         <span class="user-avatar">AR</span>

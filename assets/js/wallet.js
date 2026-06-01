@@ -1,7 +1,7 @@
 (function () {
   const FALLBACK_SUPABASE_URL = 'https://umxmwcwuwsvkvsbdhbdl.supabase.co';
   const FALLBACK_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVteG13Y3d1d3N2a3ZzYmRoYmRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NDYwNjcsImV4cCI6MjA5NTAyMjA2N30.qCwKT7EU21JJKS-_73_uuXdLrhoI3a9644Wk73O2uJY';
-  const DEFAULT_PRICE = 0.001;
+  const DEFAULT_PRICE = 0.00385;
 
   const labels = {
     ar: {
@@ -137,7 +137,7 @@
   }
 
   function samplePriceHistory() {
-    const base = [0.00072, 0.00079, 0.00075, 0.00082, 0.00090, 0.00086, 0.00093, 0.00072, 0.00081, 0.00076, 0.00088, 0.00099, 0.00096, 0.00107];
+    const base = [0.00362, 0.00368, 0.00371, 0.00376, 0.00382, 0.00379, 0.00385, 0.00381, 0.00387, 0.00384, 0.00390, 0.00394, 0.00389, 0.00385];
     return base.map((price, index) => ({
       date: new Date(Date.now() - (base.length - index - 1) * 86400000).toISOString(),
       price

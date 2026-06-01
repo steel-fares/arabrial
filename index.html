@@ -41,7 +41,7 @@
       </div>
       <div class="hero-btns">
         <button class="btn-primary" onclick="location.href='buy.html'" data-i18n="buyNow">🪙 اشترِ ARBR الآن</button>
-        <a class="btn-secondary" href="login.html" data-i18n="investorLogin">دخول المستخدم ←</a>
+        <a class="btn-secondary" href="login.html" data-auth-guest data-i18n="investorLogin">دخول المستخدم ←</a>
       </div>
     </div>
 
@@ -57,8 +57,13 @@
           <span data-i18n="foundingPrice">سعر ARBR التأسيسي</span>
           <span class="price-indicative" data-i18n="priceIndicative">تقديري</span>
         </div>
-        <div class="pc-price"><span class="ltr-token">0.001 OMR</span></div>
+        <div class="pc-price"><span class="ltr-token" id="homeCurrencyPrice">0.00385 OMR</span></div>
         <div class="pc-stage-note" data-i18n="priceStageNote">مرحلة Founders — للعرض التوضيحي فقط</div>
+        <div class="pc-currency">
+          <label for="homeCurrencySelect" data-i18n="purchaseCurrency">عملة الدفع</label>
+          <select id="homeCurrencySelect" aria-label="Payment currency"></select>
+          <div class="pc-currency-meta" id="homeCurrencyMeta"></div>
+        </div>
         <div class="pc-chart">
           <svg viewBox="0 0 240 60" preserveAspectRatio="none">
             <defs>
@@ -220,7 +225,7 @@
     <h2 data-i18n="ctaTitle">ابدأ رحلتك مع ARBR الآن 🚀</h2>
     <p data-i18n="ctaDesc">انضم إلى المستثمرين الأوائل واستفد من أسعار الدخول المبكر الحصرية.</p>
   </div>
-  <a class="btn-primary" href="login.html" style="padding:15px 36px;font-size:16px" data-i18n="loginNow">تسجيل الدخول الآن</a>
+  <a class="btn-primary" href="login.html" style="padding:15px 36px;font-size:16px" data-auth-guest data-i18n="loginNow">تسجيل الدخول الآن</a>
 </div>
 </main>
 <footer>
