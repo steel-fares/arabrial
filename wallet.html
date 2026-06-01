@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ARBR | المحفظة</title>
+<meta name="description" content="محفظة Arab Rial ARBR لعرض الرصيد، السعر، حركة الرصيد، وسجل المعاملات." />
+<meta name="theme-color" content="#060910" />
+<link rel="icon" href="logo-aa.png" type="image/png" />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/arbr.css" />
+</head>
+<body class="lang-ar wallet-body" data-page="wallet">
+<div class="bg-layer"></div>
+<div class="bg-grid"></div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+<div id="site-nav"></div>
+<main class="wallet-main">
+  <section class="wallet-hero">
+    <div class="wallet-hero-art" aria-hidden="true">
+      <div class="wallet-coin coin-a">ARBR</div>
+      <div class="wallet-coin coin-b">ARBR</div>
+      <div class="wallet-coin coin-c">ARBR</div>
+      <div class="wallet-graphic"><img src="logo-aa.png" alt="" /></div>
+    </div>
+    <div class="wallet-hero-copy">
+      <h1 data-i18n-wallet="title">المحفظة</h1>
+      <p data-i18n-wallet="subtitle">محفظتك الشخصية ونظرة عامة على السوق</p>
+    </div>
+  </section>
+
+  <section class="wallet-alert">
+    <span class="wallet-alert-icon">!</span>
+    <span data-i18n-wallet="warning">تنبيه: سعر ARBR متغير وقد يرتفع أو ينخفض. ARBR ليس عملة رسمية ولا يضمن الربح أو الاسترداد.</span>
+  </section>
+
+  <section class="wallet-summary-grid" id="walletSummaryCards">
+    <article class="wallet-metric">
+      <div class="wallet-metric-icon blue">▣</div>
+      <small data-i18n-wallet="currentBalance">الرصيد الحالي</small>
+      <b id="walletBalance">0 ARBR</b>
+      <span id="walletBalanceOmr">≈ 0 OMR</span>
+    </article>
+    <article class="wallet-metric">
+      <div class="wallet-metric-icon green">⇧</div>
+      <small data-i18n-wallet="totalPurchased">إجمالي المشتريات</small>
+      <b id="walletPurchased">0 ARBR</b>
+      <span id="walletPurchasedOmr">≈ 0 OMR</span>
+    </article>
+    <article class="wallet-metric">
+      <div class="wallet-metric-icon red">⇩</div>
+      <small data-i18n-wallet="totalSold">إجمالي البيع / الاسترداد</small>
+      <b id="walletSold">0 ARBR</b>
+      <span id="walletSoldOmr">≈ 0 OMR</span>
+    </article>
+    <article class="wallet-metric">
+      <div class="wallet-metric-icon green">▥</div>
+      <small data-i18n-wallet="totalSpent">إجمالي المدفوع بالريال العماني</small>
+      <b id="walletSpent">0 OMR</b>
+      <span data-i18n-wallet="allTransactions">في جميع المعاملات</span>
+    </article>
+    <article class="wallet-metric">
+      <div class="wallet-metric-icon blue">⌁</div>
+      <small data-i18n-wallet="currentPrice">السعر الحالي</small>
+      <b id="walletPrice">1 ARBR = 0.001 OMR</b>
+      <span id="walletPriceSub">≈ 0.001 OMR لكل ARBR</span>
+    </article>
+    <article class="wallet-metric">
+      <div class="wallet-metric-icon green">↗</div>
+      <small data-i18n-wallet="priceChange">نسبة التغير (24 ساعة)</small>
+      <b id="walletChange">+0.00%</b>
+      <span id="walletChangeOmr">▲ +0.000000 OMR</span>
+    </article>
+  </section>
+
+  <section class="wallet-content-grid">
+    <article class="wallet-panel">
+      <div class="wallet-panel-head">
+        <div>
+          <h2 data-i18n-wallet="priceChart">منحنى السعر</h2>
+          <p data-i18n-wallet="priceChartSub">سعر ARBR مقابل الريال العماني</p>
+        </div>
+        <div class="wallet-range-tabs" aria-label="Chart range">
+          <button class="active" type="button">7 أيام</button>
+          <button type="button">30 يوم</button>
+          <button type="button">90 يوم</button>
+          <button type="button">سنة</button>
+        </div>
+      </div>
+      <svg class="wallet-chart" id="priceChart" role="img" aria-label="ARBR price chart"></svg>
+      <div class="chart-legend"><span class="up"></span> ارتفاع <span class="down"></span> انخفاض</div>
+    </article>
+
+    <article class="wallet-panel">
+      <div class="wallet-panel-head">
+        <div>
+          <h2 data-i18n-wallet="balanceChart">حركة الرصيد / المعروض</h2>
+          <p data-i18n-wallet="balanceChartSub">إجمالي رصيدك من ARBR عبر الوقت</p>
+        </div>
+      </div>
+      <svg class="wallet-chart" id="balanceChart" role="img" aria-label="ARBR balance chart"></svg>
+      <div class="chart-legend"><span class="up"></span> شراء <span class="down"></span> بيع / استرداد</div>
+    </article>
+  </section>
+
+  <section class="wallet-lower-grid">
+    <article class="wallet-panel wallet-table-panel">
+      <div class="wallet-table-toolbar">
+        <button class="wallet-filter" type="button">كل الأنواع⌄</button>
+        <h2><span data-i18n-wallet="transactions">سجل المعاملات</span> <span class="wallet-table-icon">▤</span></h2>
+      </div>
+      <div class="wallet-table-wrap">
+        <table class="wallet-table">
+          <thead>
+            <tr>
+              <th data-i18n-wallet="date">التاريخ</th>
+              <th data-i18n-wallet="type">النوع</th>
+              <th data-i18n-wallet="arbrAmount">كمية ARBR</th>
+              <th data-i18n-wallet="omrAmount">المبلغ OMR</th>
+              <th data-i18n-wallet="status">الحالة</th>
+              <th data-i18n-wallet="reference">الرقم المرجعي</th>
+              <th data-i18n-wallet="notes">ملاحظات</th>
+            </tr>
+          </thead>
+          <tbody id="walletTransactions">
+            <tr><td colspan="7">جار تحميل المعاملات...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <aside class="wallet-side">
+      <article class="wallet-side-card">
+        <div class="side-card-head"><h3 data-i18n-wallet="lastUpdate">آخر تحديث للسعر</h3><span>↻</span></div>
+        <b id="lastPriceUpdate">1 ARBR = 0.001000 OMR</b>
+        <p id="lastPriceUpdateTime">--</p>
+      </article>
+      <article class="wallet-side-card">
+        <div class="side-card-head"><h3 data-i18n-wallet="marketNotes">ملاحظات السوق</h3><span>▧</span></div>
+        <p id="marketNotes">يشهد سوق ARBR نشاطا إيجابيا خلال الأيام الأخيرة.</p>
+        <a href="how-it-works.html" data-i18n-wallet="showMarket">عرض ملخص السوق ←</a>
+      </article>
+      <article class="wallet-cta-card">
+        <h3 data-i18n-wallet="readyInvest">جاهز للاستثمار؟</h3>
+        <p data-i18n-wallet="buyCtaText">اشتر ARBR الآن وكن جزءا من مستقبل ريال عربي.</p>
+        <a class="wallet-cta-btn" href="buy.html">شراء ARBR</a>
+      </article>
+      <article class="wallet-side-card outline">
+        <div class="side-card-head"><h3 data-i18n-wallet="riskStatement">عرض بيان المخاطر</h3><span>◇</span></div>
+        <p data-i18n-wallet="riskText">اكتشف المعلومات الرئيسية قبل الاستثمار.</p>
+        <a href="#walletRiskNotice">عرض التفاصيل ←</a>
+      </article>
+    </aside>
+  </section>
+
+  <section class="wallet-trust-strip" id="walletRiskNotice">
+    <div><b>التزام بالامتثال</b><span>نلتزم بالقوانين والمعايير المحلية</span></div>
+    <div><b>دعم موثوق</b><span>فريق دعم متخصص على مدار الساعة</span></div>
+    <div><b>شفافية كاملة</b><span>بيانات السوق في الوقت الفعلي</span></div>
+    <div><b>أمان متقدم</b><span>تشفير وحماية بيانات</span></div>
+  </section>
+</main>
+<footer></footer>
+<div id="shared-modals"></div>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/layout.js"></script>
+<script src="assets/js/arbr.js"></script>
+<script src="assets/js/wallet.js"></script>
+</body>
+</html>

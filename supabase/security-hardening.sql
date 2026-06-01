@@ -25,7 +25,6 @@ begin
     new.kyc_status := old.kyc_status;
     new.account_status := old.account_status;
     new.email := old.email;
-    new.phone := old.phone;
   end if;
   return new;
 end;
@@ -35,6 +34,61 @@ drop trigger if exists profiles_protect_sensitive on public.profiles;
 create trigger profiles_protect_sensitive
 before update on public.profiles
 for each row execute function public.protect_profile_sensitive_columns();
+
+create or replace function public.enforce_request_rate_limit()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  recent_count integer;
+  pending_count integer;
+begin
+  if auth.uid() is null or new.user_id <> auth.uid() then
+    raise exception 'Request user mismatch' using errcode = '42501';
+  end if;
+
+  execute format(
+    'select count(*) from public.%I where user_id = $1 and created_at > now() - interval ''1 hour''',
+    tg_table_name
+  )
+  into recent_count
+  using new.user_id;
+
+  execute format(
+    'select count(*) from public.%I where user_id = $1 and status in (''pending'', ''reviewing'')',
+    tg_table_name
+  )
+  into pending_count
+  using new.user_id;
+
+  if recent_count >= 5 then
+    raise exception 'Too many requests in one hour' using errcode = 'P0001';
+  end if;
+
+  if pending_count >= 5 then
+    raise exception 'Too many pending requests' using errcode = 'P0001';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists purchase_requests_rate_limit on public.purchase_requests;
+create trigger purchase_requests_rate_limit
+before insert on public.purchase_requests
+for each row execute function public.enforce_request_rate_limit();
+
+drop trigger if exists pilot_deposits_rate_limit on public.pilot_deposits;
+create trigger pilot_deposits_rate_limit
+before insert on public.pilot_deposits
+for each row execute function public.enforce_request_rate_limit();
+
+drop trigger if exists redeem_requests_rate_limit on public.redeem_requests;
+create trigger redeem_requests_rate_limit
+before insert on public.redeem_requests
+for each row execute function public.enforce_request_rate_limit();
 
 create or replace function public.admin_review_purchase_request(
   p_request_id uuid,
@@ -176,6 +230,29 @@ on public.pilot_deposits for update
 to authenticated
 using (public.is_admin())
 with check (public.is_admin());
+
+drop policy if exists "Users can update own editable profile fields" on public.profiles;
+create policy "Users can update own editable profile fields"
+on public.profiles for update
+to authenticated
+using (auth.uid() = id)
+with check (
+  auth.uid() = id
+  and role = (select role from public.profiles where id = auth.uid())
+  and verification_status = (select verification_status from public.profiles where id = auth.uid())
+  and kyc_status = (select kyc_status from public.profiles where id = auth.uid())
+  and account_status = (select account_status from public.profiles where id = auth.uid())
+);
+
+drop policy if exists "Users can delete own pending purchase requests" on public.purchase_requests;
+create policy "Users can delete own pending purchase requests"
+on public.purchase_requests for delete
+to authenticated
+using (auth.uid() = user_id and status = 'pending');
+
+grant update (full_name, phone, country) on public.profiles to authenticated;
+grant delete on public.purchase_requests to authenticated;
+grant execute on function public.enforce_request_rate_limit() to authenticated;
 
 -- Audit: RLS must stay enabled.
 alter table public.profiles force row level security;

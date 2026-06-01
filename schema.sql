@@ -143,6 +143,24 @@ create table if not exists public.platform_state (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.price_history (
+  id bigserial primary key,
+  recorded_at timestamptz not null default now(),
+  price_omr numeric(18, 9) not null check (price_omr > 0),
+  source text not null default 'admin',
+  note text
+);
+
+create table if not exists public.market_snapshots (
+  id uuid primary key default gen_random_uuid(),
+  current_price_omr numeric(18, 9) not null check (current_price_omr > 0),
+  price_change_percent numeric(9, 4) not null default 0,
+  notes text,
+  update_interval text not null default '60 دقيقة',
+  created_by uuid references auth.users(id),
+  created_at timestamptz not null default now()
+);
+
 insert into public.platform_state (id, sold_tokens)
 values (1, 0)
 on conflict (id) do nothing;
@@ -310,12 +328,64 @@ alter table public.pilot_deposits enable row level security;
 alter table public.redeem_requests enable row level security;
 alter table public.transaction_ledger enable row level security;
 alter table public.platform_state enable row level security;
+alter table public.price_history enable row level security;
+alter table public.market_snapshots enable row level security;
 
 drop policy if exists "Public can read platform state" on public.platform_state;
 create policy "Public can read platform state"
 on public.platform_state for select
 to anon, authenticated
 using (true);
+
+drop policy if exists "Public can read price history" on public.price_history;
+create policy "Public can read price history"
+on public.price_history for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "Public can read market snapshots" on public.market_snapshots;
+create policy "Public can read market snapshots"
+on public.market_snapshots for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "Admins can insert price history" on public.price_history;
+create policy "Admins can insert price history"
+on public.price_history for insert
+to authenticated
+with check (public.is_admin());
+
+drop policy if exists "Admins can update price history" on public.price_history;
+create policy "Admins can update price history"
+on public.price_history for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "Admins can delete price history" on public.price_history;
+create policy "Admins can delete price history"
+on public.price_history for delete
+to authenticated
+using (public.is_admin());
+
+drop policy if exists "Admins can insert market snapshots" on public.market_snapshots;
+create policy "Admins can insert market snapshots"
+on public.market_snapshots for insert
+to authenticated
+with check (public.is_admin());
+
+drop policy if exists "Admins can update market snapshots" on public.market_snapshots;
+create policy "Admins can update market snapshots"
+on public.market_snapshots for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "Admins can delete market snapshots" on public.market_snapshots;
+create policy "Admins can delete market snapshots"
+on public.market_snapshots for delete
+to authenticated
+using (public.is_admin());
 
 drop policy if exists "Users can read own profile" on public.profiles;
 create policy "Users can read own profile"
@@ -429,6 +499,8 @@ revoke insert, update, delete on public.purchase_requests from authenticated;
 revoke insert, update, delete on public.pilot_deposits from authenticated;
 revoke insert, update, delete on public.redeem_requests from authenticated;
 revoke insert, update, delete on public.transaction_ledger from authenticated;
+revoke insert, update, delete on public.price_history from anon;
+revoke insert, update, delete on public.market_snapshots from anon;
 
 grant select on public.profiles to authenticated;
 grant update (full_name, country) on public.profiles to authenticated;
@@ -454,6 +526,11 @@ grant insert (
 grant select on public.transaction_ledger to authenticated;
 
 grant select on public.platform_state to anon, authenticated;
+grant select on public.price_history to anon, authenticated;
+grant select on public.market_snapshots to anon, authenticated;
+grant insert, update, delete on public.price_history to authenticated;
+grant insert, update, delete on public.market_snapshots to authenticated;
+grant usage, select on sequence public.price_history_id_seq to authenticated;
 grant execute on function public.is_admin() to authenticated;
 
 -- Set admin role only in Supabase Dashboard (SQL), never from the website:
