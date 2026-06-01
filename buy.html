@@ -29,9 +29,14 @@
         <div class="price-line"><span data-i18n="currentStage">المرحلة الحالية</span><b>Founders</b></div>
       </div>
       <div class="fgroup">
-        <label data-i18n="amountOmani">المبلغ بالريال العماني (OMR)</label>
+        <label data-i18n="purchaseCurrency">عملة الدفع</label>
+        <select id="currencySelect"></select>
+      </div>
+      <div class="fgroup">
+        <label id="amountCurrencyLabel" data-i18n="amountCurrency">المبلغ بعملة الدفع</label>
         <input id="amt" type="number" min="1" value="100" placeholder="مثال: 100" data-i18n-placeholder="amountPlaceholder" />
       </div>
+      <div class="currency-preview" id="currencyPreview"></div>
       <div class="fgroup">
         <label data-i18n="paymentMethod">طريقة الدفع</label>
         <select id="payM">

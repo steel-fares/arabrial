@@ -221,6 +221,9 @@ p.hero-lead{font-size:15px;line-height:2.1;color:var(--light);max-width:460px;
   border-radius:14px;padding:18px 20px;margin-bottom:18px;text-align:center}
 .calc-result small{font-size:12px;color:var(--muted)}
 .calc-result b{display:block;font-size:30px;font-weight:900;color:var(--gold-light);margin:8px 0 4px}
+.currency-preview{display:grid;gap:7px;margin:-4px 0 18px;padding:13px 15px;border:1px solid rgba(200,149,42,.18);border-radius:14px;background:rgba(255,255,255,.03);color:var(--muted);font-size:12px;line-height:1.7}
+.currency-preview b{color:var(--gold-light);font-weight:900}
+.currency-preview .currency-error{color:#fca5a5}
 .pay-methods{display:flex;flex-direction:column;gap:14px}
 .pay-method{display:flex;align-items:center;justify-content:space-between;
   padding:16px 18px;background:rgba(255,255,255,.03);
