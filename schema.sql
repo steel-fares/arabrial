@@ -56,6 +56,11 @@ create table if not exists public.purchase_requests (
   amount_omr numeric(14, 3) not null check (amount_omr >= 10),
   estimated_arbr numeric(18, 2) not null check (estimated_arbr >= 100),
   amount_usd numeric(12, 2),
+  input_currency text not null default 'OMR',
+  input_amount numeric(14, 3),
+  exchange_rate_to_omr numeric(18, 9),
+  exchange_rate_source text,
+  exchange_rate_at timestamptz,
   token_amount numeric(18, 2) generated always as (estimated_arbr) stored,
   payment_method text not null check (payment_method in ('USDT (TRC20 / Polygon)', 'Visa / Mastercard')),
   payment_reference text,
@@ -71,6 +76,11 @@ create table if not exists public.purchase_requests (
 alter table public.purchase_requests add column if not exists amount_omr numeric(14, 3);
 alter table public.purchase_requests add column if not exists estimated_arbr numeric(18, 2);
 alter table public.purchase_requests add column if not exists amount_usd numeric(12, 2);
+alter table public.purchase_requests add column if not exists input_currency text not null default 'OMR';
+alter table public.purchase_requests add column if not exists input_amount numeric(14, 3);
+alter table public.purchase_requests add column if not exists exchange_rate_to_omr numeric(18, 9);
+alter table public.purchase_requests add column if not exists exchange_rate_source text;
+alter table public.purchase_requests add column if not exists exchange_rate_at timestamptz;
 alter table public.purchase_requests add column if not exists payment_reference text;
 alter table public.purchase_requests add column if not exists note text;
 alter table public.purchase_requests add column if not exists wallet_address text;
@@ -86,6 +96,11 @@ alter table public.purchase_requests add constraint purchase_requests_estimated_
 update public.purchase_requests
 set amount_omr = coalesce(amount_omr, amount_usd),
     estimated_arbr = coalesce(estimated_arbr, token_amount, amount_usd * 1000),
+    input_currency = coalesce(input_currency, 'OMR'),
+    input_amount = coalesce(input_amount, amount_omr, amount_usd),
+    exchange_rate_to_omr = coalesce(exchange_rate_to_omr, 1),
+    exchange_rate_source = coalesce(exchange_rate_source, 'legacy'),
+    exchange_rate_at = coalesce(exchange_rate_at, created_at),
     note = coalesce(note, wallet_address, ''),
     wallet_address = coalesce(wallet_address, note)
 where amount_omr is null or estimated_arbr is null or note is null or wallet_address is null;
@@ -281,6 +296,78 @@ begin
 end;
 $$;
 
+create or replace function public.admin_review_purchase_request(
+  p_request_id uuid,
+  p_status text,
+  p_admin_notes text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_updated integer;
+begin
+  if not public.is_admin() then
+    raise exception 'Admin role required' using errcode = '42501';
+  end if;
+
+  if p_status not in ('approved', 'rejected') then
+    raise exception 'Invalid purchase request status' using errcode = '22023';
+  end if;
+
+  update public.purchase_requests
+  set status = p_status,
+      admin_notes = coalesce(nullif(trim(p_admin_notes), ''), admin_notes),
+      reviewed_at = now(),
+      updated_at = now()
+  where id = p_request_id
+    and status in ('pending', 'reviewing')
+  returning 1 into v_updated;
+
+  if v_updated is null then
+    raise exception 'Purchase request is not pending or does not exist' using errcode = 'P0002';
+  end if;
+end;
+$$;
+
+create or replace function public.admin_review_pilot_deposit(
+  p_deposit_id uuid,
+  p_status text,
+  p_admin_notes text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_updated integer;
+begin
+  if not public.is_admin() then
+    raise exception 'Admin role required' using errcode = '42501';
+  end if;
+
+  if p_status not in ('approved', 'rejected') then
+    raise exception 'Invalid pilot deposit status' using errcode = '22023';
+  end if;
+
+  update public.pilot_deposits
+  set status = p_status,
+      admin_notes = coalesce(nullif(trim(p_admin_notes), ''), admin_notes),
+      reviewed_at = now(),
+      updated_at = now()
+  where id = p_deposit_id
+    and status in ('pending', 'reviewing')
+  returning 1 into v_updated;
+
+  if v_updated is null then
+    raise exception 'Pilot deposit is not pending or does not exist' using errcode = 'P0002';
+  end if;
+end;
+$$;
+
 drop trigger if exists profiles_set_updated_at on public.profiles;
 create trigger profiles_set_updated_at
 before update on public.profiles
@@ -425,6 +512,13 @@ on public.purchase_requests for select
 to authenticated
 using (public.is_admin());
 
+drop policy if exists "Admins can update purchase request review status" on public.purchase_requests;
+create policy "Admins can update purchase request review status"
+on public.purchase_requests for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
 drop policy if exists "Users can create own purchase requests" on public.purchase_requests;
 create policy "Users can create own purchase requests"
 on public.purchase_requests for insert
@@ -452,6 +546,13 @@ create policy "Admins can read all pilot deposits"
 on public.pilot_deposits for select
 to authenticated
 using (public.is_admin());
+
+drop policy if exists "Admins can update pilot deposit review status" on public.pilot_deposits;
+create policy "Admins can update pilot deposit review status"
+on public.pilot_deposits for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
 
 drop policy if exists "Verified users can create own pilot deposits" on public.pilot_deposits;
 create policy "Verified users can create own pilot deposits"
@@ -508,14 +609,17 @@ grant select on public.wallets to authenticated;
 
 grant select on public.purchase_requests to authenticated;
 grant insert (
-  user_id, amount_omr, amount_usd, estimated_arbr, payment_method,
+  user_id, amount_omr, amount_usd, estimated_arbr, input_currency, input_amount,
+  exchange_rate_to_omr, exchange_rate_source, exchange_rate_at, payment_method,
   payment_reference, note, wallet_address, status
 ) on public.purchase_requests to authenticated;
+grant update (status, admin_notes, reviewed_at, updated_at) on public.purchase_requests to authenticated;
 
 grant select on public.pilot_deposits to authenticated;
 grant insert (
   user_id, amount_omr, payment_method, payment_reference, notes, status, is_refundable
 ) on public.pilot_deposits to authenticated;
+grant update (status, admin_notes, reviewed_at, updated_at) on public.pilot_deposits to authenticated;
 
 grant select on public.redeem_requests to authenticated;
 grant insert (
@@ -532,6 +636,10 @@ grant insert, update, delete on public.price_history to authenticated;
 grant insert, update, delete on public.market_snapshots to authenticated;
 grant usage, select on sequence public.price_history_id_seq to authenticated;
 grant execute on function public.is_admin() to authenticated;
+revoke all on function public.admin_review_purchase_request(uuid, text, text) from public;
+revoke all on function public.admin_review_pilot_deposit(uuid, text, text) from public;
+grant execute on function public.admin_review_purchase_request(uuid, text, text) to authenticated;
+grant execute on function public.admin_review_pilot_deposit(uuid, text, text) to authenticated;
 
 -- Set admin role only in Supabase Dashboard (SQL), never from the website:
 -- update public.profiles set role = 'admin' where email = 'you@example.com';

@@ -47,6 +47,28 @@ const ARBR_CONFIG = {
   lockDays: 30,
   maxSellPerDay: 2000,
   largeBuyVerificationAmount: 5000,
+  ratesApiUrl: 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/omr.json',
+  currencyRateSource: 'Fawaz Ahmed Currency API via jsDelivr',
+  supportedCurrencies: [
+    { code: 'OMR', ar: 'الريال العماني', en: 'Omani Rial', omrRate: 1 },
+    { code: 'USD', ar: 'الدولار الأمريكي', en: 'US Dollar', omrPerCurrency: 0.384998 },
+    { code: 'EUR', ar: 'اليورو', en: 'Euro', omrPerCurrency: 0.448418 },
+    { code: 'AED', ar: 'الدرهم الإماراتي', en: 'UAE Dirham', omrPerCurrency: 0.104833 },
+    { code: 'SAR', ar: 'الريال السعودي', en: 'Saudi Riyal', omrPerCurrency: 0.102666 },
+    { code: 'QAR', ar: 'الريال القطري', en: 'Qatari Riyal', omrPerCurrency: 0.105769 },
+    { code: 'KWD', ar: 'الدينار الكويتي', en: 'Kuwaiti Dinar', omrPerCurrency: 1.244321 },
+    { code: 'BHD', ar: 'الدينار البحريني', en: 'Bahraini Dinar', omrPerCurrency: 1.023933 },
+    { code: 'EGP', ar: 'الجنيه المصري', en: 'Egyptian Pound', omrPerCurrency: 0.007350 },
+    { code: 'JOD', ar: 'الدينار الأردني', en: 'Jordanian Dinar', omrPerCurrency: 0.543016 },
+    { code: 'MAD', ar: 'الدرهم المغربي', en: 'Moroccan Dirham', omrPerCurrency: 0.041939 },
+    { code: 'DZD', ar: 'الدينار الجزائري', en: 'Algerian Dinar', omrPerCurrency: 0.002901 },
+    { code: 'TND', ar: 'الدينار التونسي', en: 'Tunisian Dinar', omrPerCurrency: 0.134527 },
+    { code: 'GBP', ar: 'الجنيه الإسترليني', en: 'British Pound', omrPerCurrency: 0.518059 },
+    { code: 'CNY', ar: 'اليوان الصيني', en: 'Chinese Yuan', omrPerCurrency: 0.056881 },
+    { code: 'JPY', ar: 'الين الياباني', en: 'Japanese Yen', omrPerCurrency: 0.002414 },
+    { code: 'INR', ar: 'الروبية الهندية', en: 'Indian Rupee', omrPerCurrency: 0.004060 },
+    { code: 'TRY', ar: 'الليرة التركية', en: 'Turkish Lira', omrPerCurrency: 0.008386 }
+  ],
   stages: [
     { name: 'Founders', from: 0, to: 5000000, price: 0.001 },
     { name: 'Early VIP', from: 5000000, to: 15000000, price: 0.002 },
@@ -184,6 +206,14 @@ const I18N = {
     earlyPriceLabel: 'سعر الدخول المبكر',
     currentStage: 'المرحلة الحالية',
     amountOmani: 'المبلغ بالريال العماني (OMR)',
+    purchaseCurrency: 'عملة الدفع',
+    amountCurrency: 'المبلغ بعملة الدفع',
+    convertedOmr: 'القيمة المحولة إلى OMR',
+    exchangeRateLabel: 'سعر التحويل',
+    exchangeUpdated: 'آخر تحديث',
+    exchangeFallback: 'تعذر جلب السعر المباشر، تم استخدام آخر سعر احتياطي.',
+    exchangeLoading: 'جار جلب سعر التحويل المباشر...',
+    priceFormula: 'المعادلة: مبلغ العملة × سعر التحويل إلى OMR × 1,000 = كمية ARBR',
     walletNote: 'ملاحظة / محفظة استلام ARBR',
     estimatedAmount: 'الكمية المتوقعة',
     estimatedNote: 'الكمية تقديرية ويتم اعتماد الطلب بعد تأكيد بيانات العملية.',
@@ -194,7 +224,7 @@ const I18N = {
     securePaymentLink: 'سيتم الإعلان عن روابط الدفع عند تفعيلها',
     readyToConnect: 'غير مفعل حاليًا',
     buyProcessText: 'بعد إرسال الطلب تتم مراجعة بيانات الدفع يدويًا من الإدارة. عند الموافقة يُحدَّث الطلب ويُضاف الرصيد المعتمد إلى محفظتك. قد تُحال بعض الطلبات إلى مراجعة إضافية لأسباب أمنية أو تشغيلية.',
-    buyLimitText: 'الحد الأدنى للطلب <strong style="color:var(--gold-light)">10 OMR</strong>، ولا يوجد حد أقصى ثابت للطلبات.',
+    buyLimitText: 'الحد الأدنى للطلب يعادل <strong style="color:var(--gold-light)">10 OMR</strong>، ولا يوجد حد أقصى ثابت للطلبات.',
     ctaTitle: 'ابدأ رحلتك مع ARBR الآن 🚀',
     ctaDesc: 'انضم إلى مستخدمي المنصة واستفد من أسعار الدخول المبكر الحصرية.',
     loginNow: 'تسجيل الدخول الآن',
@@ -308,7 +338,7 @@ const I18N = {
     enterPhone: '⚠️ أدخل رقم الهاتف',
     shortPassword: '⚠️ كلمة المرور يجب ألا تقل عن 8 أحرف',
     enterWallet: '⚠️ أدخل محفظة الاستلام أو ملاحظة الطلب',
-    minPurchase: '⚠️ الحد الأدنى للشراء 10 OMR',
+    minPurchase: '⚠️ الحد الأدنى للشراء يعادل 10 OMR',
     invalidAmount: 'يرجى إدخال مبلغ صحيح',
     choosePaymentWarning: 'يرجى اختيار طريقة الدفع',
     agreePilot: 'يجب الموافقة على شروط إيداع العضوية قبل الإرسال',
@@ -459,6 +489,14 @@ const I18N = {
     earlyPriceLabel: 'Early access price',
     currentStage: 'Current stage',
     amountOmani: 'Amount in Omani Rial (OMR)',
+    purchaseCurrency: 'Payment currency',
+    amountCurrency: 'Amount in payment currency',
+    convertedOmr: 'Converted value in OMR',
+    exchangeRateLabel: 'Exchange rate',
+    exchangeUpdated: 'Last updated',
+    exchangeFallback: 'Live rate could not be loaded, using the latest fallback rate.',
+    exchangeLoading: 'Loading live exchange rate...',
+    priceFormula: 'Formula: currency amount × conversion rate to OMR × 1,000 = ARBR amount',
     walletNote: 'Note / ARBR receiving wallet',
     estimatedAmount: 'Estimated amount',
     estimatedNote: 'The amount is estimated and the request is approved after transaction verification.',
@@ -469,7 +507,7 @@ const I18N = {
     securePaymentLink: 'Payment links will be announced once activated',
     readyToConnect: 'Not active yet',
     buyProcessText: 'After you submit, payment details are reviewed manually by administration. When approved, the request status is updated and credited ARBR is added to your wallet. Some requests may require additional compliance review.',
-    buyLimitText: 'Minimum request amount is <strong style="color:var(--gold-light)">10 OMR</strong>, with no fixed maximum request limit.',
+    buyLimitText: 'Minimum request amount equals <strong style="color:var(--gold-light)">10 OMR</strong>, with no fixed maximum request limit.',
     ctaTitle: 'Start your ARBR journey now 🚀',
     ctaDesc: 'Join platform users and benefit from exclusive early access prices.',
     loginNow: 'Login now',
@@ -583,7 +621,7 @@ const I18N = {
     enterPhone: '⚠️ Enter your phone number',
     shortPassword: '⚠️ Password must be at least 8 characters',
     enterWallet: '⚠️ Enter the receiving wallet or request note',
-    minPurchase: '⚠️ Minimum purchase is 10 OMR',
+    minPurchase: '⚠️ Minimum purchase equals 10 OMR',
     invalidAmount: 'Please enter a valid amount',
     choosePaymentWarning: 'Please choose a payment method',
     agreePilot: 'You must agree to the membership deposit terms before submitting',
@@ -644,6 +682,7 @@ function setLanguage(lang) {
     if (!btn.disabled) btn.dataset.originalText = btn.innerHTML;
   });
   updateLocalizedUserText();
+  if (typeof window.ARBR_UPDATE_BUY_PREVIEW === 'function') window.ARBR_UPDATE_BUY_PREVIEW();
 }
 
 function toggleLanguage() {
@@ -666,9 +705,12 @@ function updateLocalizedUserText() {
   if (currentUser && currentProfile) {
     const name = profileDisplayName();
     const balance = currentWallet?.arbr_balance || 0;
-    document.getElementById('navUserName').textContent = t('greeting', { name });
-    document.getElementById('navUserBalance').textContent = t('balanceLabel', { amount: formatNumber(balance, 'ARBR') });
-    document.getElementById('dashAccountStatus').textContent = profileHasColumn('account_status') ? accountStatusLabel(currentProfile.account_status) : t('activeStatus');
+    const navUserName = document.getElementById('navUserName');
+    const navUserBalance = document.getElementById('navUserBalance');
+    const dashAccountStatus = document.getElementById('dashAccountStatus');
+    if (navUserName) navUserName.textContent = t('greeting', { name });
+    if (navUserBalance) navUserBalance.textContent = t('balanceLabel', { amount: formatNumber(balance, 'ARBR') });
+    if (dashAccountStatus) dashAccountStatus.textContent = profileHasColumn('account_status') ? accountStatusLabel(currentProfile.account_status) : t('activeStatus');
     const verificationEl = document.getElementById('dashVerificationStatus');
     if (verificationEl) verificationEl.innerHTML = `<span class="verification-badge ${verificationClass()}">${verificationLabel()}</span>`;
   }
@@ -708,6 +750,12 @@ function withTimeout(promise, timeoutMs, message) {
 function formatNumber(value, suffix = '') {
   const n = Number(value || 0);
   const formatted = n.toLocaleString('en-US', { maximumFractionDigits: 2 }) + (suffix ? ' ' + suffix : '');
+  return suffix ? '\u2068' + formatted + '\u2069' : formatted;
+}
+
+function formatRate(value, suffix = '') {
+  const n = Number(value || 0);
+  const formatted = n.toLocaleString('en-US', { maximumFractionDigits: 6 }) + (suffix ? ' ' + suffix : '');
   return suffix ? '\u2068' + formatted + '\u2069' : formatted;
 }
 
@@ -834,6 +882,11 @@ function requestAmount(order) {
 
 function requestEstimated(order) {
   return Number(order.estimated_arbr || 0);
+}
+
+function purchaseCurrencySummary(order) {
+  if (!order?.input_currency || !order?.input_amount) return '';
+  return `${formatNumber(order.input_amount, order.input_currency)} → ${formatNumber(order.amount_omr, 'OMR')}`;
 }
 
 function requestDate(order) {
@@ -1127,7 +1180,7 @@ function renderAdminPurchaseRequests() {
               <td class="req-id">${requestId(item)}</td>
               <td>${escapeHtml(adminFallbackText(item._profileName || item.user_id))}</td>
               <td>${escapeHtml(adminFallbackText(item._profileEmail))}</td>
-              <td>${formatNumber(requestAmount(item), ARBR_CONFIG.entryCurrency)}</td>
+              <td>${purchaseCurrencySummary(item) || formatNumber(requestAmount(item), ARBR_CONFIG.entryCurrency)}</td>
               <td>${formatNumber(requestEstimated(item), 'ARBR')}</td>
               <td>${escapeHtml(item.payment_method || '-')}</td>
               <td>${adminDate(item.created_at)}</td>
@@ -1245,8 +1298,10 @@ function openAdminDetailsModal(type, item) {
       detailItem(t('adminUserId'), common.userId),
       detailItem(t('adminUserName'), common.name),
       detailItem(t('adminEmail'), common.email),
-      detailItem(t('adminAmount'), formatNumber(requestAmount(item), ARBR_CONFIG.entryCurrency)),
+      detailItem(t('adminAmount'), purchaseCurrencySummary(item) || formatNumber(requestAmount(item), ARBR_CONFIG.entryCurrency)),
       detailItem(t('adminArbrAmount'), formatNumber(requestEstimated(item), 'ARBR')),
+      item.exchange_rate_to_omr ? detailItem(t('exchangeRateLabel'), `1 ${item.input_currency || '-'} = ${formatRate(item.exchange_rate_to_omr, 'OMR')}`) : '',
+      item.exchange_rate_at ? detailItem(t('exchangeUpdated'), adminDate(item.exchange_rate_at)) : '',
       detailItem(t('paymentMethod'), item.payment_method || '-'),
       detailItem(t('adminStatus'), common.status),
       detailItem(t('adminCreatedAt'), common.created),
@@ -1299,6 +1354,16 @@ function adminReviewParams(type, id, action) {
   };
 }
 
+async function adminReviewDirectUpdate(type, id, action) {
+  const table = type === 'purchase' ? 'purchase_requests' : 'pilot_deposits';
+  const status = action === 'approve' ? 'approved' : 'rejected';
+  return supabaseClient
+    .from(table)
+    .update({ status, reviewed_at: new Date().toISOString() })
+    .eq('id', id)
+    .in('status', ['pending', 'reviewing']);
+}
+
 async function handleAdminReviewAction(btn) {
   if (!btn || btn.disabled || !supabaseClient || !isAdminUser()) return;
   const type = btn.dataset.adminType;
@@ -1311,14 +1376,22 @@ async function handleAdminReviewAction(btn) {
   btn.textContent = currentLang === 'ar' ? 'جار التنفيذ...' : 'Working...';
   try {
     const { error } = await supabaseClient.rpc(adminReviewRpcName(type), adminReviewParams(type, id, action));
-    if (error) throw error;
+    if (error) {
+      const message = String(error.message || '');
+      if (error.code === '42883' || message.includes('function') || message.includes('schema cache')) {
+        const fallback = await adminReviewDirectUpdate(type, id, action);
+        if (fallback.error) throw fallback.error;
+      } else {
+        throw error;
+      }
+    }
     adminAuditLog('admin_review_action', `${type}:${id}:${action}`);
     showToast(t('adminActionSuccess'), 'success');
     closeAdminDetailsModal();
     await loadAdminDashboard(true);
   } catch (error) {
     adminAuditLog('admin_review_action_failed', error?.message || `${type}:${id}:${action}`);
-    showToast(t('adminActionFailed'), 'error');
+    showToast(`${t('adminActionFailed')}: ${error?.message || ''}`, 'error', 7000);
   } finally {
     btn.disabled = false;
     btn.textContent = label;
@@ -1647,7 +1720,7 @@ function renderOrdersTable(orders, showNote = true) {
           ${orders.map(order => `
             <tr>
               <td class="req-id"><button class="order-link" type="button" data-order-detail="${order.id}">${requestId(order)}</button></td>
-              <td>${formatNumber(requestAmount(order), ARBR_CONFIG.entryCurrency)}</td>
+              <td>${purchaseCurrencySummary(order) || formatNumber(requestAmount(order), ARBR_CONFIG.entryCurrency)}</td>
               <td>${escapeHtml(order.payment_method || '-')}</td>
               <td>${formatNumber(requestEstimated(order), 'ARBR')}</td>
               <td><span class="status-pill ${statusClass(order.status)}">${statusLabel(order.status)}</span></td>
@@ -1682,7 +1755,7 @@ function openOrderDetails(orderId) {
   content.innerHTML = [
     detailItem(t('requestNumber'), requestId(order)),
     detailItem(t('paymentMethod'), order.payment_method || '-'),
-    detailItem(currentLang === 'ar' ? 'المبلغ' : 'Amount', formatNumber(requestAmount(order), ARBR_CONFIG.entryCurrency)),
+    detailItem(currentLang === 'ar' ? 'المبلغ' : 'Amount', purchaseCurrencySummary(order) || formatNumber(requestAmount(order), ARBR_CONFIG.entryCurrency)),
     detailItem(currentLang === 'ar' ? 'كمية ARBR' : 'ARBR quantity', formatNumber(requestEstimated(order), 'ARBR')),
     detailItem(currentLang === 'ar' ? 'رقم المرجع' : 'Reference number', order.payment_reference || order.reference_number || '-'),
     detailItem(t('walletAddress'), order.wallet_address || order.note || '-'),
@@ -2009,41 +2082,164 @@ function bindLoginPage() {
   });
 }
 
+let latestCurrencyRates = null;
+let latestCurrencyDate = '';
+let latestCurrencySource = 'fallback';
+
+function currencyMeta(code) {
+  return ARBR_CONFIG.supportedCurrencies.find(item => item.code === code) || ARBR_CONFIG.supportedCurrencies[0];
+}
+
+function currencyLabel(code) {
+  const item = currencyMeta(code);
+  return `${item.code} - ${currentLang === 'ar' ? item.ar : item.en}`;
+}
+
+function fallbackOmrToCurrency(code) {
+  if (code === 'OMR') return 1;
+  const fallback = currencyMeta(code).omrPerCurrency || 1;
+  return 1 / fallback;
+}
+
+function omrToCurrencyRate(code) {
+  if (code === 'OMR') return 1;
+  const live = latestCurrencyRates?.[code.toLowerCase()];
+  return Number(live || fallbackOmrToCurrency(code));
+}
+
+function currencyToOmrRate(code) {
+  return code === 'OMR' ? 1 : 1 / omrToCurrencyRate(code);
+}
+
+function selectedBuyCurrency() {
+  return document.getElementById('currencySelect')?.value || 'OMR';
+}
+
+async function loadLiveCurrencyRates() {
+  try {
+    const response = await fetch(ARBR_CONFIG.ratesApiUrl, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`FX ${response.status}`);
+    const data = await response.json();
+    if (!data?.omr) throw new Error('Invalid FX payload');
+    latestCurrencyRates = data.omr;
+    latestCurrencyDate = data.date || new Date().toISOString().slice(0, 10);
+    latestCurrencySource = ARBR_CONFIG.currencyRateSource;
+  } catch (error) {
+    latestCurrencyRates = null;
+    latestCurrencyDate = '';
+    latestCurrencySource = 'fallback';
+  }
+}
+
+function populateCurrencySelect() {
+  const select = document.getElementById('currencySelect');
+  if (!select) return;
+  const preferred = localStorage.getItem('arbr_buy_currency') || 'OMR';
+  select.innerHTML = ARBR_CONFIG.supportedCurrencies
+    .map(item => `<option value="${item.code}">${item.code} - ${currentLang === 'ar' ? item.ar : item.en}</option>`)
+    .join('');
+  select.value = ARBR_CONFIG.supportedCurrencies.some(item => item.code === preferred) ? preferred : 'OMR';
+}
+
+function currentBuyCalculation() {
+  const amount = Math.max(0, Number(document.getElementById('amt')?.value || 0));
+  const currency = selectedBuyCurrency();
+  const rateToOmr = currencyToOmrRate(currency);
+  const amountOmr = amount * rateToOmr;
+  const estimatedArbr = amountOmr * ARBR_CONFIG.entryTokenRate;
+  const omrToUsd = omrToCurrencyRate('USD');
+  return {
+    inputAmount: amount,
+    currency,
+    rateToOmr,
+    amountOmr,
+    estimatedArbr,
+    usdEquivalent: amountOmr * omrToUsd,
+    source: latestCurrencySource,
+    rateDate: latestCurrencyDate
+  };
+}
+
+function updateBuyPreview() {
+  const arbResult = document.getElementById('arbResult');
+  const preview = document.getElementById('currencyPreview');
+  const amountLabel = document.getElementById('amountCurrencyLabel');
+  if (!arbResult) return;
+  const calc = currentBuyCalculation();
+  if (amountLabel) amountLabel.textContent = `${t('amountCurrency')} (${calc.currency})`;
+  arbResult.textContent = formatNumber(calc.estimatedArbr, 'ARBR');
+  if (!preview) return;
+  const sourceLine = calc.source === 'fallback'
+    ? `<span class="currency-error">${t('exchangeFallback')}</span>`
+    : `${t('exchangeUpdated')}: <b>${escapeHtml(calc.rateDate || '-')}</b>`;
+  preview.innerHTML = `
+    <span>${t('convertedOmr')}: <b>${formatNumber(calc.amountOmr, 'OMR')}</b></span>
+    <span>${t('exchangeRateLabel')}: <b>1 ${escapeHtml(calc.currency)} = ${formatRate(calc.rateToOmr, 'OMR')}</b></span>
+    <span>${t('priceFormula')}</span>
+    <span>${sourceLine}</span>
+  `;
+}
+
+async function insertPurchaseRequest(payload) {
+  const response = await supabaseClient
+    .from('purchase_requests')
+    .insert(payload)
+    .select('id,status')
+    .single();
+  if (!response.error) return response;
+  const msg = String(response.error.message || '');
+  if (!msg.includes('input_currency') && !msg.includes('exchange_rate')) return response;
+  const legacyPayload = { ...payload };
+  delete legacyPayload.input_currency;
+  delete legacyPayload.input_amount;
+  delete legacyPayload.exchange_rate_to_omr;
+  delete legacyPayload.exchange_rate_source;
+  delete legacyPayload.exchange_rate_at;
+  return supabaseClient
+    .from('purchase_requests')
+    .insert(legacyPayload)
+    .select('id,status')
+    .single();
+}
+
 function bindBuyPage() {
   const amtInput = document.getElementById('amt');
-  const arbResult = document.getElementById('arbResult');
-  if (!amtInput || !arbResult) return;
-  const calc = () => {
-    const v = Math.max(0, Number(amtInput.value || 0));
-    arbResult.textContent = formatNumber(v * ARBR_CONFIG.entryTokenRate, 'ARBR');
-  };
-  amtInput.addEventListener('input', calc);
-  calc();
+  if (!amtInput || !document.getElementById('arbResult')) return;
+  populateCurrencySelect();
+  window.ARBR_UPDATE_BUY_PREVIEW = updateBuyPreview;
+  amtInput.addEventListener('input', updateBuyPreview);
+  document.getElementById('currencySelect')?.addEventListener('change', event => {
+    localStorage.setItem('arbr_buy_currency', event.target.value);
+    updateBuyPreview();
+  });
+  updateBuyPreview();
+  loadLiveCurrencyRates().then(updateBuyPreview);
   document.getElementById('submitBuy')?.addEventListener('click', async () => {
     if (!requireSupabase()) return;
     if (!requireLoginBeforePurchase()) return;
     const btn = document.getElementById('submitBuy');
     const note = document.getElementById('wallet').value.trim();
-    const amount = Number(amtInput.value);
+    const calc = currentBuyCalculation();
     const paymentMethod = document.getElementById('payM').value;
     if (!note) { showToast(t('enterWallet'), 'warning'); return; }
-    if (amount < 10) { showToast(t('minPurchase'), 'warning'); return; }
-    if (amount >= ARBR_CONFIG.largeBuyVerificationAmount && !requireVerifiedService()) return;
+    if (calc.amountOmr < 10) { showToast(t('minPurchase'), 'warning'); return; }
+    if (calc.amountOmr >= ARBR_CONFIG.largeBuyVerificationAmount && !requireVerifiedService()) return;
     setBusy(btn, true, t('submittingRequest'));
-    const { data, error } = await supabaseClient
-      .from('purchase_requests')
-      .insert({
-        user_id: currentUser.id,
-        amount_omr: amount,
-        amount_usd: amount,
-        estimated_arbr: amount * ARBR_CONFIG.entryTokenRate,
-        payment_method: paymentMethod,
-        wallet_address: note,
-        note,
-        status: 'pending'
-      })
-      .select('id,status')
-      .single();
+    const { data, error } = await insertPurchaseRequest({
+      user_id: currentUser.id,
+      amount_omr: Number(calc.amountOmr.toFixed(3)),
+      amount_usd: Number(calc.usdEquivalent.toFixed(2)),
+      estimated_arbr: Number(calc.estimatedArbr.toFixed(2)),
+      input_currency: calc.currency,
+      input_amount: Number(calc.inputAmount.toFixed(3)),
+      exchange_rate_to_omr: Number(calc.rateToOmr.toFixed(9)),
+      exchange_rate_source: calc.source,
+      exchange_rate_at: calc.rateDate || new Date().toISOString(),
+      payment_method: paymentMethod,
+      wallet_address: note,
+      note,
+      status: 'pending'
+    });
     setBusy(btn, false);
     if (error) { showToast(t('requestFailed') + ': ' + error.message, 'error'); return; }
     showToast(t('requestSubmitted'), 'success');
