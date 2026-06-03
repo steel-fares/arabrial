@@ -87,6 +87,13 @@ a.btn-secondary{display:inline-flex;align-items:center;justify-content:center}
   color:var(--light);padding:11px 24px;border-radius:10px;
   font-weight:800;font-size:14px;cursor:pointer;transition:.25s ease;white-space:nowrap}
 .btn-secondary:hover{border-color:var(--gold);color:var(--gold-light)}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--muted);font-size:12px;font-weight:800}
+.auth-divider::before,.auth-divider::after{content:'';height:1px;flex:1;background:var(--border)}
+.password-meter{height:8px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--border);overflow:hidden;margin:-6px 0 8px}
+.password-meter span{display:block;width:0;height:100%;background:linear-gradient(135deg,var(--gold-soft),var(--green));transition:width .2s ease}
+.helper-text{display:block;color:var(--muted);font-size:12px;line-height:1.7}
+.small-btn{border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--light);border-radius:8px;padding:7px 10px;font-weight:800;font-size:12px;cursor:pointer;margin:2px}
+.small-btn:hover{border-color:var(--gold);color:var(--gold-light)}
 
 /* ── Hero ── */
 .hero{min-height:90vh;padding:80px 6% 0;display:flex;flex-direction:column;gap:52px;position:relative;overflow:hidden}

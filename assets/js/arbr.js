@@ -14,7 +14,7 @@ window.ARBR_SUPABASE_CLIENT = supabaseClient;
 window.ARBR_PUBLIC_CONFIG = { supabaseUrl: SUPABASE_URL, supabaseAnonKey: SUPABASE_ANON_KEY };
 
 const ARBR_PAGE = document.body.dataset.page || 'home';
-const AUTH_REQUIRED_PAGES = new Set(['buy', 'deposit', 'sell', 'dashboard', 'orders', 'wallet', 'admin']);
+const AUTH_REQUIRED_PAGES = new Set(['buy', 'deposit', 'sell', 'dashboard', 'orders', 'wallet', 'admin', 'kyc', 'transfer', 'p2p', 'notifications', 'passkeys']);
 
 function loginUrl(nextPage) {
   const next = nextPage || (location.pathname.split('/').pop() || 'dashboard.html');
@@ -96,6 +96,11 @@ const I18N = {
     navDeposit: 'إيداع / تحويل',
     navSell: 'بيع / استرداد',
     navWallet: 'المحفظة',
+    navPrice: 'سعر ARBR',
+    navTransfer: 'التحويلات',
+    navP2P: 'P2P',
+    navKyc: 'التحقق KYC',
+    navNotifications: 'الإشعارات',
     navAdmin: 'الإدارة',
     login: 'تسجيل الدخول',
     signup: 'إنشاء حساب',
@@ -379,6 +384,11 @@ const I18N = {
     navDeposit: 'Deposit / Transfer',
     navSell: 'Sell / Redeem',
     navWallet: 'Wallet',
+    navPrice: 'ARBR Price',
+    navTransfer: 'Transfers',
+    navP2P: 'P2P',
+    navKyc: 'KYC',
+    navNotifications: 'Notifications',
     navAdmin: 'Admin',
     login: 'Login',
     signup: 'Create Account',

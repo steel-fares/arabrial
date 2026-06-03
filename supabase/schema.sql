@@ -46,9 +46,28 @@ create table if not exists public.wallets (
   updated_at timestamptz not null default now()
 );
 
-insert into public.wallets (user_id)
-select id from public.profiles
-on conflict (user_id) do nothing;
+do $$
+begin
+  if 2 = (
+    select count(*)
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'wallets'
+      and column_name in ('wallet_id', 'wallet_address')
+  ) then
+    insert into public.wallets (user_id, wallet_id, wallet_address)
+    select
+      id,
+      'ARBR-' || upper(replace(left(id::text, 13), '-', '')),
+      'ARBR-' || upper(replace(id::text, '-', ''))
+    from public.profiles
+    on conflict (user_id) do nothing;
+  else
+    insert into public.wallets (user_id)
+    select id from public.profiles
+    on conflict (user_id) do nothing;
+  end if;
+end $$;
 
 create table if not exists public.purchase_requests (
   id uuid primary key default gen_random_uuid(),
@@ -120,6 +139,15 @@ create table if not exists public.pilot_deposits (
   updated_at timestamptz not null default now()
 );
 
+alter table public.pilot_deposits add column if not exists payment_reference text;
+alter table public.pilot_deposits add column if not exists notes text;
+alter table public.pilot_deposits add column if not exists status text not null default 'pending';
+alter table public.pilot_deposits add column if not exists is_refundable boolean not null default true;
+alter table public.pilot_deposits add column if not exists admin_notes text;
+alter table public.pilot_deposits add column if not exists reviewed_at timestamptz;
+alter table public.pilot_deposits add column if not exists created_at timestamptz not null default now();
+alter table public.pilot_deposits add column if not exists updated_at timestamptz not null default now();
+
 create table if not exists public.redeem_requests (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -136,6 +164,17 @@ create table if not exists public.redeem_requests (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.redeem_requests add column if not exists estimated_gross_omr numeric(14, 3) not null default 0;
+alter table public.redeem_requests add column if not exists service_fee_omr numeric(14, 3) not null default 0;
+alter table public.redeem_requests add column if not exists processing_fee_omr numeric(14, 3) not null default 0;
+alter table public.redeem_requests add column if not exists estimated_final_omr numeric(14, 3) not null default 0;
+alter table public.redeem_requests add column if not exists wallet_address text;
+alter table public.redeem_requests add column if not exists note text;
+alter table public.redeem_requests add column if not exists admin_notes text;
+alter table public.redeem_requests add column if not exists reviewed_at timestamptz;
+alter table public.redeem_requests add column if not exists created_at timestamptz not null default now();
+alter table public.redeem_requests add column if not exists updated_at timestamptz not null default now();
 
 create table if not exists public.transaction_ledger (
   id uuid primary key default gen_random_uuid(),
@@ -225,9 +264,25 @@ begin
     email = excluded.email,
     full_name = coalesce(nullif(public.profiles.full_name, ''), excluded.full_name);
 
-  insert into public.wallets (user_id)
-  values (new.id)
-  on conflict (user_id) do nothing;
+  if 2 = (
+    select count(*)
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'wallets'
+      and column_name in ('wallet_id', 'wallet_address')
+  ) then
+    insert into public.wallets (user_id, wallet_id, wallet_address)
+    values (
+      new.id,
+      'ARBR-' || upper(replace(left(new.id::text, 13), '-', '')),
+      'ARBR-' || upper(replace(new.id::text, '-', ''))
+    )
+    on conflict (user_id) do nothing;
+  else
+    insert into public.wallets (user_id)
+    values (new.id)
+    on conflict (user_id) do nothing;
+  end if;
   return new;
 end;
 $$;

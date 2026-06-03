@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ARBR | P2P Trading</title>
+<link rel="icon" href="logo-aa.png" type="image/png" />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/arbr.css" />
+</head>
+<body class="lang-ar" data-page="p2p">
+<div class="bg-layer"></div><div class="bg-grid"></div><div class="bg-orb bg-orb-1"></div><div class="bg-orb bg-orb-2"></div>
+<div id="site-nav"></div>
+<main class="page-main app-page">
+  <section class="sec">
+    <h2 class="sec-title">P2P <span>Trading</span></h2>
+    <p class="sec-desc">Create buy or sell orders and review active/completed order book entries.</p>
+    <div class="buy-grid">
+      <form class="panel" id="p2pOrderForm">
+        <h3>Create Order</h3>
+        <div class="fgroup"><label>Buy / Sell</label><select id="p2pSide"><option value="buy">Buy ARBR</option><option value="sell">Sell ARBR</option></select></div>
+        <div class="fgroup"><label>Amount</label><input id="p2pAmount" type="number" min="1" step="0.01" required /></div>
+        <div class="fgroup"><label>Price per ARBR (OMR)</label><input id="p2pPrice" type="number" min="0.000001" step="0.000001" value="0.00385" required /></div>
+        <button class="btn-primary" id="createP2POrderBtn" type="submit" style="width:100%;padding:14px">Create P2P Order</button>
+      </form>
+      <div class="panel">
+        <h3>Order Book</h3>
+        <div class="orders-tabs" style="margin-bottom:14px">
+          <button class="orders-tab active" type="button">Active Orders</button>
+          <button class="orders-tab" type="button">Completed Orders</button>
+        </div>
+        <div id="p2pOrders"><div class="empty-orders">Loading...</div></div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer></footer>
+<div id="shared-modals"></div><div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/layout.js"></script>
+<script src="assets/js/arbr.js"></script>
+<script src="assets/js/arbr-features.js"></script>
+</body>
+</html>

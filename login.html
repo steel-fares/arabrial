@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ARBR | تسجيل الدخول</title>
-<meta name="description" content="Arab Rial (ARBR) — منصة أصول رقمية للمستثمرين والتجار المؤهلين." />
+<title>ARBR | Login</title>
+<meta name="description" content="Arab Rial ARBR account access." />
 <meta name="theme-color" content="#060910" />
 <link rel="icon" href="logo-aa.png" type="image/png" />
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
@@ -16,38 +16,55 @@
 <div class="bg-orb bg-orb-1"></div>
 <div class="bg-orb bg-orb-2"></div>
 <div id="site-nav"></div>
-<main class="page-main"><div class="auth-page-wrap">
-  <div class="auth-panel">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
-      <div class="logo-mark" style="width:40px;height:40px"><img src="logo-aa.png" alt="Arab Rial ARBR logo" /></div>
-      <div class="logo-text"><b>ARBR</b><small class="auth-portal" data-i18n="investorAccess">بوابة المستثمر ARBR</small></div>
-    </div>
-    <div class="tabs">
-      <button class="tab active" id="loginTab" type="button" data-i18n="login">تسجيل الدخول</button>
-      <button class="tab" id="signupTab" type="button" data-i18n="signup">إنشاء حساب</button>
-    </div>
-    <div id="loginForm">
-      <div class="fgroup"><label data-i18n="email">البريد الإلكتروني</label><input id="loginEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder" /></div>
-      <div class="fgroup"><label data-i18n="password">كلمة المرور</label><input id="loginPass" type="password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder" /></div>
-      <button class="btn-primary" style="width:100%;padding:13px" id="doLogin" type="button" data-i18n="loginInvestor">دخول الحساب</button>
-    </div>
-    <div id="signupForm" class="hidden">
-      <div class="fgroup"><label data-i18n="fullName">الاسم الكامل</label><input id="sName" placeholder="اكتب اسمك الكامل" data-i18n-placeholder="fullNamePlaceholder" /></div>
-      <div class="fgroup"><label data-i18n="phone">رقم الهاتف</label><input id="sPhone" type="tel" placeholder="+..." data-i18n-placeholder="phonePlaceholder" /></div>
-      <div class="fgroup"><label data-i18n="email">البريد الإلكتروني</label><input id="sEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder" /></div>
-      <div class="fgroup"><label data-i18n="password">كلمة المرور</label><input id="sPass" type="password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder" /></div>
-      <button class="btn-primary" style="width:100%;padding:13px" id="doSignup" type="button" data-i18n="createAccount">إنشاء حساب</button>
-    </div>
-    <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-top:18px;text-align:center;padding-top:14px;border-top:1px solid var(--border)">
-      <span data-i18n="loginFootnote">دخول آمن لحساب المستثمر ومتابعة الطلبات والأرصدة داخل منصة ARBR.</span>
-    </p>
-    <div class="quick-links">
-      <a class="quick-link" href="buy.html" data-i18n="navBuy">اشترِ</a>
-      <a class="quick-link" href="deposit.html" data-i18n="navDeposit">إيداع</a>
-      <a class="quick-link" href="dashboard.html" data-i18n="dashboardMenu">لوحة التحكم</a>
+<main class="page-main">
+  <div class="auth-page-wrap">
+    <div class="auth-panel">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+        <div class="logo-mark" style="width:40px;height:40px"><img src="logo-aa.png" alt="Arab Rial ARBR logo" /></div>
+        <div class="logo-text"><b>ARBR</b><small class="auth-portal" data-i18n="investorAccess">Account Portal</small></div>
+      </div>
+      <div class="tabs">
+        <button class="tab active" id="loginTab" type="button" data-i18n="login">Login</button>
+        <button class="tab" id="signupTab" type="button" data-i18n="signup">Create Account</button>
+      </div>
+      <div id="loginForm">
+        <div class="fgroup"><label data-i18n="email">Email</label><input id="loginEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder" /></div>
+        <div class="fgroup"><label data-i18n="password">Password</label><input id="loginPass" type="password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder" /></div>
+        <button class="btn-primary" style="width:100%;padding:13px" id="doLogin" type="button" data-i18n="loginInvestor">Login</button>
+        <div class="auth-divider"><span>or</span></div>
+        <button class="btn-secondary" style="width:100%;padding:13px" id="googleLoginBtn" type="button">Continue with Google</button>
+        <a class="quick-link" href="forgot-password.html" style="display:block;text-align:center;margin-top:12px">Forgot password?</a>
+        <div class="feature-pending" style="margin-top:14px">
+          <b>Phone OTP</b>
+          <div class="fgroup" style="margin-top:12px"><label>Phone number</label><input id="phoneOtpInput" type="tel" placeholder="+968..." /></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn-secondary" id="sendPhoneOtpBtn" type="button" style="flex:1">Send OTP</button>
+            <input id="phoneOtpCode" placeholder="000000" style="flex:1;min-width:110px" />
+            <button class="btn-primary" id="verifyPhoneOtpBtn" type="button" style="flex:1">Verify</button>
+          </div>
+        </div>
+      </div>
+      <div id="signupForm" class="hidden">
+        <div class="fgroup"><label data-i18n="fullName">Full Name</label><input id="sName" placeholder="Full name" data-i18n-placeholder="fullNamePlaceholder" /></div>
+        <div class="fgroup"><label>Username</label><input id="sUsername" placeholder="username" dir="ltr" /></div>
+        <div class="fgroup"><label data-i18n="phone">Phone</label><input id="sPhone" type="tel" placeholder="+..." data-i18n-placeholder="phonePlaceholder" /></div>
+        <div class="fgroup"><label data-i18n="email">Email</label><input id="sEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder" /></div>
+        <div class="fgroup"><label data-i18n="password">Password</label><input id="sPass" type="password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder" /></div>
+        <div class="password-meter"><span id="passwordStrengthBar"></span></div>
+        <small class="helper-text" id="passwordStrengthLabel">Use uppercase, lowercase, number, and symbol.</small>
+        <button class="btn-primary" style="width:100%;padding:13px;margin-top:12px" id="doSignup" type="button" data-i18n="createAccount">Create Account</button>
+        <button class="btn-secondary" style="width:100%;padding:13px;margin-top:10px" id="googleSignupBtn" type="button">Register with Google</button>
+      </div>
+      <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-top:18px;text-align:center;padding-top:14px;border-top:1px solid var(--border)">
+        <span data-i18n="loginFootnote">Secure access for your ARBR account, wallet, and requests.</span>
+      </p>
+      <div class="quick-links">
+        <a class="quick-link" href="buy.html" data-i18n="navBuy">Buy</a>
+        <a class="quick-link" href="deposit.html" data-i18n="navDeposit">Deposit</a>
+        <a class="quick-link" href="dashboard.html" data-i18n="dashboardMenu">Dashboard</a>
+      </div>
     </div>
   </div>
-</div>
 </main>
 <footer>
   <div class="footer-logo">ARBR</div>
@@ -59,6 +76,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/layout.js"></script>
 <script src="assets/js/arbr.js"></script>
+<script src="assets/js/arbr-features.js"></script>
 </body>
 </html>
-

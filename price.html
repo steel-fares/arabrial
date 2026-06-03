@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ARBR | How Price Works</title>
+<link rel="icon" href="logo-aa.png" type="image/png" />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/arbr.css" />
+</head>
+<body class="lang-ar" data-page="price">
+<div class="bg-layer"></div><div class="bg-grid"></div><div class="bg-orb bg-orb-1"></div><div class="bg-orb bg-orb-2"></div>
+<div id="site-nav"></div>
+<main class="page-main app-page">
+  <section class="sec">
+    <h2 class="sec-title">How ARBR <span>Price Works</span></h2>
+    <p class="sec-desc">ARBR pricing combines current price, supply and demand, market activity, trading volume, and available supply.</p>
+    <div class="dash-stats-grid" id="priceStats"></div>
+    <div class="panel" style="margin-top:22px">
+      <h3>Dynamic Price Calculation</h3>
+      <p class="legal-notice">Current price is read from price history or the founding price. Daily and weekly changes are calculated from recorded price points. Available supply equals total supply minus circulating ARBR from live wallet balances.</p>
+      <svg id="priceChartSvg" class="wallet-chart" viewBox="0 0 720 310" role="img" aria-label="ARBR price chart"></svg>
+    </div>
+  </section>
+</main>
+<footer></footer>
+<div id="shared-modals"></div><div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/layout.js"></script>
+<script src="assets/js/arbr.js"></script>
+<script src="assets/js/arbr-features.js"></script>
+</body>
+</html>
