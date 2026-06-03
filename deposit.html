@@ -57,6 +57,23 @@
         <div class="empty-orders" data-i18n="noPilotDeposits">لا توجد طلبات إيداع عضوية حتى الآن.</div>
       </div>
     </div>
+    <form class="part2-card" id="coinbaseDepositForm">
+      <h3>Coinbase Commerce</h3>
+      <div class="fgroup">
+        <label>Deposit amount (OMR)</label>
+        <input id="coinbaseAmount" type="number" min="1" step="0.001" placeholder="100" />
+      </div>
+      <div class="fgroup">
+        <label>Crypto currency</label>
+        <select id="coinbaseCurrency">
+          <option value="USDT">USDT</option>
+          <option value="BTC">BTC</option>
+          <option value="ETH">ETH</option>
+        </select>
+      </div>
+      <button class="btn-primary" id="createCoinbaseChargeBtn" type="submit" style="width:100%;padding:14px">Create Payment Link</button>
+      <p class="helper-text" style="margin-top:12px">Payment detection and balance credit are handled by the Coinbase webhook Edge Function.</p>
+    </form>
   </div>
 </main>
 <footer>
@@ -69,6 +86,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/layout.js"></script>
 <script src="assets/js/arbr.js"></script>
+<script src="assets/js/arbr-features.js"></script>
 </body>
 </html>
 

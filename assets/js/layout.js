@@ -6,6 +6,9 @@
   const links = [
     { href: 'index.html', page: 'home', i18n: 'navHome' },
     { href: 'buy.html', page: 'buy', i18n: 'navBuy' },
+    { href: 'price.html', page: 'price', i18n: 'navPrice' },
+    { href: 'transfer.html', page: 'transfer', i18n: 'navTransfer' },
+    { href: 'p2p.html', page: 'p2p', i18n: 'navP2P' },
     { href: 'orders.html', page: 'orders', i18n: 'myOrdersMenu' },
     { href: 'wallet.html', page: 'wallet', i18n: 'navWallet' }
   ];
@@ -47,6 +50,10 @@
         <a class="menu-item" href="dashboard.html"><span data-i18n="dashboardMenu">لوحة التحكم</span><span>↙</span></a>
         <a class="menu-item" href="orders.html"><span data-i18n="myOrdersMenu">طلباتي</span><span>↙</span></a>
         <a class="menu-item" href="wallet.html"><span data-i18n="navWallet">المحفظة</span><span>↙</span></a>
+        <a class="menu-item" href="transfer.html"><span data-i18n="navTransfer">Transfers</span><span>↙</span></a>
+        <a class="menu-item" href="kyc.html"><span data-i18n="navKyc">KYC</span><span>↙</span></a>
+        <a class="menu-item" href="passkeys.html"><span>Passkeys</span><span>↙</span></a>
+        <a class="menu-item" href="notifications.html"><span data-i18n="navNotifications">Notifications</span><span>↙</span></a>
         <button class="menu-item" type="button" id="openSettingsBtn"><span data-i18n="settings">الإعدادات</span><span>⚙</span></button>
         <button class="menu-item danger" type="button" id="logoutBtn"><span data-i18n="logout">تسجيل الخروج</span><span>×</span></button>
       </div>

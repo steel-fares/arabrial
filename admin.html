@@ -22,6 +22,34 @@
   <p class="sec-desc" data-i18n="adminDashboardDesc">عرض ومراجعة الطلبات المعلقة داخل Arab Rial. إجراءات الموافقة والرفض غير مفعلة في هذه المرحلة.</p>
   <div id="adminPermissionNotice" class="admin-state-card hidden" data-i18n="adminRlsRequired">تحتاج صلاحيات الإدارة إلى إعداد RLS في Supabase</div>
   <div id="adminDashboardContent">
+    <div class="admin-summary-grid" id="adminUserStats"></div>
+    <div class="admin-panel">
+      <div class="admin-panel-head">
+        <h3>User Management</h3>
+        <span class="admin-count-badge">Live</span>
+      </div>
+      <div id="adminUsersTable">
+        <div class="admin-state-card admin-loading">Loading users...</div>
+      </div>
+    </div>
+    <div class="admin-panel">
+      <div class="admin-panel-head">
+        <h3>KYC Review Queue</h3>
+        <span class="admin-count-badge">KYC</span>
+      </div>
+      <div id="adminKycTable">
+        <div class="admin-state-card admin-loading">Loading KYC requests...</div>
+      </div>
+    </div>
+    <div class="admin-panel">
+      <div class="admin-panel-head">
+        <h3>P2P Order Control</h3>
+        <span class="admin-count-badge">P2P</span>
+      </div>
+      <div id="adminP2PTable">
+        <div class="admin-state-card admin-loading">Loading P2P orders...</div>
+      </div>
+    </div>
     <div class="admin-summary-grid" id="adminSummaryCards"></div>
     <div class="admin-panel">
       <div class="admin-panel-head">
@@ -55,6 +83,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/layout.js"></script>
 <script src="assets/js/arbr.js"></script>
+<script src="assets/js/arbr-features.js"></script>
 </body>
 </html>
 

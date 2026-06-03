@@ -90,25 +90,25 @@
 <div class="stats-bar" style="margin-top:-1px">
   <div class="stat-item">
     <span class="s-ico">👥</span>
-    <div><b>+10</b><small data-i18n="qualifiedInvestors">مستثمر مؤهل</small></div>
+    <div><b id="homeUsersCount">0</b><small data-i18n="qualifiedInvestors">مستثمر مؤهل</small></div>
   </div>
   <div class="stat-item">
     <span class="s-ico">💱</span>
-    <div><b>+100K</b><small data-i18n="totalTransfers">إجمالي التحويلات</small></div>
+    <div><b id="homeTransfersCount">0</b><small data-i18n="totalTransfers">إجمالي التحويلات</small></div>
   </div>
   <div class="stat-item">
     <span class="s-ico">📈</span>
-    <div><b>+15K</b><small data-i18n="totalInvestments">إجمالي الطلبات</small></div>
+    <div><b id="homeP2PVolume">0</b><small data-i18n="totalInvestments">إجمالي الطلبات</small></div>
   </div>
   <div class="stat-item">
     <span class="s-ico">🪙</span>
-    <div><b>100M ARBR</b><small data-i18n="totalSupply">إجمالي المعروض</small></div>
+    <div><b id="homeTotalSupply">0 ARBR</b><small data-i18n="totalSupply">إجمالي المعروض</small></div>
   </div>
   <div class="stat-item">
     <span class="s-ico">🛡️</span>
-    <div><b data-i18n="statsSecurityValue">مراجعة يدوية</b><small data-i18n="securityTransparency">أمان وشفافية</small></div>
+    <div><b id="homeAvailableSupply">0 ARBR</b><small data-i18n="securityTransparency">أمان وشفافية</small></div>
   </div>
-  <p class="stats-disclaimer" data-i18n="statsDisclaimer">الأرقام أعلاه تأسيسية/توضيحية وليست بيانات تداول مباشرة.</p>
+  <p class="stats-disclaimer">Live counters are calculated directly from the database.</p>
 </div>
 
 <!-- ══════════ ABOUT ══════════ -->
@@ -238,6 +238,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/layout.js"></script>
 <script src="assets/js/arbr.js"></script>
+<script src="assets/js/arbr-features.js"></script>
 </body>
 </html>
 

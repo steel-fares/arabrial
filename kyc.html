@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ARBR | KYC Verification</title>
+<link rel="icon" href="logo-aa.png" type="image/png" />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/arbr.css" />
+</head>
+<body class="lang-ar" data-page="kyc">
+<div class="bg-layer"></div><div class="bg-grid"></div><div class="bg-orb bg-orb-1"></div><div class="bg-orb bg-orb-2"></div>
+<div id="site-nav"></div>
+<main class="page-main app-page">
+  <section class="sec">
+    <h2 class="sec-title">KYC <span>Verification</span></h2>
+    <p class="sec-desc">Submit identity documents to unlock deposits, withdrawals, large transfers, and P2P trading.</p>
+    <div class="dashboard-shell">
+      <form class="dash-card" id="kycForm">
+        <h3>Identity Details <span id="kycBadge" style="float:inline-end"></span></h3>
+        <div class="fgroup"><label>Full Name</label><input id="kycFullName" required /></div>
+        <div class="fgroup"><label>Country</label><input id="kycCountry" required /></div>
+        <div class="fgroup"><label>Date of Birth</label><input id="kycDob" type="date" required /></div>
+        <div class="fgroup"><label>Document Type</label><select id="kycDocType"><option value="national_id">National ID</option><option value="passport">Passport</option></select></div>
+        <div class="fgroup"><label>National ID / Passport</label><input id="kycDocument" type="file" accept="image/*,.pdf" required /></div>
+        <div class="fgroup"><label>Selfie</label><input id="kycSelfie" type="file" accept="image/*" required /></div>
+        <button class="btn-primary" id="submitKycBtn" type="submit" style="width:100%;padding:14px">Submit KYC</button>
+      </form>
+      <div class="dash-card">
+        <h3>KYC History</h3>
+        <div id="kycHistory"><div class="empty-orders">Loading...</div></div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer></footer>
+<div id="shared-modals"></div><div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/layout.js"></script>
+<script src="assets/js/arbr.js"></script>
+<script src="assets/js/arbr-features.js"></script>
+</body>
+</html>
