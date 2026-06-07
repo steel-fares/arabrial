@@ -1037,7 +1037,9 @@ async function loadRedeemRequests(user = currentUser) {
 }
 
 function isAdminUser() {
-  return profileHasColumn('role') && currentProfile?.role === 'admin';
+  const check = profileHasColumn('role') && currentProfile?.role === 'admin';
+  console.log('isAdminUser() check. currentProfile:', currentProfile, 'result:', check);
+  return check;
 }
 
 async function loadPlatformState() {
@@ -1405,31 +1407,49 @@ async function adminReviewDirectUpdate(type, id, action) {
 }
 
 async function handleAdminReviewAction(btn) {
-  if (!btn || btn.disabled || !supabaseClient || !isAdminUser()) return;
+  console.log('handleAdminReviewAction called. btn:', btn);
+  console.log('isAdminUser:', isAdminUser(), 'supabaseClient:', !!supabaseClient);
+  if (!btn || btn.disabled || !supabaseClient || !isAdminUser()) {
+    console.log('Early exit condition met inside handleAdminReviewAction.');
+    return;
+  }
   const type = btn.dataset.adminType;
   const id = btn.dataset.adminId;
   const action = btn.dataset.adminAction;
-  if (!type || !id || !['approve', 'reject'].includes(action)) return;
+  console.log('Action params. type:', type, 'id:', id, 'action:', action);
+  if (!type || !id || !['approve', 'reject'].includes(action)) {
+    console.log('Invalid action parameters.');
+    return;
+  }
 
   const label = btn.textContent;
   btn.disabled = true;
   btn.textContent = currentLang === 'ar' ? 'جار التنفيذ...' : 'Working...';
   try {
+    console.log('Calling RPC:', adminReviewRpcName(type), 'with params:', adminReviewParams(type, id, action));
     const { error } = await supabaseClient.rpc(adminReviewRpcName(type), adminReviewParams(type, id, action));
+    console.log('RPC execution completed. error:', error);
     if (error) {
       const message = String(error.message || '');
       if (error.code === '42883' || message.includes('function') || message.includes('schema cache')) {
+        console.log('RPC failed with function/existence error. Triggering RLS fallback...');
         const fallback = await adminReviewDirectUpdate(type, id, action);
+        console.log('RLS fallback execution completed. error:', fallback.error, 'data:', fallback.data);
         if (fallback.error) throw fallback.error;
       } else {
         throw error;
       }
     }
+    console.log('Logging audit log...');
     adminAuditLog('admin_review_action', `${type}:${id}:${action}`);
+    console.log('Action successful. Showing toast...');
     showToast(t('adminActionSuccess'), 'success');
+    console.log('Closing details modal...');
     closeAdminDetailsModal();
+    console.log('Reloading admin dashboard...');
     await loadAdminDashboard(true);
   } catch (error) {
+    console.error('Error in handleAdminReviewAction:', error);
     adminAuditLog('admin_review_action_failed', error?.message || `${type}:${id}:${action}`);
     showToast(`${t('adminActionFailed')}: ${error?.message || ''}`, 'error', 7000);
   } finally {
