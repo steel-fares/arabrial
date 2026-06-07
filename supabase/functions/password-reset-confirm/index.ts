@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   const { data: profile } = await supabase
     .from("profiles")
     .select("id")
-    .or(isEmail ? `email.eq.${identifier}` : `phone.eq.${identifier}`)
+    .eq(isEmail ? "email" : "phone", identifier)
     .maybeSingle();
   if (!profile?.id) return jsonResponse({ error: "Account not found" }, 404);
 

@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
   const { data: profile } = await supabase
     .from("profiles")
     .select("id,email,phone")
-    .or(isEmail ? `email.eq.${identifier}` : `phone.eq.${identifier}`)
+    .eq(isEmail ? "email" : "phone", identifier)
     .maybeSingle();
 
   await supabase.rpc("enforce_action_rate_limit", {

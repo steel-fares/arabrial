@@ -124,6 +124,13 @@
     });
   }
 
+  function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   function setText(id, text) {
     const el = document.getElementById(id);
     if (el) el.textContent = text;
@@ -284,8 +291,8 @@
         <td>${fmt(row.arbr)}</td>
         <td>${fmt(row.omr, 2)}</td>
         <td><span class="wallet-status ${row.status}">${tr(row.status) || row.status}</span></td>
-        <td>${row.ref}</td>
-        <td>${row.note || '-'}</td>
+        <td>${escapeHtml(row.ref)}</td>
+        <td>${escapeHtml(row.note) || '-'}</td>
       </tr>
     `).join('');
   }
