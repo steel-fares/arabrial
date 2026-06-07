@@ -147,3 +147,12 @@ $$;
 -- Grant permissions to make these RPCs callable from frontend (via anon and authenticated roles)
 grant execute on function public.log_login_attempt(text, text, text, text, text, text) to anon, authenticated;
 grant execute on function public.admin_set_user_kyc(uuid, text) to authenticated;
+
+-- 3. Fix check constraints on public.profiles to allow all necessary verification and KYC statuses
+alter table public.profiles drop constraint if exists profiles_verification_status_check;
+alter table public.profiles drop constraint if exists profiles_verification_status_chk;
+alter table public.profiles add constraint profiles_verification_status_check check (verification_status in ('unverified', 'pending', 'verified', 'rejected'));
+
+alter table public.profiles drop constraint if exists profiles_kyc_status_check;
+alter table public.profiles drop constraint if exists profiles_kyc_status_chk;
+alter table public.profiles add constraint profiles_kyc_status_check check (kyc_status in ('pending', 'submitted', 'approved', 'rejected'));
