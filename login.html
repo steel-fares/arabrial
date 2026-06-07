@@ -9,6 +9,388 @@
 <link rel="icon" href="logo-aa.png" type="image/png" />
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/arbr.css" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  .arbr-auth-wrap {
+    min-height: calc(100vh - 120px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .arbr-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    background: #0d1220;
+    border: 1px solid #1a2540;
+    border-radius: 16px;
+    padding: 40px 36px;
+    box-shadow: 0 0 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.06);
+    animation: cardIn 0.5s cubic-bezier(.22,1,.36,1);
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Logo */
+  .arbr-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    justify-content: center;
+  }
+  .arbr-logo img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+  }
+  .arbr-logo-text {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #c9a84c;
+    letter-spacing: 2px;
+  }
+  .arbr-logo-sub {
+    font-size: 10px;
+    color: #4a5a7a;
+    letter-spacing: 1px;
+    text-align: center;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* Divider */
+  .arbr-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #1a2540, transparent);
+    margin: 0 -36px 28px;
+  }
+
+  /* Tab switcher */
+  .arbr-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #1a2540;
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 28px;
+    gap: 2px;
+  }
+  .arbr-tab {
+    padding: 9px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #4a5a7a;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+  .arbr-tab.active {
+    background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.08));
+    color: #c9a84c;
+    border: 1px solid rgba(201,168,76,0.2);
+    font-weight: 600;
+  }
+  .arbr-tab:hover:not(.active) {
+    color: #cdd6f0;
+    background: rgba(255,255,255,0.04);
+  }
+
+  /* Method switcher */
+  .arbr-method-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 22px;
+  }
+  .arbr-method-btn {
+    flex: 1;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid #1a2540;
+    background: transparent;
+    color: #4a5a7a;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+  .arbr-method-btn.active {
+    border-color: rgba(201,168,76,0.35);
+    color: #c9a84c;
+    background: rgba(201,168,76,0.06);
+  }
+  .arbr-method-btn:hover:not(.active) {
+    border-color: #2a3a5a;
+    color: #cdd6f0;
+  }
+
+  /* Form fields */
+  .arbr-field {
+    margin-bottom: 14px;
+    text-align: right;
+  }
+  body.lang-en .arbr-field {
+    text-align: left;
+  }
+  .arbr-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: #4a5a7a;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .arbr-input {
+    width: 100%;
+    padding: 11px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #1a2540;
+    border-radius: 9px;
+    color: #cdd6f0;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .arbr-input:focus {
+    border-color: rgba(201,168,76,0.45);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+  }
+  .arbr-input::placeholder { color: #4a5a7a; opacity: 0.7; }
+
+  .arbr-input-group {
+    display: flex;
+    gap: 8px;
+  }
+  .arbr-input-group .arbr-input { flex: 1; }
+
+  /* Password hint */
+  .arbr-hint {
+    font-size: 11px;
+    color: #4a5a7a;
+    margin-top: 5px;
+    line-height: 1.4;
+  }
+
+  /* Forgot */
+  .arbr-forgot {
+    display: block;
+    text-align: right;
+    font-size: 12px;
+    color: #4a5a7a;
+    text-decoration: none;
+    margin-top: -6px;
+    margin-bottom: 18px;
+    transition: color 0.2s;
+  }
+  body.lang-en .arbr-forgot {
+    text-align: left;
+  }
+  .arbr-forgot:hover { color: #c9a84c; }
+
+  /* Primary button */
+  .arbr-btn-primary {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #c9a84c, #a8893d);
+    color: #060910;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(201,168,76,0.25);
+    margin-bottom: 14px;
+  }
+  .arbr-btn-primary:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 28px rgba(201,168,76,0.35);
+  }
+  .arbr-btn-primary:active { transform: translateY(0); }
+
+  /* Secondary button */
+  .arbr-btn-secondary {
+    padding: 11px 16px;
+    border-radius: 9px;
+    border: 1px solid rgba(201,168,76,0.3);
+    background: rgba(201,168,76,0.08);
+    color: #c9a84c;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .arbr-btn-secondary:hover {
+    background: rgba(201,168,76,0.15);
+    border-color: rgba(201,168,76,0.5);
+  }
+  .arbr-btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Separator */
+  .arbr-sep {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 2px 0 14px;
+    font-size: 11px;
+    color: #4a5a7a;
+  }
+  .arbr-sep::before, .arbr-sep::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #1a2540;
+  }
+
+  /* Google button */
+  .arbr-btn-google {
+    width: 100%;
+    padding: 11px;
+    border-radius: 10px;
+    border: 1px solid #1a2540;
+    background: rgba(255,255,255,0.03);
+    color: #cdd6f0;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .arbr-btn-google:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: #2a3a5a;
+  }
+
+  /* Footer */
+  .arbr-footer {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #1a2540;
+    text-align: center;
+    font-size: 11px;
+    color: #4a5a7a;
+    letter-spacing: 0.3px;
+  }
+  .arbr-footer strong {
+    font-family: 'Cinzel', serif;
+    color: rgba(201,168,76,0.5);
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+
+  /* Info box */
+  .arbr-info {
+    background: rgba(201,168,76,0.05);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 9px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: rgba(201,168,76,0.8);
+    margin-bottom: 16px;
+    line-height: 1.5;
+    text-align: right;
+  }
+  body.lang-en .arbr-info {
+    text-align: left;
+  }
+
+  /* OTP boxes */
+  .arbr-otp-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    direction: ltr !important;
+  }
+  .arbr-otp-input {
+    flex: 1;
+    padding: 14px 6px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #1a2540;
+    border-radius: 9px;
+    color: #c9a84c;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .arbr-otp-input:focus {
+    border-color: rgba(201,168,76,0.45);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+  }
+
+  /* Fade animation */
+  .fade-in {
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .hidden {
+    display: none !important;
+  }
+  
+  /* Password strength meter override */
+  .password-meter {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid #1a2540;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  .password-meter span {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(135deg, #c9a84c, #22C55E);
+    transition: width 0.25s ease;
+  }
+  
+  /* Quick links styling to match card */
+  .quick-links {
+    margin-top: 24px;
+    justify-content: center;
+  }
+</style>
 </head>
 <body class="lang-ar" data-page="login">
 <div class="bg-layer"></div>
@@ -16,66 +398,298 @@
 <div class="bg-orb bg-orb-1"></div>
 <div class="bg-orb bg-orb-2"></div>
 <div id="site-nav"></div>
+
 <main class="page-main">
-  <div class="auth-page-wrap">
-    <div class="auth-panel">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
-        <div class="logo-mark" style="width:40px;height:40px"><img src="logo-aa.png" alt="Arab Rial ARBR logo" /></div>
-        <div class="logo-text"><b>ARBR</b><small class="auth-portal" data-i18n="investorAccess">Account Portal</small></div>
+  <div class="arbr-auth-wrap">
+    <div class="arbr-card">
+      <!-- Logo -->
+      <div class="arbr-logo">
+        <img src="logo-aa.png" alt="ARBR" onerror="this.style.display='none'" />
+        <div>
+          <div class="arbr-logo-text">ARBR</div>
+          <div class="arbr-logo-sub" data-i18n="accountPortal">Account Portal</div>
+        </div>
       </div>
-      <div class="tabs">
-        <button class="tab active" id="loginTab" type="button" data-i18n="login">Login</button>
-        <button class="tab" id="signupTab" type="button" data-i18n="signup">Create Account</button>
+
+      <div class="arbr-divider"></div>
+
+      <!-- Tab switcher -->
+      <div class="arbr-tabs">
+        <button class="arbr-tab active" id="loginTab" type="button" data-i18n="login">Login</button>
+        <button class="arbr-tab" id="signupTab" type="button" data-i18n="signup">Create Account</button>
       </div>
-      <div id="loginForm">
-        <div class="fgroup"><label data-i18n="email">Email</label><input id="loginEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder" /></div>
-        <div class="fgroup"><label data-i18n="password">Password</label><input id="loginPass" type="password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder" /></div>
-        <button class="btn-primary" style="width:100%;padding:13px" id="doLogin" type="button" data-i18n="loginInvestor">Login</button>
-        <div class="auth-divider"><span>or</span></div>
-        <button class="btn-secondary" style="width:100%;padding:13px" id="googleLoginBtn" type="button">Continue with Google</button>
-        <a class="quick-link" href="forgot-password.html" style="display:block;text-align:center;margin-top:12px">Forgot password?</a>
-        <div class="feature-pending" style="margin-top:14px">
-          <b>Phone OTP</b>
-          <div class="fgroup" style="margin-top:12px"><label>Phone number</label><input id="phoneOtpInput" type="tel" placeholder="+968..." /></div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn-secondary" id="sendPhoneOtpBtn" type="button" style="flex:1">Send OTP</button>
-            <input id="phoneOtpCode" placeholder="000000" style="flex:1;min-width:110px" />
-            <button class="btn-primary" id="verifyPhoneOtpBtn" type="button" style="flex:1">Verify</button>
+
+      <!-- ─── LOGIN FORM CONTAINER ─── -->
+      <div id="loginFormContainer" class="fade-in">
+        <!-- Method switcher -->
+        <div class="arbr-method-tabs">
+          <button class="arbr-method-btn active" id="loginMethodEmail" type="button" data-i18n="emailPasswordTab">
+            🔑 Email & Password
+          </button>
+          <button class="arbr-method-btn" id="loginMethodPhone" type="button" data-i18n="phoneOtpTab">
+            📱 Phone OTP
+          </button>
+        </div>
+
+        <!-- Email/Password Sub-Form -->
+        <div id="emailLoginForm" class="fade-in">
+          <div class="arbr-field">
+            <label class="arbr-label" data-i18n="email">Email</label>
+            <input class="arbr-input" id="loginEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder" />
+          </div>
+          <div class="arbr-field">
+            <label class="arbr-label" data-i18n="password">Password</label>
+            <input class="arbr-input" id="loginPass" type="password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder" />
+          </div>
+          <a href="forgot-password.html" class="arbr-forgot" data-i18n="forgotPassword">Forgot password?</a>
+          <button class="arbr-btn-primary" id="doLogin" type="button" data-i18n="login">Login</button>
+          <div class="arbr-sep" data-i18n="or">or</div>
+          <button class="arbr-btn-google" id="googleLoginBtn" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" style="margin-inline-end: 8px;">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            <span data-i18n="continueWithGoogle">Continue with Google</span>
+          </button>
+        </div>
+
+        <!-- Phone OTP Sub-Form -->
+        <div id="phoneLoginForm" class="fade-in hidden">
+          <!-- Step 1: Phone number entry -->
+          <div id="phoneOtpEntry" class="fade-in">
+            <div class="arbr-info" data-i18n="phoneOtpInfo">
+              Enter your registered phone number to receive a one-time verification code.
+            </div>
+            <div class="arbr-field">
+              <label class="arbr-label" data-i18n="phone">Phone Number</label>
+              <div class="arbr-input-group">
+                <input class="arbr-input" id="phoneOtpInput" type="tel" placeholder="+..." data-i18n-placeholder="phonePlaceholder" />
+                <button class="arbr-btn-secondary" id="sendPhoneOtpBtn" type="button" data-i18n="sendOtp">Send OTP</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: 6-Digit code verification -->
+          <div id="phoneOtpCodeVerification" class="fade-in hidden">
+            <div class="arbr-info" data-i18n="otpSentInfo">
+              Enter the 6-digit code sent to your phone.
+            </div>
+            <!-- Standard hidden input for compatibility with arbr-features.js -->
+            <input type="hidden" id="phoneOtpCode" />
+            <div class="arbr-otp-row">
+              <input id="otp-0" class="arbr-otp-input" type="text" inputmode="numeric" maxlength="1" />
+              <input id="otp-1" class="arbr-otp-input" type="text" inputmode="numeric" maxlength="1" />
+              <input id="otp-2" class="arbr-otp-input" type="text" inputmode="numeric" maxlength="1" />
+              <input id="otp-3" class="arbr-otp-input" type="text" inputmode="numeric" maxlength="1" />
+              <input id="otp-4" class="arbr-otp-input" type="text" inputmode="numeric" maxlength="1" />
+              <input id="otp-5" class="arbr-otp-input" type="text" inputmode="numeric" maxlength="1" />
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+              <span style="font-size: 12px; color: #4a5a7a;" id="otpTimerText"></span>
+              <button class="arbr-btn-secondary" style="padding: 6px 14px; font-size: 12px;" id="resendOtpBtn" type="button" disabled data-i18n="resend">Resend</button>
+            </div>
+            <button class="arbr-btn-primary" id="verifyPhoneOtpBtn" type="button" data-i18n="verifyLogin">Verify & Login</button>
           </div>
         </div>
       </div>
-      <div id="signupForm" class="hidden">
-        <div class="fgroup"><label data-i18n="fullName">Full Name</label><input id="sName" placeholder="Full name" data-i18n-placeholder="fullNamePlaceholder" /></div>
-        <div class="fgroup"><label>Username</label><input id="sUsername" placeholder="username" dir="ltr" /></div>
-        <div class="fgroup"><label data-i18n="phone">Phone</label><input id="sPhone" type="tel" placeholder="+..." data-i18n-placeholder="phonePlaceholder" /></div>
-        <div class="fgroup"><label data-i18n="email">Email</label><input id="sEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder" /></div>
-        <div class="fgroup"><label data-i18n="password">Password</label><input id="sPass" type="password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder" /></div>
-        <div class="password-meter"><span id="passwordStrengthBar"></span></div>
-        <small class="helper-text" id="passwordStrengthLabel">Use uppercase, lowercase, number, and symbol.</small>
-        <button class="btn-primary" style="width:100%;padding:13px;margin-top:12px" id="doSignup" type="button" data-i18n="createAccount">Create Account</button>
-        <button class="btn-secondary" style="width:100%;padding:13px;margin-top:10px" id="googleSignupBtn" type="button">Register with Google</button>
+
+      <!-- ─── SIGNUP FORM CONTAINER ─── -->
+      <div id="signupFormContainer" class="fade-in hidden">
+        <div class="arbr-field">
+          <label class="arbr-label" data-i18n="fullName">Full Name</label>
+          <input class="arbr-input" id="sName" type="text" placeholder="Your full name" data-i18n-placeholder="fullNamePlaceholder" />
+        </div>
+        <div class="arbr-field">
+          <label class="arbr-label" data-i18n="usernameLabel">Username</label>
+          <input class="arbr-input" id="sUsername" type="text" placeholder="username" data-i18n-placeholder="usernamePlaceholder" dir="ltr" />
+        </div>
+        <div class="arbr-field">
+          <label class="arbr-label" data-i18n="phone">Phone Number</label>
+          <input class="arbr-input" id="sPhone" type="tel" placeholder="+..." data-i18n-placeholder="phonePlaceholder" />
+        </div>
+        <div class="arbr-field">
+          <label class="arbr-label" data-i18n="email">Email</label>
+          <input class="arbr-input" id="sEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="emailPlaceholder" />
+        </div>
+        <div class="arbr-field">
+          <label class="arbr-label" data-i18n="password">Password</label>
+          <input class="arbr-input" id="sPass" type="password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder" />
+          <div class="password-meter"><span id="passwordStrengthBar"></span></div>
+          <p class="arbr-hint" id="passwordStrengthLabel" data-i18n="passwordHint">Use uppercase, lowercase, number, and symbol.</p>
+        </div>
+        <button class="arbr-btn-primary" style="margin-top: 6px;" id="doSignup" type="button" data-i18n="signup">Create Account</button>
+        <div class="arbr-sep" data-i18n="or">or</div>
+        <button class="arbr-btn-google" id="googleSignupBtn" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" style="margin-inline-end: 8px;">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          <span data-i18n="registerWithGoogle">Register with Google</span>
+        </button>
       </div>
-      <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-top:18px;text-align:center;padding-top:14px;border-top:1px solid var(--border)">
-        <span data-i18n="loginFootnote">Secure access for your ARBR account, wallet, and requests.</span>
-      </p>
-      <div class="quick-links">
-        <a class="quick-link" href="buy.html" data-i18n="navBuy">Buy</a>
-        <a class="quick-link" href="deposit.html" data-i18n="navDeposit">Deposit</a>
-        <a class="quick-link" href="dashboard.html" data-i18n="dashboardMenu">Dashboard</a>
+
+      <!-- Footer -->
+      <div class="arbr-footer">
+        <strong>ARBR</strong><br />
+        THE DIGITAL ASSET<br />
+        <span style="font-size: 10px; margin-top: 4px; display: block;">© 2026 ARBR Network</span>
       </div>
     </div>
   </div>
+
+  <div class="quick-links">
+    <a class="quick-link" href="buy.html" data-i18n="navBuy">Buy</a>
+    <a class="quick-link" href="deposit.html" data-i18n="navDeposit">Deposit</a>
+    <a class="quick-link" href="dashboard.html" data-i18n="dashboardMenu">Dashboard</a>
+  </div>
 </main>
-<footer>
-  <div class="footer-logo">ARBR</div>
-  <div style="margin-bottom:8px;font-size:12px;letter-spacing:2px;color:var(--muted)">THE DIGITAL ASSET</div>
-  © 2026 ARBR Network.
-</footer>
+
+<footer></footer>
 <div id="shared-modals"></div>
 <div class="toast" id="toast"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/layout.js"></script>
 <script src="assets/js/arbr.js"></script>
 <script src="assets/js/arbr-features.js"></script>
+
+<script>
+  // UI State Manager
+  (function () {
+    const loginTab = document.getElementById('loginTab');
+    const signupTab = document.getElementById('signupTab');
+    const loginFormContainer = document.getElementById('loginFormContainer');
+    const signupFormContainer = document.getElementById('signupFormContainer');
+
+    const loginMethodEmail = document.getElementById('loginMethodEmail');
+    const loginMethodPhone = document.getElementById('loginMethodPhone');
+    const emailLoginForm = document.getElementById('emailLoginForm');
+    const phoneLoginForm = document.getElementById('phoneLoginForm');
+
+    const phoneOtpEntry = document.getElementById('phoneOtpEntry');
+    const phoneOtpCodeVerification = document.getElementById('phoneOtpCodeVerification');
+    const resendOtpBtn = document.getElementById('resendOtpBtn');
+    const otpTimerText = document.getElementById('otpTimerText');
+    const phoneOtpCode = document.getElementById('phoneOtpCode');
+    const otpInputs = document.querySelectorAll('.arbr-otp-input');
+
+    let countdownInterval = null;
+
+    // Tab switcher (Login / Register)
+    loginTab.addEventListener('click', () => {
+      loginTab.classList.add('active');
+      signupTab.classList.remove('active');
+      loginFormContainer.classList.remove('hidden');
+      signupFormContainer.classList.add('hidden');
+    });
+
+    signupTab.addEventListener('click', () => {
+      signupTab.classList.add('active');
+      loginTab.classList.remove('active');
+      signupFormContainer.classList.remove('hidden');
+      loginFormContainer.classList.add('hidden');
+    });
+
+    // Method switcher (Email / Phone)
+    loginMethodEmail.addEventListener('click', () => {
+      loginMethodEmail.classList.add('active');
+      loginMethodPhone.classList.remove('active');
+      emailLoginForm.classList.remove('hidden');
+      phoneLoginForm.classList.add('hidden');
+    });
+
+    loginMethodPhone.addEventListener('click', () => {
+      loginMethodPhone.classList.add('active');
+      loginMethodEmail.classList.remove('active');
+      phoneLoginForm.classList.remove('hidden');
+      emailLoginForm.classList.add('hidden');
+    });
+
+    // Timer countdown function
+    function startCountdown() {
+      let countdown = 60;
+      otpTimerText.textContent = `Resend in ${countdown}s`;
+      resendOtpBtn.disabled = true;
+
+      clearInterval(countdownInterval);
+      countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown <= 0) {
+          clearInterval(countdownInterval);
+          otpTimerText.textContent = '';
+          resendOtpBtn.disabled = false;
+        } else {
+          otpTimerText.textContent = `Resend in ${countdown}s`;
+        }
+      }, 1000);
+    }
+
+    // React to backend OTP success event
+    document.addEventListener('phone-otp-sent', () => {
+      phoneOtpEntry.classList.add('hidden');
+      phoneOtpCodeVerification.classList.remove('hidden');
+      startCountdown();
+      otpInputs[0].focus();
+    });
+
+    // Resend trigger
+    resendOtpBtn.addEventListener('click', () => {
+      document.getElementById('sendPhoneOtpBtn').click();
+    });
+
+    // OTP field navigation (focus next, backspace)
+    otpInputs.forEach((input, index) => {
+      input.addEventListener('input', (e) => {
+        const val = e.target.value;
+        if (!/^\d?$/.test(val)) {
+          e.target.value = '';
+          return;
+        }
+        if (val && index < 5) {
+          otpInputs[index + 1].focus();
+        }
+        updateCodeValue();
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace') {
+          if (!input.value && index > 0) {
+            otpInputs[index - 1].value = '';
+            otpInputs[index - 1].focus();
+          } else {
+            input.value = '';
+          }
+          updateCodeValue();
+          e.preventDefault();
+        }
+      });
+
+      // Handle paste
+      input.addEventListener('paste', (e) => {
+        const pasteData = (e.clipboardData || window.clipboardData).getData('text').trim();
+        if (/^\d{6}$/.test(pasteData)) {
+          otpInputs.forEach((inp, idx) => {
+            inp.value = pasteData[idx];
+          });
+          phoneOtpCode.value = pasteData;
+          otpInputs[5].focus();
+          e.preventDefault();
+        }
+      });
+    });
+
+    function updateCodeValue() {
+      let code = '';
+      otpInputs.forEach(inp => {
+        code += inp.value;
+      });
+      phoneOtpCode.value = code;
+    }
+  })();
+</script>
 </body>
 </html>

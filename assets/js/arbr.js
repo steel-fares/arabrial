@@ -1,4 +1,4 @@
-﻿/* Supabase config
+/* Supabase config
    ضع القيم من Supabase Dashboard > Project Settings > API.
    استخدم anon/public key فقط هنا، ولا تضع أي مفتاح إداري داخل GitHub Pages. */
 const SUPABASE_URL = 'https://umxmwcwuwsvkvsbdhbdl.supabase.co';
@@ -370,7 +370,21 @@ const I18N = {
     verified: 'تم التحقق من الهوية',
     pendingIdentity: 'قيد المراجعة',
     rejectedIdentity: 'تم رفض التحقق',
-    not_verified: 'لم يتم التحقق من الهوية'
+    not_verified: 'لم يتم التحقق من الهوية',
+    accountPortal: 'بوابة الحساب',
+    emailPasswordTab: '🔑 البريد وكلمة المرور',
+    phoneOtpTab: '📱 رمز الهاتف OTP',
+    phoneOtpInfo: 'أدخل رقم هاتفك المسجل لتلقي رمز تحقق لمرة واحدة.',
+    otpSentInfo: 'أدخل الرمز المكون من 6 أرقام المرسل إلى هاتفك.',
+    sendOtp: 'إرسال الرمز',
+    resend: 'إعادة إرسال',
+    verifyLogin: 'التحقق والدخول',
+    passwordHint: 'استخدم حرفًا كبيرًا وحرفًا صغيرًا ورقمًا ورمزًا.',
+    or: 'أو',
+    continueWithGoogle: 'المتابعة باستخدام Google',
+    registerWithGoogle: 'التسجيل باستخدام Google',
+    usernameLabel: 'اسم المستخدم',
+    usernamePlaceholder: 'اسم المستخدم'
   },
   en: {
     logoSub: 'The Digital Asset',
@@ -658,7 +672,21 @@ const I18N = {
     verified: 'Identity verified',
     pendingIdentity: 'Under review',
     rejectedIdentity: 'Verification rejected',
-    not_verified: 'Identity not verified'
+    not_verified: 'Identity not verified',
+    accountPortal: 'Account Portal',
+    emailPasswordTab: '🔑 Email & Password',
+    phoneOtpTab: '📱 Phone OTP',
+    phoneOtpInfo: 'Enter your registered phone number to receive a one-time verification code.',
+    otpSentInfo: 'Enter the 6-digit code sent to your phone.',
+    sendOtp: 'Send OTP',
+    resend: 'Resend',
+    verifyLogin: 'Verify & Login',
+    passwordHint: 'Use uppercase, lowercase, number, and symbol.',
+    or: 'or',
+    continueWithGoogle: 'Continue with Google',
+    registerWithGoogle: 'Register with Google',
+    usernameLabel: 'Username',
+    usernamePlaceholder: 'username'
   }
 };
 

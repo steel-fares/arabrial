@@ -112,6 +112,7 @@
         await client().auth.signInWithOtp({ phone });
         await invoke("otp-send", { identifier: phone, channel: "sms", purpose: "phone_verify" }).catch(() => null);
         toast("OTP sent.");
+        document.dispatchEvent(new CustomEvent("phone-otp-sent", { detail: { phone } }));
       } catch (error) {
         toast(`OTP failed: ${error.message}`, "error");
       } finally {
