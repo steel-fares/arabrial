@@ -149,6 +149,9 @@ grant execute on function public.log_login_attempt(text, text, text, text, text,
 grant execute on function public.admin_set_user_kyc(uuid, text) to authenticated;
 
 -- 3. Fix check constraints on public.profiles to allow all necessary verification and KYC statuses
+-- Disable the protection trigger temporarily so updates from SQL editor are not blocked
+alter table public.profiles disable trigger profiles_protect_sensitive;
+
 -- Correct any swapped/mismatched values first
 update public.profiles
 set kyc_status = 'approved'
@@ -195,3 +198,6 @@ end $$;
 -- Add correct check constraints
 alter table public.profiles add constraint profiles_verification_status_check check (verification_status in ('unverified', 'pending', 'verified', 'rejected'));
 alter table public.profiles add constraint profiles_kyc_status_check check (kyc_status in ('pending', 'submitted', 'approved', 'rejected'));
+
+-- Re-enable the protection trigger
+alter table public.profiles enable trigger profiles_protect_sensitive;
