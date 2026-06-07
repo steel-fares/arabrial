@@ -149,7 +149,20 @@ grant execute on function public.log_login_attempt(text, text, text, text, text,
 grant execute on function public.admin_set_user_kyc(uuid, text) to authenticated;
 
 -- 3. Fix check constraints on public.profiles to allow all necessary verification and KYC statuses
--- Clean up any invalid values first to prevent constraint violations
+-- Correct any swapped/mismatched values first
+update public.profiles
+set kyc_status = 'approved'
+where kyc_status = 'verified';
+
+update public.profiles
+set verification_status = 'verified'
+where verification_status = 'approved';
+
+update public.profiles
+set verification_status = 'pending'
+where verification_status = 'submitted';
+
+-- Clean up any other invalid values to defaults
 update public.profiles
 set kyc_status = 'pending'
 where kyc_status not in ('pending', 'submitted', 'approved', 'rejected') 
@@ -160,10 +173,25 @@ set verification_status = 'unverified'
 where verification_status not in ('unverified', 'pending', 'verified', 'rejected') 
    or verification_status is null;
 
-alter table public.profiles drop constraint if exists profiles_verification_status_check;
-alter table public.profiles drop constraint if exists profiles_verification_status_chk;
-alter table public.profiles add constraint profiles_verification_status_check check (verification_status in ('unverified', 'pending', 'verified', 'rejected'));
+-- Dynamically drop all old check constraints related to kyc or verification to avoid conflicts
+do $$
+declare
+  r record;
+begin
+  for r in (
+    select conname
+    from pg_constraint c
+    join pg_class t on c.conrelid = t.oid
+    join pg_namespace n on t.relnamespace = n.oid
+    where n.nspname = 'public'
+      and t.relname = 'profiles'
+      and c.contype = 'c'
+      and (conname like '%kyc%' or conname like '%verification%')
+  ) loop
+    execute 'alter table public.profiles drop constraint if exists ' || quote_ident(r.conname);
+  end loop;
+end $$;
 
-alter table public.profiles drop constraint if exists profiles_kyc_status_check;
-alter table public.profiles drop constraint if exists profiles_kyc_status_chk;
+-- Add correct check constraints
+alter table public.profiles add constraint profiles_verification_status_check check (verification_status in ('unverified', 'pending', 'verified', 'rejected'));
 alter table public.profiles add constraint profiles_kyc_status_check check (kyc_status in ('pending', 'submitted', 'approved', 'rejected'));
