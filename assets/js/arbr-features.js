@@ -1,7 +1,7 @@
 (function () {
   const client = () => window.ARBR_SUPABASE_CLIENT || null;
   const page = document.body.dataset.page || "";
-  const priceOmr = 0.00385;
+  const priceOmr = 0.0385;
   const totalSupply = 100000000;
 
   function $id(id) { return document.getElementById(id); }
@@ -386,10 +386,11 @@
       sb.from("price_history").select("recorded_at,price_omr").order("recorded_at", { ascending: true }).limit(30).catch(() => ({ data: [] })),
     ]);
     const s = stats.data?.[0] || { total_supply: totalSupply, circulating_supply: 0, available_supply: totalSupply, p2p_volume: 0 };
-    const rows = prices.data?.length ? prices.data : [
-      { recorded_at: new Date(Date.now() - 86400000).toISOString(), price_omr: priceOmr * 0.98 },
-      { recorded_at: new Date().toISOString(), price_omr: priceOmr },
+    const currentLivePrice = Number(s.current_price_omr || window.ARBR_CURRENT_PRICE_OMR || priceOmr);
+    const rows = prices.data?.length ? [...prices.data] : [
+      { recorded_at: new Date(Date.now() - 86400000).toISOString(), price_omr: currentLivePrice * 0.98 }
     ];
+    rows.push({ recorded_at: new Date().toISOString(), price_omr: currentLivePrice });
     const current = Number(rows.at(-1).price_omr);
     const prev = Number(rows.at(-2)?.price_omr || current);
     const daily = prev ? ((current - prev) / prev) * 100 : 0;

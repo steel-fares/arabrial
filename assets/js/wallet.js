@@ -1,7 +1,7 @@
 (function () {
   const FALLBACK_SUPABASE_URL = 'https://umxmwcwuwsvkvsbdhbdl.supabase.co';
   const FALLBACK_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVteG13Y3d1d3N2a3ZzYmRoYmRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NDYwNjcsImV4cCI6MjA5NTAyMjA2N30.qCwKT7EU21JJKS-_73_uuXdLrhoI3a9644Wk73O2uJY';
-  const DEFAULT_PRICE = 0.00385;
+  const DEFAULT_PRICE = 0.0385;
 
   const labels = {
     ar: {
@@ -250,7 +250,7 @@
     const spent = approvedPurchases.reduce((sum, x) => sum + Number(x.amount_omr || x.amount_usd || 0), 0);
     const balance = Number(wallet?.arbr_balance || 0) || rows.reduce((sum, x) => sum + (x.type === 'buy' ? x.arbr : -x.arbr), 0);
     const history = priceHistory.length ? priceHistory : samplePriceHistory();
-    const last = Number(marketSnapshot?.current_price_omr || history[history.length - 1]?.price || DEFAULT_PRICE);
+    const last = Number(window.ARBR_CURRENT_PRICE_OMR || marketSnapshot?.current_price_omr || history[history.length - 1]?.price || DEFAULT_PRICE);
     const prev = Number(history[history.length - 2]?.price || last);
     const change = prev ? ((last - prev) / prev) * 100 : 0;
     return { balance, purchased, sold, spent, price: last, change, prevPrice: prev };
@@ -364,6 +364,9 @@
     ]);
 
     const livePriceHistory = (priceRows || []).map(row => ({ date: row.recorded_at, price: Number(row.price_omr || DEFAULT_PRICE) }));
+    if (livePriceHistory.length > 0 && window.ARBR_CURRENT_PRICE_OMR) {
+      livePriceHistory.push({ date: new Date().toISOString(), price: window.ARBR_CURRENT_PRICE_OMR });
+    }
     const rows = normalizeTransactions(purchases || [], redeems || [], []);
     const ledgerRows = normalizeTransactions([], [], ledger || []);
     const displayRows = rows;
@@ -378,6 +381,8 @@
     setText('lastPriceUpdateTime', market?.created_at ? `${dateFmt(market.created_at)} (${market.update_interval || '60 دقيقة'})` : new Date().toLocaleString(lang() === 'ar' ? 'ar-OM' : 'en-GB'));
     setText('marketNotes', market?.notes || 'يشهد سوق ARBR نشاطا إيجابيا خلال الأيام الأخيرة مدفوعا بزيادة الطلب وثقة المستثمرين.');
   }
+
+  window.ARBR_LOAD_WALLET = loadWallet;
 
   document.addEventListener('DOMContentLoaded', () => {
     loadWallet();

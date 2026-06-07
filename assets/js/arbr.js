@@ -38,12 +38,25 @@ let adminSummary = { pendingPurchases: 0, pendingDeposits: 0, totalPending: 0, t
 let adminDashboardError = '';
 let adminRealtimeChannel = null;
 
+window.ARBR_CURRENT_PRICE_OMR = 0.0385;
+window.ARBR_CURRENT_PRICE_USD = 0.10;
+
+function calculateTokenPrice(soldTokens) {
+  const milestone = Math.floor(soldTokens / 1000000);
+  const progress = (soldTokens % 1000000) / 1000000;
+  const basePriceUsd = 0.10 * Math.pow(1.1, milestone);
+  const nextPriceUsd = 0.10 * Math.pow(1.1, milestone + 1);
+  const priceUsd = basePriceUsd + progress * (nextPriceUsd - basePriceUsd);
+  const priceOmr = priceUsd * 0.385;
+  return { milestone, progress, priceUsd, priceOmr };
+}
+
 const ARBR_CONFIG = {
   totalSupply: 100000000,
   entryCurrency: 'OMR',
-  entryPriceUsd: 0.01,
-  entryPriceOmr: 0.00385,
-  entryTokenRate: 1 / 0.00385,
+  entryPriceUsd: 0.10,
+  entryPriceOmr: 0.0385,
+  entryTokenRate: 1 / 0.0385,
   spreadRate: 0.05,
   exitFeeRate: 0.10,
   lockDays: 30,
@@ -1063,7 +1076,13 @@ async function loadPlatformState() {
     .select('sold_tokens')
     .eq('id', 1)
     .maybeSingle();
-  if (!error && data) estimatedSoldTokens = Number(data.sold_tokens || 0);
+  if (!error && data) {
+    estimatedSoldTokens = Number(data.sold_tokens || 0);
+    const priceInfo = calculateTokenPrice(estimatedSoldTokens);
+    window.ARBR_CURRENT_PRICE_OMR = priceInfo.priceOmr;
+    window.ARBR_CURRENT_PRICE_USD = priceInfo.priceUsd;
+    console.log('Loaded platform state. Price OMR:', priceInfo.priceOmr, 'Price USD:', priceInfo.priceUsd);
+  }
 }
 
 function adminFallbackText(value) {
@@ -2230,7 +2249,7 @@ function currentBuyCalculation() {
   const currency = selectedBuyCurrency();
   const rateToOmr = currencyToOmrRate(currency);
   const amountOmr = amount * rateToOmr;
-  const estimatedArbr = amountOmr / ARBR_CONFIG.entryPriceOmr;
+  const estimatedArbr = amountOmr / (window.ARBR_CURRENT_PRICE_OMR || 0.0385);
   const omrToUsd = omrToCurrencyRate('USD');
   return {
     inputAmount: amount,
@@ -2252,14 +2271,35 @@ function updateBuyPreview() {
   const calc = currentBuyCalculation();
   if (amountLabel) amountLabel.textContent = `${t('amountCurrency')} (${calc.currency})`;
   arbResult.textContent = formatNumber(calc.estimatedArbr, 'ARBR');
+  
+  // Update static stage text inside the purchase page
+  const priceLineVal = document.querySelector('.price-info .price-line:nth-child(1) b');
+  if (priceLineVal) {
+    priceLineVal.innerHTML = `<span class="ltr-token">1 ARBR = $${(window.ARBR_CURRENT_PRICE_USD || 0.10).toFixed(4)} ≈ ${(window.ARBR_CURRENT_PRICE_OMR || 0.0385).toFixed(6)} OMR</span>`;
+  }
+  const stageLineVal = document.querySelector('.price-info .price-line:nth-child(2) b');
+  if (stageLineVal) {
+    const milestone = Math.floor(estimatedSoldTokens / 1000000);
+    stageLineVal.textContent = currentLang === 'ar' ? `المرحلة ${milestone + 1}` : `Milestone ${milestone + 1}`;
+  }
+  const buyDesc = document.querySelector('.sec-desc[data-i18n="buyDesc"]');
+  if (buyDesc) {
+    buyDesc.innerHTML = currentLang === 'ar' 
+      ? `السعر المباشر الحالي: <span class="ltr-token">1 ARBR = $${(window.ARBR_CURRENT_PRICE_USD || 0.10).toFixed(4)} ≈ ${(window.ARBR_CURRENT_PRICE_OMR || 0.0385).toFixed(6)} OMR</span>. بوابات الدفع غير مفعلة حاليًا، وتخضع الطلبات للمراجعة الداخلية.`
+      : `Current Live Price: <span class="ltr-token">1 ARBR = $${(window.ARBR_CURRENT_PRICE_USD || 0.10).toFixed(4)} ≈ ${(window.ARBR_CURRENT_PRICE_OMR || 0.0385).toFixed(6)} OMR</span>. Payment gateways are currently disabled, and requests are subject to internal review.`;
+  }
+
   if (!preview) return;
   const sourceLine = calc.source === 'fallback'
     ? `<span class="currency-error">${t('exchangeFallback')}</span>`
     : `${t('exchangeUpdated')}: <b>${escapeHtml(calc.rateDate || '-')}</b>`;
+  const formulaText = currentLang === 'ar' 
+    ? `المعادلة: القيمة المحولة إلى OMR ÷ ${(window.ARBR_CURRENT_PRICE_OMR || 0.0385).toFixed(6)} = كمية ARBR` 
+    : `Formula: Converted OMR ÷ ${(window.ARBR_CURRENT_PRICE_OMR || 0.0385).toFixed(6)} = ARBR Amount`;
   preview.innerHTML = `
     <span>${t('convertedOmr')}: <b>${formatNumber(calc.amountOmr, 'OMR')}</b></span>
     <span>${t('exchangeRateLabel')}: <b>1 ${escapeHtml(calc.currency)} = ${formatRate(calc.rateToOmr, 'OMR')}</b></span>
-    <span>${t('priceFormula')}</span>
+    <span>${formulaText}</span>
     <span>${sourceLine}</span>
   `;
 }
@@ -2271,8 +2311,18 @@ function updateHomeCurrencyPreview() {
   if (!select || !priceEl) return;
   const currency = select.value || 'OMR';
   const omrToSelected = omrToCurrencyRate(currency);
-  const priceInSelected = ARBR_CONFIG.entryPriceOmr * omrToSelected;
+  const priceInSelected = (window.ARBR_CURRENT_PRICE_OMR || 0.0385) * omrToSelected;
   priceEl.textContent = formatRate(priceInSelected, currency);
+
+  // Update home stage note text to reflect the current milestone
+  const stageNote = document.querySelector('.pc-stage-note');
+  if (stageNote) {
+    const milestone = Math.floor(estimatedSoldTokens / 1000000);
+    stageNote.textContent = currentLang === 'ar'
+      ? `المرحلة ${milestone + 1} — سعر مباشر ومحدث`
+      : `Milestone ${milestone + 1} — Live updated price`;
+  }
+
   if (!meta) return;
   const sourceLine = latestCurrencySource === 'fallback'
     ? `<span class="currency-error">${t('exchangeFallback')}</span>`
@@ -2514,6 +2564,36 @@ async function loadSharedModals() {
   host.innerHTML = (html && html.trim()) ? html : MODALS_FALLBACK_HTML;
 }
 
+let platformStateChannel = null;
+function setupPlatformStateRealtime() {
+  if (!supabaseClient || platformStateChannel) return;
+  platformStateChannel = supabaseClient
+    .channel('public:platform_state_price')
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'platform_state', filter: 'id=eq.1' },
+      payload => {
+        console.log('Realtime platform_state update:', payload);
+        const newSold = Number(payload.new?.sold_tokens || 0);
+        estimatedSoldTokens = newSold;
+        const priceInfo = calculateTokenPrice(newSold);
+        window.ARBR_CURRENT_PRICE_OMR = priceInfo.priceOmr;
+        window.ARBR_CURRENT_PRICE_USD = priceInfo.priceUsd;
+        console.log('Realtime price updated. OMR:', priceInfo.priceOmr, 'USD:', priceInfo.priceUsd);
+        if (typeof window.ARBR_UPDATE_BUY_PREVIEW === 'function') {
+          window.ARBR_UPDATE_BUY_PREVIEW();
+        }
+        updateHomeCurrencyPreview();
+        if (typeof window.ARBR_LOAD_WALLET === 'function') {
+          window.ARBR_LOAD_WALLET();
+        }
+      }
+    )
+    .subscribe((status) => {
+      console.log('platform_state realtime channel status:', status);
+    });
+}
+
 async function initArbrApp() {
   try {
     await loadSharedModals();
@@ -2521,6 +2601,7 @@ async function initArbrApp() {
     initPageBindings();
     setLanguage(currentLang);
     await refreshUserState();
+    setupPlatformStateRealtime();
     if (supabaseClient) {
       supabaseClient.auth.onAuthStateChange(() => setTimeout(() => refreshUserState(), 0));
     }
