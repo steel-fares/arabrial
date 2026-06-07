@@ -130,9 +130,11 @@
         const { error } = await client().auth.verifyOtp({ phone, token, type: "sms" });
         if (error) throw error;
         await invoke("otp-verify", { identifier: phone, code: token, purpose: "phone_verify" }).catch(() => null);
+        await client().rpc("log_login_attempt", { p_identifier: phone, p_status: "success", p_device_id: deviceId() }).catch(() => null);
         toast("Phone verified.");
         setTimeout(() => location.href = "dashboard.html", 500);
       } catch (error) {
+        await client().rpc("log_login_attempt", { p_identifier: phone, p_status: "failed", p_device_id: deviceId(), p_reason: error.message }).catch(() => null);
         toast(`OTP verify failed: ${error.message}`, "error");
       } finally {
         busy(btn, false);
@@ -184,10 +186,14 @@
         const profile = await currentProfile();
         if (profile?.login_disabled || profile?.frozen_at) {
           await client().auth.signOut();
-          throw new Error(profile.freeze_reason || "Account is frozen or login is disabled.");
+          const blockReason = profile.freeze_reason || "Account is frozen or login is disabled.";
+          await client().rpc("log_login_attempt", { p_identifier: email, p_status: "blocked", p_device_id: deviceId(), p_reason: blockReason }).catch(() => null);
+          throw new Error(blockReason);
         }
+        await client().rpc("log_login_attempt", { p_identifier: email, p_status: "success", p_device_id: deviceId() }).catch(() => null);
         location.href = new URLSearchParams(location.search).get("next") || "dashboard.html";
       } catch (error) {
+        await client().rpc("log_login_attempt", { p_identifier: email, p_status: "failed", p_device_id: deviceId(), p_reason: error.message }).catch(() => null);
         toast(`Login failed: ${error.message}`, "error");
       } finally {
         busy(loginBtn, false);
@@ -521,6 +527,40 @@
     if (page !== "admin") return;
     const profile = await currentProfile();
     if (profile?.role !== "admin") return;
+
+    // Inject custom logins modal for admin
+    const sharedModals = $id("shared-modals");
+    if (sharedModals && !$id("userLoginsModal")) {
+      const modalDiv = document.createElement("div");
+      modalDiv.innerHTML = `
+        <div class="modal" id="userLoginsModal">
+          <div class="modal-card modal-wide" style="width: min(720px, 96vw); max-height: 90vh; overflow-y: auto;">
+            <button class="modal-close" id="closeUserLogins">×</button>
+            <h3 style="color:var(--gold-light);margin-bottom:16px" id="userLoginsTitle">تفاصيل الدخول والأجهزة</h3>
+            
+            <div style="margin-bottom: 24px;">
+              <h4 style="color:var(--gold-soft);margin-bottom:10px;font-size:15px;text-align:right;">الأجهزة المسجلة (Devices)</h4>
+              <div id="userDevicesList" style="display:grid;grid-template-columns:1fr;gap:10px;direction:ltr;">
+                <div class="admin-state-card">Loading devices...</div>
+              </div>
+            </div>
+
+            <div>
+              <h4 style="color:var(--gold-soft);margin-bottom:10px;font-size:15px;text-align:right;">سجل محاولات الدخول (Login Logs)</h4>
+              <div id="userLoginsList" style="max-height: 300px; overflow-y: auto;">
+                <div class="admin-state-card">Loading logins...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      sharedModals.appendChild(modalDiv.firstElementChild);
+      
+      $id("closeUserLogins")?.addEventListener("click", () => {
+        $id("userLoginsModal").classList.remove("open");
+      });
+    }
+
     const [users, wallets, kyc, orders, stats] = await Promise.all([
       client().from("profiles").select("*").order("created_at", { ascending: false }).limit(100),
       client().from("wallets").select("user_id,wallet_id,arbr_balance"),
@@ -536,10 +576,34 @@
       ["Pending KYC", s.pending_kyc],
       ["Frozen Accounts", s.frozen_accounts],
     ].map(([k, v]) => `<div class="admin-summary-card"><small>${k}</small><b>${v || 0}</b></div>`).join("");
+    
     if ($id("adminUsersTable")) $id("adminUsersTable").innerHTML = `
       <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>ID</th><th>Username</th><th>Wallet</th><th>Phone</th><th>Email</th><th>Balance</th><th>KYC</th><th>Created</th><th>Actions</th></tr></thead><tbody>
-      ${(users.data || []).map((u) => `<tr><td>${esc(String(u.id).slice(0, 8))}</td><td>${esc(u.username)}</td><td>${esc(walletMap[u.id]?.wallet_id || "-")}</td><td>${esc(u.phone)}</td><td>${esc(u.email)}</td><td>${fmt(walletMap[u.id]?.arbr_balance, "ARBR")}</td><td>${esc(u.kyc_status)}</td><td>${new Date(u.created_at).toLocaleDateString()}</td><td><button class="small-btn" data-reset-user="${esc(u.email || u.phone)}">Reset Password</button><button class="small-btn" data-disable-user="${u.id}">Disable Login</button><button class="small-btn" data-freeze-user="${u.id}">Freeze</button><button class="small-btn" data-unfreeze-user="${u.id}">Unfreeze</button></td></tr>`).join("")}
+      ${(users.data || []).map((u) => {
+        const kycBtn = u.kyc_status === 'approved' 
+          ? `<button class="small-btn" style="border-color:#ef4444;color:#fca5a5" data-kyc-toggle="rejected" data-user-id="${u.id}">Reject KYC</button>`
+          : `<button class="small-btn" style="border-color:#22c55e;color:#86efac" data-kyc-toggle="approved" data-user-id="${u.id}">Approve KYC</button>`;
+        return `<tr>
+          <td>${esc(String(u.id).slice(0, 8))}</td>
+          <td>${esc(u.username)}</td>
+          <td>${esc(walletMap[u.id]?.wallet_id || "-")}</td>
+          <td>${esc(u.phone)}</td>
+          <td>${esc(u.email)}</td>
+          <td>${fmt(walletMap[u.id]?.arbr_balance, "ARBR")}</td>
+          <td>${esc(u.kyc_status)}</td>
+          <td>${new Date(u.created_at).toLocaleDateString()}</td>
+          <td>
+            <button class="small-btn" data-reset-user="${esc(u.email || u.phone)}">Reset Password</button>
+            <button class="small-btn" data-disable-user="${u.id}">Disable Login</button>
+            <button class="small-btn" data-freeze-user="${u.id}">Freeze</button>
+            <button class="small-btn" data-unfreeze-user="${u.id}">Unfreeze</button>
+            ${kycBtn}
+            <button class="small-btn" data-view-logins="${u.id}" data-username="${esc(u.username)}">Logins</button>
+          </td>
+        </tr>`;
+      }).join("")}
       </tbody></table></div>`;
+
     document.querySelectorAll("[data-reset-user]").forEach((btn) => btn.addEventListener("click", async () => {
       await invoke("password-reset-request", { identifier: btn.dataset.resetUser });
       toast("Password reset request logged and sent if provider is configured.");
@@ -558,6 +622,119 @@
       await client().rpc("admin_set_user_freeze", { p_user_id: btn.dataset.unfreezeUser, p_freeze: false, p_disable_login: false, p_reason: null });
       location.reload();
     }));
+
+    // KYC toggling click event binding
+    document.querySelectorAll("[data-kyc-toggle]").forEach((btn) => btn.addEventListener("click", async () => {
+      const userId = btn.dataset.userId;
+      const status = btn.dataset.kycToggle;
+      const isAr = (typeof currentLang !== 'undefined' ? currentLang : (localStorage.getItem('arbr_lang') || 'ar')) === 'ar';
+      const confirmMsg = status === "approved"
+        ? (isAr ? "هل أنت متأكد من توثيق حساب هذا المستخدم؟" : "Are you sure you want to verify this user's KYC?")
+        : (isAr ? "هل أنت متأكد من إلغاء توثيق حساب هذا المستخدم؟" : "Are you sure you want to reject/unverify this user's KYC?");
+      if (!confirm(confirmMsg)) return;
+      
+      busy(btn, true, "Processing...");
+      try {
+        const { error } = await client().rpc("admin_set_user_kyc", { p_user_id: userId, p_status: status });
+        if (error) throw error;
+        toast(isAr ? "تم تحديث حالة التحقق بنجاح." : "KYC status updated successfully.");
+        setTimeout(() => location.reload(), 800);
+      } catch (error) {
+        toast(`Error: ${error.message}`, "error");
+      } finally {
+        busy(btn, false);
+      }
+    }));
+
+    // Logins details click event binding
+    document.querySelectorAll("[data-view-logins]").forEach((btn) => btn.addEventListener("click", async () => {
+      const userId = btn.dataset.viewLogins;
+      const username = btn.dataset.username;
+      const isAr = (typeof currentLang !== 'undefined' ? currentLang : (localStorage.getItem('arbr_lang') || 'ar')) === 'ar';
+      
+      $id("userLoginsTitle").textContent = isAr 
+        ? `أجهزة وسجل دخول الحساب: ${username}`
+        : `Devices & Login History for: ${username}`;
+        
+      $id("userDevicesList").innerHTML = `<div class="admin-state-card">${isAr ? 'جار تحميل الأجهزة...' : 'Loading devices...'}</div>`;
+      $id("userLoginsList").innerHTML = `<div class="admin-state-card">${isAr ? 'جار تحميل سجل الدخول...' : 'Loading logins...'}</div>`;
+      
+      $id("userLoginsModal").classList.add("open");
+      
+      try {
+        const [devicesRes, loginsRes] = await Promise.all([
+          client().from("user_devices").select("*").eq("user_id", userId).order("last_seen_at", { ascending: false }),
+          client().from("login_logs").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(50)
+        ]);
+        
+        if (devicesRes.error) throw devicesRes.error;
+        if (loginsRes.error) throw loginsRes.error;
+        
+        const devices = devicesRes.data || [];
+        const logins = loginsRes.data || [];
+        
+        // Render devices
+        if (devices.length === 0) {
+          $id("userDevicesList").innerHTML = `<div class="admin-state-card">${isAr ? 'لا توجد أجهزة مسجلة.' : 'No registered devices.'}</div>`;
+        } else {
+          $id("userDevicesList").innerHTML = devices.map(d => `
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 12px; border-radius: 12px; display:flex; justify-content:space-between; align-items:center; gap: 15px;">
+              <div style="text-align: right; flex-grow: 1; min-width: 0;">
+                <strong style="color:var(--text); font-size:14px; display:block;">ID: ${esc(d.device_id.slice(0, 8))}...</strong>
+                <div style="color:var(--muted); font-size:12px; margin-top:4px; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${esc(d.user_agent)}">${esc(d.user_agent || 'Unknown Agent')}</div>
+              </div>
+              <div style="text-align:left; font-size:12px; flex-shrink: 0;">
+                <div style="color:var(--gold-light); font-weight: bold;">IP: ${esc(d.last_ip || d.first_ip || '-')}</div>
+                <div style="color:var(--muted); margin-top:2px;">${new Date(d.last_seen_at).toLocaleString(isAr ? 'ar' : 'en-US')}</div>
+              </div>
+            </div>
+          `).join('');
+        }
+        
+        // Render logins
+        if (logins.length === 0) {
+          $id("userLoginsList").innerHTML = `<div class="admin-state-card">${isAr ? 'لا يوجد سجل دخول.' : 'No login logs found.'}</div>`;
+        } else {
+          $id("userLoginsList").innerHTML = `
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>${isAr ? 'عنوان IP' : 'IP Address'}</th>
+                    <th>${isAr ? 'الحالة' : 'Status'}</th>
+                    <th>${isAr ? 'السبب / المتصفح' : 'Reason / Agent'}</th>
+                    <th>${isAr ? 'التاريخ والوقت' : 'Date & Time'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${logins.map(l => {
+                    const isSuccess = l.status === 'success';
+                    const statusColor = isSuccess ? 'var(--green)' : '#ef4444';
+                    const displayStatus = isSuccess ? (isAr ? 'نجاح' : 'success') : (isAr ? 'فشل' : l.status);
+                    return `
+                      <tr>
+                        <td><strong>${esc(l.ip_address || '-')}</strong></td>
+                        <td><span style="color: ${statusColor}; font-weight: bold;">${esc(displayStatus)}</span></td>
+                        <td>
+                          <small style="color: var(--muted); display: block; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${esc(l.reason || l.user_agent || '')}">
+                            ${esc(l.reason || l.user_agent || '-')}
+                          </small>
+                        </td>
+                        <td><small>${new Date(l.created_at).toLocaleString(isAr ? 'ar' : 'en-US')}</small></td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+      } catch (error) {
+        $id("userDevicesList").innerHTML = `<div class="admin-state-card" style="color:#ef4444;">Error: ${esc(error.message)}</div>`;
+        $id("userLoginsList").innerHTML = `<div class="admin-state-card" style="color:#ef4444;">Error: ${esc(error.message)}</div>`;
+      }
+    }));
+
     if ($id("adminKycTable")) $id("adminKycTable").innerHTML = (kyc.data || []).length ? (kyc.data || []).map((k) => `
       <div class="order-row"><div><b>${esc(k.full_name)}</b><small>${esc(k.country)} · ${esc(k.document_type)}</small></div><div><button class="small-btn" data-kyc-action="approved" data-kyc-id="${k.id}">Approve</button><button class="small-btn" data-kyc-action="rejected" data-kyc-id="${k.id}">Reject</button><button class="small-btn" data-kyc-action="resubmission_requested" data-kyc-id="${k.id}">Resubmit</button></div></div>
     `).join("") : `<div class="empty-orders">No pending KYC requests.</div>`;
