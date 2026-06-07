@@ -1036,6 +1036,20 @@ async function loadRedeemRequests(user = currentUser) {
   return data || [];
 }
 
+async function adminAuditLog(action, details = {}) {
+  if (!supabaseClient) return;
+  try {
+    const payload = {
+      admin_id: currentUser?.id,
+      action: action,
+      details: typeof details === 'string' ? { message: details } : details
+    };
+    await supabaseClient.from('admin_activity_logs').insert(payload);
+  } catch (err) {
+    console.error('Failed to log admin activity:', err);
+  }
+}
+
 function isAdminUser() {
   const check = profileHasColumn('role') && currentProfile?.role === 'admin';
   console.log('isAdminUser() check. currentProfile:', currentProfile, 'result:', check);
