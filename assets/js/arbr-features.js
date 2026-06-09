@@ -8,6 +8,29 @@
   function esc(value) {
     return String(value ?? "").replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
   }
+
+  const ipGeoCache = {};
+  async function getIpGeo(ip, isAr = false) {
+    if (!ip || ip === "-" || ip === '::1' || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.')) {
+      return isAr ? 'شبكة محلية' : 'Local / Intranet';
+    }
+    if (ipGeoCache[ip]) return ipGeoCache[ip];
+    try {
+      const res = await fetch(`https://freeipapi.com/api/json/${ip}`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (data.countryName) {
+        const country = data.countryName;
+        const city = data.cityName || '';
+        const locationStr = city ? `${city}, ${country}` : country;
+        ipGeoCache[ip] = locationStr;
+        return locationStr;
+      }
+    } catch (e) {
+      // Ignore
+    }
+    return isAr ? 'موقع غير معروف' : 'Unknown Location';
+  }
   function toast(message, type = "success") {
     if (typeof showToast === "function") showToast(message, type);
     else console.log(message);
@@ -692,18 +715,24 @@
         if (devices.length === 0) {
           $id("userDevicesList").innerHTML = `<div class="admin-state-card">${isAr ? 'لا توجد أجهزة مسجلة.' : 'No registered devices.'}</div>`;
         } else {
-          $id("userDevicesList").innerHTML = devices.map(d => `
+          $id("userDevicesList").innerHTML = devices.map(d => {
+            const ip = d.last_ip || d.first_ip || '-';
+            return `
             <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 12px; border-radius: 12px; display:flex; justify-content:space-between; align-items:center; gap: 15px;">
               <div style="text-align: right; flex-grow: 1; min-width: 0;">
                 <strong style="color:var(--text); font-size:14px; display:block;">ID: ${esc(d.device_id.slice(0, 8))}...</strong>
                 <div style="color:var(--muted); font-size:12px; margin-top:4px; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${esc(d.user_agent)}">${esc(d.user_agent || 'Unknown Agent')}</div>
               </div>
               <div style="text-align:left; font-size:12px; flex-shrink: 0;">
-                <div style="color:var(--gold-light); font-weight: bold;">IP: ${esc(d.last_ip || d.first_ip || '-')}</div>
+                <div style="color:var(--gold-light); font-weight: bold;">
+                  IP: ${esc(ip)}
+                  <span class="ip-geo-badge" data-ip="${esc(ip)}" style="font-size:10px; color:#4a5a7a; margin-inline-start:4px; font-weight:normal;">(${isAr ? 'جاري جلب الموقع...' : 'Loading location...'})</span>
+                </div>
                 <div style="color:var(--muted); margin-top:2px;">${new Date(d.last_seen_at).toLocaleString(isAr ? 'ar' : 'en-US')}</div>
               </div>
             </div>
-          `).join('');
+            `;
+          }).join('');
         }
         
         // Render logins
@@ -726,9 +755,13 @@
                     const isSuccess = l.status === 'success';
                     const statusColor = isSuccess ? 'var(--green)' : '#ef4444';
                     const displayStatus = isSuccess ? (isAr ? 'نجاح' : 'success') : (isAr ? 'فشل' : l.status);
+                    const ip = l.ip_address || '-';
                     return `
                       <tr>
-                        <td><strong>${esc(l.ip_address || '-')}</strong></td>
+                        <td>
+                          <strong>${esc(ip)}</strong>
+                          <div class="ip-geo-badge" data-ip="${esc(ip)}" style="font-size:10px; color:#4a5a7a; font-weight:normal;">(${isAr ? 'جاري جلب الموقع...' : 'Loading location...'})</div>
+                        </td>
                         <td><span style="color: ${statusColor}; font-weight: bold;">${esc(displayStatus)}</span></td>
                         <td>
                           <small style="color: var(--muted); display: block; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${esc(l.reason || l.user_agent || '')}">
@@ -744,6 +777,18 @@
             </div>
           `;
         }
+
+        // Resolve IP locations progressively
+        const geoBadges = document.querySelectorAll(".ip-geo-badge");
+        const uniqueIps = Array.from(new Set(Array.from(geoBadges).map(b => b.dataset.ip).filter(ip => ip && ip !== '-')));
+        
+        uniqueIps.forEach(async (ip) => {
+          const geo = await getIpGeo(ip, isAr);
+          document.querySelectorAll(`.ip-geo-badge[data-ip="${ip}"]`).forEach(badge => {
+            badge.textContent = `(${geo})`;
+            badge.style.color = 'var(--gold-light)';
+          });
+        });
       } catch (error) {
         $id("userDevicesList").innerHTML = `<div class="admin-state-card" style="color:#ef4444;">Error: ${esc(error.message)}</div>`;
         $id("userLoginsList").innerHTML = `<div class="admin-state-card" style="color:#ef4444;">Error: ${esc(error.message)}</div>`;
