@@ -7,33 +7,534 @@
 <link rel="icon" href="logo-aa.png" type="image/png" />
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/arbr.css" />
+<style>
+  /* Binance P2P UI Custom Styles */
+  .p2p-nav {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+  }
+  .p2p-nav-btn {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px 12px;
+    position: relative;
+    transition: color 0.2s;
+  }
+  .p2p-nav-btn.active-buy {
+    color: var(--green);
+  }
+  .p2p-nav-btn.active-buy::after {
+    content: '';
+    position: absolute;
+    bottom: -13px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--green);
+    border-radius: 99px;
+  }
+  .p2p-nav-btn.active-sell {
+    color: #ef4444;
+  }
+  .p2p-nav-btn.active-sell::after {
+    content: '';
+    position: absolute;
+    bottom: -13px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: #ef4444;
+    border-radius: 99px;
+  }
+
+  .p2p-filter-bar {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .p2p-filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .p2p-filter-item label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .p2p-filter-input {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    min-width: 140px;
+    transition: border-color 0.2s;
+  }
+  .p2p-filter-input:focus {
+    border-color: var(--gold-light);
+  }
+
+  /* Ads Table Layout */
+  .p2p-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: right;
+  }
+  body.lang-en .p2p-table {
+    text-align: left;
+  }
+  .p2p-table th, .p2p-table td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .p2p-table th {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .p2p-price-col {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .p2p-merchant-badge {
+    background: rgba(201, 168, 76, 0.15);
+    color: var(--gold-light);
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(201, 168, 76, 0.3);
+    margin-inline-start: 6px;
+    font-weight: bold;
+  }
+  .p2p-payment-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin: 2px;
+    font-weight: 600;
+    border: 1px solid transparent;
+  }
+  .payment-bank { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-color: rgba(59, 130, 246, 0.2); }
+  .payment-vodafone { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border-color: rgba(239, 68, 68, 0.2); }
+  .payment-stc { background: rgba(139, 92, 246, 0.1); color: #c084fc; border-color: rgba(139, 92, 246, 0.2); }
+  .payment-ooredoo { background: rgba(236, 72, 153, 0.1); color: #f9a8d4; border-color: rgba(236, 72, 153, 0.2); }
+
+  /* Active Trade Room */
+  .trade-room {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    margin-top: 12px;
+  }
+  @media (max-width: 960px) {
+    .trade-room { grid-template-columns: 1fr; }
+  }
+  .trade-chat-box {
+    height: 360px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .chat-msg {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+  .chat-msg.partner {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+  }
+  .chat-msg.me {
+    align-self: flex-end;
+    background: rgba(201, 168, 76, 0.15);
+    color: var(--gold-light);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+  }
+  .chat-msg.system {
+    align-self: center;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+    max-width: 90%;
+  }
+
+  .trade-state-pill {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .state-pending_payment { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+  .state-paid { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+  .state-completed { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+  .state-cancelled { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+  .state-disputed { background: rgba(220, 38, 38, 0.25); color: #f87171; border: 1px solid rgba(220, 38, 38, 0.4); }
+
+  /* Overlay Modal */
+  .p2p-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .p2p-modal.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .p2p-modal-card {
+    background: #0d1220;
+    border: 1px solid var(--border);
+    width: 100%;
+    max-width: 480px;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+  }
+  .p2p-modal.open .p2p-modal-card {
+    transform: translateY(0);
+  }
+</style>
 </head>
 <body class="lang-ar" data-page="p2p">
 <div class="bg-layer"></div><div class="bg-grid"></div><div class="bg-orb bg-orb-1"></div><div class="bg-orb bg-orb-2"></div>
 <div id="site-nav"></div>
+
 <main class="page-main app-page">
-  <section class="sec">
-    <h2 class="sec-title">P2P <span>Trading</span></h2>
-    <p class="sec-desc">Create buy or sell orders and review active/completed order book entries.</p>
-    <div class="buy-grid">
-      <form class="panel" id="p2pOrderForm">
-        <h3>Create Order</h3>
-        <div class="fgroup"><label>Buy / Sell</label><select id="p2pSide"><option value="buy">Buy ARBR</option><option value="sell">Sell ARBR</option></select></div>
-        <div class="fgroup"><label>Amount</label><input id="p2pAmount" type="number" min="1" step="0.01" required /></div>
-        <div class="fgroup"><label>Price per ARBR (OMR)</label><input id="p2pPrice" type="number" min="0.000001" step="0.000001" value="0.00385" required /></div>
-        <button class="btn-primary" id="createP2POrderBtn" type="submit" style="width:100%;padding:14px">Create P2P Order</button>
-      </form>
-      <div class="panel">
-        <h3>Order Book</h3>
-        <div class="orders-tabs" style="margin-bottom:14px">
-          <button class="orders-tab active" type="button">Active Orders</button>
-          <button class="orders-tab" type="button">Completed Orders</button>
+  <!-- ══════════ P2P DASHBOARD VIEW ══════════ -->
+  <div id="p2pDashboardView" class="fade-in">
+    <section class="sec">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 18px; flex-wrap: wrap; gap:12px;">
+        <div>
+          <h2 class="sec-title" style="margin-bottom:6px">التداول عبر الباب <span>P2P Trading</span></h2>
+          <p class="sec-desc" style="max-width: 600px;">قم ببيع وشراء أصول ARBR الرقمية مباشرة مع أعضاء وتجار المنصة عبر نظام ضمان (إيداع معلق) آمن بالكامل.</p>
         </div>
-        <div id="p2pOrders"><div class="empty-orders">Loading...</div></div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-primary" id="openCreateAdBtn" type="button">✦ نشر إعلان تداول جديد</button>
+          <button class="btn-secondary" id="viewMyTradesBtn" type="button">📋 معاملاتي النشطة</button>
+        </div>
       </div>
-    </div>
-  </section>
+
+      <!-- P2P Toggle (Buy / Sell) -->
+      <div class="p2p-nav">
+        <button class="p2p-nav-btn active-buy" id="p2pNavBuy" type="button">شراء (Buy)</button>
+        <button class="p2p-nav-btn" id="p2pNavSell" type="button">بيع (Sell)</button>
+      </div>
+
+      <!-- Filters Row -->
+      <div class="p2p-filter-bar">
+        <div class="p2p-filter-item">
+          <label>المبلغ المطلق</label>
+          <input class="p2p-filter-input" id="filterAmount" type="number" placeholder="مثال: 50" min="0" />
+        </div>
+        <div class="p2p-filter-item">
+          <label>العملة المحلية (Fiat)</label>
+          <select class="p2p-filter-input" id="filterFiat">
+            <option value="OMR">OMR (ريال عماني)</option>
+            <option value="AED">AED (درهم إماراتي)</option>
+            <option value="SAR">SAR (ريال سعودي)</option>
+            <option value="QAR">QAR (ريال قطري)</option>
+            <option value="EGP">EGP (جنيه مصري)</option>
+          </select>
+        </div>
+        <div class="p2p-filter-item">
+          <label>طريقة الدفع</label>
+          <select class="p2p-filter-input" id="filterPayment">
+            <option value="ALL">كل طرق الدفع</option>
+            <option value="Bank Transfer">تحويل بنكي</option>
+            <option value="STC Pay">STC Pay</option>
+            <option value="Vodafone Cash">Vodafone Cash</option>
+            <option value="Ooredoo Pay">Ooredoo Pay</option>
+          </select>
+        </div>
+        <div class="p2p-filter-item" style="flex-direction:row; align-items:center; gap:10px; margin-top:20px;">
+          <input type="checkbox" id="filterMerchant" style="width:18px; height:18px; cursor:pointer;" />
+          <label for="filterMerchant" style="cursor:pointer; user-select:none; font-size:13px; color:var(--text)">إعلانات التجار المعتمدين فقط</label>
+        </div>
+      </div>
+
+      <!-- Ads List Panel -->
+      <div class="panel" style="padding: 0; overflow-x: auto;">
+        <table class="p2p-table">
+          <thead>
+            <tr>
+              <th>المعلن (Advertiser)</th>
+              <th>السعر (Price)</th>
+              <th>المتاح والحدود (Limit / Available)</th>
+              <th>طرق الدفع (Payment)</th>
+              <th style="text-align:center;">الإجراء (Action)</th>
+            </tr>
+          </thead>
+          <tbody id="p2pAdsList">
+            <tr>
+              <td colspan="5" style="text-align:center; padding:40px; color:var(--muted)">جاري تحميل الإعلانات المتاحة...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ══════════ P2P TRADE ROOM (Chat & Escrow Execution) ══════════ -->
+  <div id="p2pTradeRoomView" class="fade-in hidden">
+    <section class="sec">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:16px; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div>
+          <button class="small-btn" id="backToP2PBtn" type="button" style="margin-bottom:8px">← العودة للرئيسية P2P</button>
+          <h2 style="color:var(--text); font-size:20px; display:flex; align-items:center; gap:10px;">
+            تفاصيل المعاملة P2P Trade Room
+            <span class="trade-state-pill" id="tradeRoomStatus">-</span>
+          </h2>
+        </div>
+        <div style="text-align:left;">
+          <small style="color:var(--muted); display:block;">رقم المعاملة (Trade ID)</small>
+          <strong id="tradeRoomId" style="font-family:monospace; color:var(--gold-soft);">-</strong>
+        </div>
+      </div>
+
+      <div class="trade-room">
+        <!-- Chat Console & Execution -->
+        <div class="panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <h3>💬 المحادثة الآمنة (Secure Trade Chat)</h3>
+            <span id="chatConnectionStatus" style="font-size:12px; color:var(--green)">● متصل بالبث المباشر</span>
+          </div>
+
+          <!-- Messages container -->
+          <div class="trade-chat-box" id="tradeChatBox">
+            <div class="chat-msg system">جاري تحميل رسائل المحادثة...</div>
+          </div>
+
+          <!-- Message input -->
+          <form id="tradeChatForm" style="display:flex; gap:10px;">
+            <input class="arbr-input" id="tradeChatInput" type="text" placeholder="اكتب رسالة للمستخدم الآخر أو ارفع إثبات الدفع..." required style="flex:1;" />
+            <button class="btn-primary" type="submit" style="padding: 10px 24px;">إرسال</button>
+          </form>
+        </div>
+
+        <!-- Info Sidebar & Payment Operations -->
+        <div style="display:flex; flex-direction:column; gap:20px;">
+          <!-- Trade Summary Info Card -->
+          <div class="panel">
+            <h4 style="margin-bottom:12px; color:var(--gold-light); font-size:15px; border-bottom:1px solid var(--border); padding-bottom:8px;">ملخص الصفقة</h4>
+            <div style="display:flex; flex-direction:column; gap:10px; font-size:13.5px;">
+              <div style="display:flex; justify-content:space-between;">
+                <span style="color:var(--muted)">نوع المعاملة:</span>
+                <strong id="tradeRoomSide">-</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span style="color:var(--muted)">الطرف الآخر:</span>
+                <strong id="tradeRoomPartner">-</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span style="color:var(--muted)">الكمية:</span>
+                <strong id="tradeRoomAmount">-</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span style="color:var(--muted)">سعر الوحدة:</span>
+                <strong id="tradeRoomPrice">-</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; border-top:1px dashed var(--border); padding-top:8px; font-size:15px;">
+                <span style="color:var(--gold-soft); font-weight:bold;">المبلغ الإجمالي:</span>
+                <strong id="tradeRoomTotal" style="color:var(--gold-light); font-weight:bold;">-</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Execution Box -->
+          <div class="panel" id="tradeActionPanel" style="background: rgba(201, 168, 76, 0.03); border-color: rgba(201, 168, 76, 0.15)">
+            <h4 style="margin-bottom:12px; font-size:15px; color:var(--text)">إجراءات الأمان والضمان</h4>
+            
+            <div style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;" id="tradeInstructionText">
+              الرجاء الانتظار حتى اكتمال جلب تفاصيل المعاملة...
+            </div>
+
+            <!-- Timer Countdown -->
+            <div id="appealTimerContainer" style="margin-bottom:14px; padding:10px; background:rgba(0,0,0,0.2); border-radius:8px; display:none; text-align:center;">
+              <span style="font-size:11px; color:var(--muted); display:block;">مؤقت طلب التحكيم / Appeal Timer</span>
+              <strong style="font-size:18px; color:#ef4444;" id="appealTimerValue">15:00</strong>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <!-- Action buttons toggled by JS state -->
+              <button class="btn-primary" id="btnMarkPaid" type="button" style="width:100%; display:none; background:linear-gradient(135deg, var(--green), #16a34a)">✓ لقد قمت بالدفع المالي (Paid)</button>
+              <button class="btn-primary" id="btnReleaseCrypto" type="button" style="width:100%; display:none; background:linear-gradient(135deg, var(--green), #16a34a)">🔓 تحرير عملات الضمان (Release)</button>
+              <button class="btn-secondary" id="btnCancelTrade" type="button" style="width:100%; display:none; color:#fca5a5; border-color:rgba(239, 68, 68, 0.3); background:rgba(239, 68, 68, 0.05)">× إلغاء المعاملة (Cancel)</button>
+              <button class="btn-secondary" id="btnDisputeTrade" type="button" style="width:100%; display:none; color:#fbcfe8; border-color:rgba(236,72,153,0.3); background:rgba(236,72,153,0.05)">🛡️ طلب التحكيم (Dispute / Appeal)</button>
+            </div>
+
+            <!-- Admin Ruling Action Section (Visually visible only for admins on disputed trades) -->
+            <div id="adminRulingSection" style="display:none; border-top: 1px solid var(--border); margin-top: 16px; padding-top: 14px;">
+              <h4 style="color:#ef4444; font-size:14px; margin-bottom:10px;">لوحة تحكيم الإدارة (Admin Arbitration)</h4>
+              <div style="display:flex; gap:8px;">
+                <button class="small-btn" id="btnAdminRelease" style="background:#22c55e; color:#060910; border:none; flex:1;" type="button">تحرير للمشتري</button>
+                <button class="small-btn" id="btnAdminRefund" style="background:#ef4444; color:#fff; border:none; flex:1;" type="button">إرجاع للبائع</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 </main>
+
+<!-- ══════════ MODAL: NEW ADVERTISEMENT ══════════ -->
+<div class="p2p-modal" id="createAdModal">
+  <div class="p2p-modal-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <h3 style="color:var(--gold-light)">نشر إعلان تداول جديد</h3>
+      <button class="modal-close" id="closeCreateAdModal" style="background:transparent; border:none; font-size:24px; color:var(--muted); cursor:pointer;">×</button>
+    </div>
+    <form id="createAdForm">
+      <div class="fgroup">
+        <label>نوع الإعلان</label>
+        <select id="adSide" class="p2p-filter-input" style="width:100%">
+          <option value="buy">أريد الشراء (BUY - Ad owner buys, takers sell)</option>
+          <option value="sell">أريد البيع (SELL - Ad owner sells, takers buy)</option>
+        </select>
+      </div>
+      <div class="fgroup" style="margin-top:12px;">
+        <label>العملة الرقمية</label>
+        <select id="adCryptoAsset" class="p2p-filter-input" style="width:100%">
+          <option value="ARBR">ARBR</option>
+          <option value="USDT">USDT (عند التفعيل)</option>
+        </select>
+      </div>
+      <div class="fgroup" style="margin-top:12px;">
+        <label>العملة المحلية المطلوبة (Fiat)</label>
+        <select id="adFiatCurrency" class="p2p-filter-input" style="width:100%">
+          <option value="OMR">OMR (ريال عماني)</option>
+          <option value="AED">AED (درهم إماراتي)</option>
+          <option value="SAR">SAR (ريال سعودي)</option>
+          <option value="QAR">QAR (ريال قطري)</option>
+          <option value="EGP">EGP (جنيه مصري)</option>
+        </select>
+      </div>
+      <div class="fgroup" style="margin-top:12px;">
+        <label>سعر الوحدة بالعملة المحلية</label>
+        <input id="adPrice" type="number" class="p2p-filter-input" style="width:100%" placeholder="مثال: 0.0385" step="0.000001" min="0.000001" required />
+      </div>
+      <div class="fgroup" style="margin-top:12px;">
+        <label>الكمية الكلية (Amount)</label>
+        <input id="adAmount" type="number" class="p2p-filter-input" style="width:100%" placeholder="مثال: 5000 ARBR" step="0.01" min="1" required />
+      </div>
+      <div class="fgroup" style="margin-top:12px;">
+        <label>الحد الأدنى للصفقة بالعملة المحلية</label>
+        <input id="adMinLimit" type="number" class="p2p-filter-input" style="width:100%" placeholder="مثال: 10 OMR" step="0.01" min="0" required />
+      </div>
+      <div class="fgroup" style="margin-top:12px;">
+        <label>طرق الدفع المقبولة (اختر واحدة أو أكثر)</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px;" id="adPaymentMethodsContainer">
+          <label style="font-size:13px; color:var(--text)"><input type="checkbox" value="Bank Transfer" class="ad-pay-chk" /> تحويل بنكي</label>
+          <label style="font-size:13px; color:var(--text)"><input type="checkbox" value="STC Pay" class="ad-pay-chk" /> STC Pay</label>
+          <label style="font-size:13px; color:var(--text)"><input type="checkbox" value="Vodafone Cash" class="ad-pay-chk" /> Vodafone Cash</label>
+          <label style="font-size:13px; color:var(--text)"><input type="checkbox" value="Ooredoo Pay" class="ad-pay-chk" /> Ooredoo Pay</label>
+        </div>
+      </div>
+      <button class="btn-primary" type="submit" style="width:100%; margin-top:20px; padding:12px;">تأكيد ونشر الإعلان</button>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: INITIATE TRADE OVERLAY ══════════ -->
+<div class="p2p-modal" id="initiateTradeModal">
+  <div class="p2p-modal-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <h3 id="tradeModalTitle" style="color:var(--gold-light)">شراء ARBR</h3>
+      <button class="modal-close" id="closeInitiateTradeModal" style="background:transparent; border:none; font-size:24px; color:var(--muted); cursor:pointer;">×</button>
+    </div>
+    <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:16px; font-size:13px; display:flex; flex-direction:column; gap:6px;">
+      <div style="display:flex; justify-content:space-between;"><span style="color:var(--muted)">السعر:</span><strong id="tradeModalPrice">-</strong></div>
+      <div style="display:flex; justify-content:space-between;"><span style="color:var(--muted)">المتاح:</span><strong id="tradeModalAvailable">-</strong></div>
+      <div style="display:flex; justify-content:space-between;"><span style="color:var(--muted)">الحدود:</span><strong id="tradeModalLimits">-</strong></div>
+      <div style="display:flex; justify-content:space-between;"><span style="color:var(--muted)">طرق الدفع:</span><strong id="tradeModalPayment">-</strong></div>
+    </div>
+    <form id="initiateTradeForm">
+      <input type="hidden" id="tradeModalOrderId" />
+      <div class="fgroup">
+        <label id="tradeModalInputLabel">الكمية المطلوبة للشراء (ARBR)</label>
+        <input id="tradeModalAmount" type="number" class="p2p-filter-input" style="width:100%" placeholder="أدخل الكمية..." step="0.01" min="1" required />
+      </div>
+      <div style="margin:14px 0; font-size:14px; text-align:right;">
+        <span style="color:var(--muted);">المبلغ الذي ستدفعه:</span>
+        <strong id="tradeModalCalculation" style="color:var(--gold-light); font-size:16px;">0.00 OMR</strong>
+      </div>
+      <button class="btn-primary" type="submit" id="btnConfirmTrade" style="width:100%; padding:12px;">بدء الصفقة وقفل الضمان</button>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: MY ACTIVE TRADES LIST ══════════ -->
+<div class="p2p-modal" id="myTradesModal">
+  <div class="p2p-modal-card" style="max-width: 680px; max-height: 85vh; overflow-y: auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <h3 style="color:var(--gold-light)">قائمة معاملاتي النشطة</h3>
+      <button class="modal-close" id="closeMyTradesModal" style="background:transparent; border:none; font-size:24px; color:var(--muted); cursor:pointer;">×</button>
+    </div>
+    <div class="panel" style="padding:0; border:none;">
+      <table class="p2p-table">
+        <thead>
+          <tr>
+            <th>الصفقة (Trade)</th>
+            <th>الكمية (Amount)</th>
+            <th>الإجمالي (Total)</th>
+            <th>الحالة (Status)</th>
+            <th>الإجراء (Action)</th>
+          </tr>
+        </thead>
+        <tbody id="myTradesListBody">
+          <tr>
+            <td colspan="5" style="text-align:center; padding:20px; color:var(--muted)">لا توجد معاملات نشطة حالياً.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <footer></footer>
 <div id="shared-modals"></div><div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

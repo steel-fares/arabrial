@@ -394,38 +394,596 @@
 
   async function bindP2P() {
     if (page !== "p2p") return;
-    await requireUser("p2p.html");
-    async function loadOrders() {
-      const { data } = await client().from("p2p_orders").select("*").order("created_at", { ascending: false }).limit(50);
-      const orders = data || [];
-      const userIds = [...new Set(orders.map((o) => o.user_id).filter(Boolean))];
-      const profiles = userIds.length ? await client().from("profiles").select("id,username,verification_status").in("id", userIds) : { data: [] };
-      const profileMap = Object.fromEntries((profiles.data || []).map((p) => [p.id, p]));
-      $id("p2pOrders").innerHTML = orders.length ? `
-        <div class="mini-table-wrap"><table class="mini-table"><thead><tr><th>Side</th><th>User</th><th>Amount</th><th>Price</th><th>Status</th><th>Trades</th></tr></thead><tbody>
-        ${orders.map((o) => `<tr><td>${esc(o.side)}</td><td>${esc(profileMap[o.user_id]?.username || "-")} ${profileMap[o.user_id]?.verification_status === "verified" ? "✓" : ""}</td><td>${fmt(o.remaining_arbr, "ARBR")}</td><td>${Number(o.price_omr).toFixed(6)} OMR</td><td>${esc(o.status)}</td><td>${fmt(Number(o.amount_arbr || 0) - Number(o.remaining_arbr || 0))}</td></tr>`).join("")}
-        </tbody></table></div>` : `<div class="empty-orders">No active P2P orders.</div>`;
-    }
-    $id("p2pOrderForm")?.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const btn = $id("createP2POrderBtn");
-      busy(btn, true, "Creating...");
+    const user = await requireUser("p2p.html");
+    if (!user) return;
+
+    let currentActiveTradeId = null;
+    let activeTab = "buy"; // buy = takers want to buy (view sell ads), sell = takers want to sell (view buy ads)
+    let tradeRoomInterval = null;
+    let appealTimerInterval = null;
+
+    // UI elements
+    const p2pNavBuy = $id("p2pNavBuy");
+    const p2pNavSell = $id("p2pNavSell");
+    const filterAmount = $id("filterAmount");
+    const filterFiat = $id("filterFiat");
+    const filterPayment = $id("filterPayment");
+    const filterMerchant = $id("filterMerchant");
+    const p2pAdsList = $id("p2pAdsList");
+
+    const p2pDashboardView = $id("p2pDashboardView");
+    const p2pTradeRoomView = $id("p2pTradeRoomView");
+
+    // Modal elements
+    const createAdModal = $id("createAdModal");
+    const openCreateAdBtn = $id("openCreateAdBtn");
+    const closeCreateAdModal = $id("closeCreateAdModal");
+    const createAdForm = $id("createAdForm");
+
+    const initiateTradeModal = $id("initiateTradeModal");
+    const closeInitiateTradeModal = $id("closeInitiateTradeModal");
+    const initiateTradeForm = $id("initiateTradeForm");
+    const tradeModalAmount = $id("tradeModalAmount");
+
+    const myTradesModal = $id("myTradesModal");
+    const viewMyTradesBtn = $id("viewMyTradesBtn");
+    const closeMyTradesModal = $id("closeMyTradesModal");
+    const myTradesListBody = $id("myTradesListBody");
+
+    // Switch between Buy and Sell tabs
+    p2pNavBuy.addEventListener("click", () => {
+      activeTab = "buy";
+      p2pNavBuy.classList.add("active-buy");
+      p2pNavSell.classList.remove("active-sell");
+      loadAds();
+    });
+
+    p2pNavSell.addEventListener("click", () => {
+      activeTab = "sell";
+      p2pNavSell.classList.add("active-sell");
+      p2pNavBuy.classList.remove("active-buy");
+      loadAds();
+    });
+
+    // Handle filters change
+    [filterAmount, filterFiat, filterPayment, filterMerchant].forEach(el => {
+      if (el) el.addEventListener("change", loadAds);
+      if (el && el.tagName === "INPUT") el.addEventListener("input", loadAds);
+    });
+
+    // Create Advertisement Modal handlers
+    openCreateAdBtn?.addEventListener("click", () => createAdModal.classList.add("open"));
+    closeCreateAdModal?.addEventListener("click", () => createAdModal.classList.remove("open"));
+
+    createAdForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const side = $id("adSide").value;
+      const amount = Number($id("adAmount").value);
+      const price = Number($id("adPrice").value);
+      const minLimit = Number($id("adMinLimit").value);
+      const fiat = $id("adFiatCurrency").value;
+      const crypto = $id("adCryptoAsset").value;
+
+      // Collect selected payment methods
+      const paymentMethods = [];
+      document.querySelectorAll(".ad-pay-chk:checked").forEach(chk => {
+        paymentMethods.push(chk.value);
+      });
+
+      if (paymentMethods.length === 0) {
+        return toast("الرجاء اختيار طريقة دفع واحدة على الأقل.", "warning");
+      }
+
+      const btn = createAdForm.querySelector("button[type='submit']");
+      busy(btn, true, "جاري النشر...");
       try {
         const { error } = await client().rpc("create_p2p_order", {
-          p_side: $id("p2pSide").value,
-          p_amount_arbr: Number($id("p2pAmount").value),
-          p_price_omr: Number($id("p2pPrice").value),
+          p_side: side,
+          p_amount_arbr: amount,
+          p_price_omr: price,
+          p_min_limit: minLimit,
+          p_payment_methods: paymentMethods,
+          p_fiat_currency: fiat,
+          p_crypto_asset: crypto,
+          p_merchant_only: false
         });
         if (error) throw error;
-        toast("P2P order created.");
-        await loadOrders();
-      } catch (error) {
-        toast(`P2P order failed: ${error.message}`, "error");
+        toast("تم نشر إعلان التداول بنجاح!");
+        createAdModal.classList.remove("open");
+        createAdForm.reset();
+        loadAds();
+      } catch (err) {
+        toast(`فشل النشر: ${err.message}`, "error");
       } finally {
         busy(btn, false);
       }
     });
-    await loadOrders();
+
+    // Load advertisements from Supabase
+    async function loadAds() {
+      p2pAdsList.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:var(--muted)">جاري تحميل الإعلانات...</td></tr>`;
+      try {
+        const amt = Number(filterAmount.value) || 0;
+        const fiat = filterFiat.value;
+        const payMethod = filterPayment.value;
+        const merchOnly = filterMerchant.checked;
+
+        // Fetch active ads corresponding to the current tab
+        // Tab [BUY] -> we view SELL advertisements
+        // Tab [SELL] -> we view BUY advertisements
+        let query = client()
+          .from("p2p_orders")
+          .select("*, profiles(username, verification_status)")
+          .eq("status", "active")
+          .eq("side", activeTab === "buy" ? "sell" : "buy")
+          .eq("fiat_currency", fiat);
+
+        if (merchOnly) {
+          query = query.eq("profiles.verification_status", "verified");
+        }
+
+        const { data, error } = await query.order("price_omr", { ascending: activeTab === "buy" });
+        if (error) throw error;
+
+        let filtered = data || [];
+
+        // Apply local filtering for min_limit and payment_method if specified
+        if (amt > 0) {
+          filtered = filtered.filter(o => o.min_limit <= amt);
+        }
+        if (payMethod !== "ALL") {
+          filtered = filtered.filter(o => o.payment_methods && o.payment_methods.includes(payMethod));
+        }
+
+        if (filtered.length === 0) {
+          p2pAdsList.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:var(--muted)">لا توجد إعلانات تداول مطابقة لخيارات البحث الحالية.</td></tr>`;
+          return;
+        }
+
+        p2pAdsList.innerHTML = filtered.map(o => {
+          const u = o.profiles || {};
+          const isMerchant = u.verification_status === "verified";
+          const minMaxLimit = `${o.min_limit} - ${o.amount_arbr * o.price_omr} ${o.fiat_currency}`;
+          const payBadges = (o.payment_methods || []).map(p => {
+            const cls = p.toLowerCase().includes("stc") ? "payment-stc" :
+                        p.toLowerCase().includes("vodafone") ? "payment-vodafone" :
+                        p.toLowerCase().includes("ooredoo") ? "payment-ooredoo" : "payment-bank";
+            return `<span class="p2p-payment-tag ${cls}">${esc(p)}</span>`;
+          }).join("");
+
+          const actionBtnText = activeTab === "buy" ? `شراء ${o.crypto_asset}` : `بيع ${o.crypto_asset}`;
+          const actionBtnClass = activeTab === "buy" ? "btn-primary" : "btn-secondary";
+          const actionBtnStyle = activeTab === "buy" ? "background:#22c55e; border-color:#22c55e;" : "background:#ef4444; border-color:#ef4444; color:white;";
+
+          return `
+            <tr>
+              <td>
+                <strong>${esc(u.username || "Unknown")}</strong>
+                ${isMerchant ? `<span class="p2p-merchant-badge">تاجر معتمد</span>` : ""}
+              </td>
+              <td class="p2p-price-col">${Number(o.price_omr).toFixed(4)} <small style="font-size:12px; color:var(--muted)">${esc(o.fiat_currency)}</small></td>
+              <td>
+                <div><small style="color:var(--muted)">المتاح:</small> <strong>${fmt(o.remaining_arbr)} ${esc(o.crypto_asset)}</strong></div>
+                <div style="margin-top:4px;"><small style="color:var(--muted)">الحدود:</small> <span style="font-size:12.5px">${minMaxLimit}</span></div>
+              </td>
+              <td>${payBadges}</td>
+              <td style="text-align:center;">
+                <button class="${actionBtnClass} small-btn" style="padding:10px 18px; font-weight:700; ${actionBtnStyle}" data-trade-order-id="${o.id}">
+                  ${actionBtnText}
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        // Bind clicks on trade action buttons
+        document.querySelectorAll("[data-trade-order-id]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const orderId = btn.dataset.tradeOrderId;
+            const order = filtered.find(o => o.id === orderId);
+            if (order) openInitiateTrade(order);
+          });
+        });
+
+      } catch (err) {
+        p2pAdsList.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#ef4444">فشل تحميل الإعلانات: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    // Initiate Trade Modal setup
+    function openInitiateTrade(order) {
+      $id("tradeModalOrderId").value = order.id;
+      $id("tradeModalTitle").textContent = activeTab === "buy" ? `شراء ${order.crypto_asset}` : `بيع ${order.crypto_asset}`;
+      $id("tradeModalPrice").textContent = `${Number(order.price_omr).toFixed(4)} ${order.fiat_currency}`;
+      $id("tradeModalAvailable").textContent = `${fmt(order.remaining_arbr)} ${order.crypto_asset}`;
+      $id("tradeModalLimits").textContent = `${order.min_limit} - ${order.amount_arbr * order.price_omr} ${order.fiat_currency}`;
+      $id("tradeModalPayment").textContent = (order.payment_methods || []).join(" / ");
+      
+      $id("tradeModalInputLabel").textContent = activeTab === "buy" 
+        ? `الكمية التي ترغب بشرائها (${order.crypto_asset})` 
+        : `الكمية التي ترغب ببيعها (${order.crypto_asset})`;
+
+      tradeModalAmount.value = "";
+      $id("tradeModalCalculation").textContent = `0.00 ${order.fiat_currency}`;
+
+      // Live calculation updates
+      tradeModalAmount.oninput = () => {
+        const amt = Number(tradeModalAmount.value) || 0;
+        const total = amt * order.price_omr;
+        $id("tradeModalCalculation").textContent = `${total.toFixed(2)} ${order.fiat_currency}`;
+      };
+
+      initiateTradeModal.classList.add("open");
+    }
+
+    closeInitiateTradeModal?.addEventListener("click", () => initiateTradeModal.classList.remove("open"));
+
+    initiateTradeForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const orderId = $id("tradeModalOrderId").value;
+      const amount = Number(tradeModalAmount.value);
+      if (amount <= 0) return toast("الرجاء إدخال كمية صحيحة.", "warning");
+
+      const btn = $id("btnConfirmTrade");
+      busy(btn, true, "جاري بدء الصفقة...");
+      try {
+        const { data: tradeId, error } = await client().rpc("initiate_p2p_trade", {
+          p_order_id: orderId,
+          p_amount_arbr: amount
+        });
+        if (error) throw error;
+        toast("تم بدء الصفقة بنجاح وقفل الضمان!");
+        initiateTradeModal.classList.remove("open");
+        initiateTradeForm.reset();
+        loadTradeRoom(tradeId);
+      } catch (err) {
+        toast(`فشل بدء الصفقة: ${err.message}`, "error");
+      } finally {
+        busy(btn, false);
+      }
+    });
+
+    // View My Active Trades Modal
+    viewMyTradesBtn?.addEventListener("click", async () => {
+      myTradesListBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted)">جاري تحميل الصفحات...</td></tr>`;
+      myTradesModal.classList.add("open");
+      try {
+        const { data: trades, error } = await client()
+          .from("p2p_trades")
+          .select("*")
+          .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        if (!trades || trades.length === 0) {
+          myTradesListBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted)">لا توجد معاملات نشطة.</td></tr>`;
+          return;
+        }
+
+        myTradesListBody.innerHTML = trades.map(t => {
+          const sideText = t.buyer_id === user.id ? "شراء" : "بيع";
+          const statusClass = `state-${t.status}`;
+          return `
+            <tr>
+              <td>
+                <strong>#${t.id.slice(0, 8)}...</strong>
+                <div style="font-size:11px; color:var(--muted); margin-top:2px;">${sideText}</div>
+              </td>
+              <td>${fmt(t.amount_arbr)} ARBR</td>
+              <td>${t.total_omr} OMR</td>
+              <td><span class="trade-state-pill ${statusClass}">${esc(t.status)}</span></td>
+              <td>
+                <button class="small-btn btn-primary" data-room-trade-id="${t.id}" style="padding:6px 12px;">دخول الغرفة</button>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        document.querySelectorAll("[data-room-trade-id]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const tId = btn.dataset.roomTradeId;
+            myTradesModal.classList.remove("open");
+            loadTradeRoom(tId);
+          });
+        });
+
+      } catch (err) {
+        myTradesListBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#ef4444">خطأ في التحميل: ${esc(err.message)}</td></tr>`;
+      }
+    });
+
+    closeMyTradesModal?.addEventListener("click", () => myTradesModal.classList.remove("open"));
+
+    // Back to P2P button handler
+    $id("backToP2PBtn")?.addEventListener("click", () => {
+      currentActiveTradeId = null;
+      clearInterval(tradeRoomInterval);
+      clearInterval(appealTimerInterval);
+      p2pTradeRoomView.classList.add("hidden");
+      p2pDashboardView.classList.remove("hidden");
+      loadAds();
+    });
+
+    // Load Trade Room Room View
+    async function loadTradeRoom(tradeId) {
+      p2pDashboardView.classList.add("hidden");
+      p2pTradeRoomView.classList.remove("hidden");
+      currentActiveTradeId = tradeId;
+      
+      $id("tradeRoomId").textContent = `#${tradeId.slice(0, 8)}...`;
+      $id("tradeChatBox").innerHTML = `<div class="chat-msg system">جاري تحميل رسائل المحادثة...</div>`;
+
+      await refreshTradeRoomData(tradeId);
+      startTradeRoomPolling(tradeId);
+    }
+
+    // Refresh trade detail, chat messages, appeal timers
+    async function refreshTradeRoomData(tradeId) {
+      if (currentActiveTradeId !== tradeId) return;
+      try {
+        const { data: trade, error } = await client()
+          .from("p2p_trades")
+          .select("*")
+          .eq("id", tradeId)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (!trade) return;
+
+        // Fetch partner details & profiles
+        const partnerId = trade.buyer_id === user.id ? trade.seller_id : trade.buyer_id;
+        const [partnerRes, orderRes, chatRes, profileRes] = await Promise.all([
+          client().from("profiles").select("username").eq("id", partnerId).maybeSingle(),
+          client().from("p2p_orders").select("*").eq("id", trade.order_id).maybeSingle(),
+          client().from("p2p_trade_messages").select("*").eq("trade_id", tradeId).order("created_at", { ascending: true }),
+          client().from("profiles").select("role").eq("id", user.id).maybeSingle(),
+        ]);
+
+        const partnerUser = partnerRes.data?.username || "Unknown";
+        const orderData = orderRes.data || {};
+        const messages = chatRes.data || [];
+        const isBuyer = trade.buyer_id === user.id;
+        const isAdmin = profileRes.data?.role === "admin";
+
+        // Render trade values
+        $id("tradeRoomStatus").className = `trade-state-pill state-${trade.status}`;
+        $id("tradeRoomStatus").textContent = trade.status;
+        $id("tradeRoomSide").textContent = isBuyer ? "شراء (BUY)" : "بيع (SELL)";
+        $id("tradeRoomPartner").textContent = partnerUser;
+        $id("tradeRoomAmount").textContent = `${fmt(trade.amount_arbr)} ARBR`;
+        $id("tradeRoomPrice").textContent = `${Number(trade.price_omr).toFixed(4)} OMR`;
+        $id("tradeRoomTotal").textContent = `${trade.total_omr} OMR`;
+
+        // Instructions text based on state and role
+        let instructions = "";
+        if (trade.status === "pending_payment") {
+          instructions = isBuyer 
+            ? `أنت تشتري ARBR. الرجاء تحويل مبلغ <strong>${trade.total_omr} OMR</strong> إلى البائع باستخدام أحد طرق الدفع المتاحة: <strong>${(orderData.payment_methods || []).join(", ")}</strong> ثم اضغط على زر "لقد قمت بالدفع المالي".`
+            : `أنت تبيع ARBR. الضمان معلق ومقفل الآن. الرجاء انتظار تحويل المشتري مبلغ <strong>${trade.total_omr} OMR</strong> وتأكيده للدفع.`;
+        } else if (trade.status === "paid") {
+          instructions = isBuyer
+            ? `لقد قمت بتأكيد الدفع. الرجاء انتظار قيام البائع بتحرير عملات الـ ARBR لك من محفظة الضمان.`
+            : `قام المشتري بتأكيد تحويل الأموال. يرجى التحقق من حسابك فوراً. بعد استلامك للمبلغ، اضغط على زر "تحرير عملات الضمان" لإرسال الـ ARBR للمشتري.`;
+        } else if (trade.status === "disputed") {
+          instructions = `الصفقة حالياً تحت التحكيم والإدارة تراجع تفاصيل المعاملة. يرجى تزويد الإدارة بإثباتات التحويل والدفع في المحادثة المباشرة أدناه.`;
+        } else if (trade.status === "completed") {
+          instructions = `تم تحرير العملات واكتملت المعاملة بنجاح! شكراً لك لاستخدام P2P.`;
+        } else if (trade.status === "cancelled") {
+          instructions = `تم إلغاء هذه المعاملة بنجاح وإرجاع عملات الضمان.`;
+        }
+        $id("tradeInstructionText").innerHTML = instructions;
+
+        // Render Action Buttons
+        $id("btnMarkPaid").style.display = (isBuyer && trade.status === "pending_payment") ? "block" : "none";
+        $id("btnReleaseCrypto").style.display = (!isBuyer && trade.status === "paid") ? "block" : "none";
+        $id("btnCancelTrade").style.display = (isBuyer && trade.status === "pending_payment") ? "block" : "none";
+        $id("btnDisputeTrade").style.display = (trade.status === "paid" || trade.status === "pending_payment") ? "block" : "none";
+
+        // Admin Ruling Actions Section
+        $id("adminRulingSection").style.display = (isAdmin && trade.status === "disputed") ? "block" : "none";
+
+        // Countdown Timer Logic for disputes
+        if (trade.status === "paid") {
+          $id("appealTimerContainer").style.display = "block";
+          const payTime = new Date(trade.updated_at).getTime();
+          const expireTime = payTime + 15 * 60 * 1000;
+          
+          clearInterval(appealTimerInterval);
+          appealTimerInterval = setInterval(() => {
+            const now = Date.now();
+            const diff = expireTime - now;
+            if (diff <= 0) {
+              clearInterval(appealTimerInterval);
+              $id("appealTimerValue").textContent = "متاح للتحكيم الفوري";
+            } else {
+              const mins = Math.floor(diff / 60000);
+              const secs = Math.floor((diff % 60000) / 1000);
+              $id("appealTimerValue").textContent = `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+            }
+          }, 1000);
+        } else {
+          $id("appealTimerContainer").style.display = "none";
+          clearInterval(appealTimerInterval);
+        }
+
+        // Render chat messages
+        const chatBox = $id("tradeChatBox");
+        const wasScrolledToBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 50;
+
+        if (messages.length === 0) {
+          chatBox.innerHTML = `<div class="chat-msg system">بدأت المحادثة الآمنة. أرسل رسالة للطرف الآخر للاتفاق على الدفع المباشر.</div>`;
+        } else {
+          chatBox.innerHTML = messages.map(msg => {
+            if (msg.is_system) {
+              return `<div class="chat-msg system">${esc(msg.message)}</div>`;
+            }
+            const cls = msg.sender_id === user.id ? "me" : "partner";
+            return `<div class="chat-msg ${cls}">${esc(msg.message)}</div>`;
+          }).join("");
+        }
+
+        if (wasScrolledToBottom || messages.length <= 1) {
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+      } catch (err) {
+        console.error("Error refreshing trade room data: ", err);
+      }
+    }
+
+    // Polling setup for active trade room
+    function startTradeRoomPolling(tradeId) {
+      clearInterval(tradeRoomInterval);
+      tradeRoomInterval = setInterval(async () => {
+        if (currentActiveTradeId !== tradeId) return clearInterval(tradeRoomInterval);
+        await refreshTradeRoomData(tradeId);
+      }, 3000);
+    }
+
+    // Submit new chat message
+    $id("tradeChatForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const tradeId = currentActiveTradeId;
+      const msgText = $id("tradeChatInput").value.trim();
+      if (!tradeId || !msgText) return;
+
+      const input = $id("tradeChatInput");
+      input.value = "";
+      try {
+        const { error } = await client().from("p2p_trade_messages").insert({
+          trade_id: tradeId,
+          sender_id: user.id,
+          message: msgText
+        });
+        if (error) throw error;
+        await refreshTradeRoomData(tradeId);
+      } catch (err) {
+        toast(`تعذر إرسال الرسالة: ${err.message}`, "error");
+      }
+    });
+
+    // Mark trade as paid action
+    $id("btnMarkPaid")?.addEventListener("click", async () => {
+      const tradeId = currentActiveTradeId;
+      if (!tradeId) return;
+      if (!confirm("هل أنت متأكد أنك قمت بتحويل كامل المبلغ المطلوب للبائع؟")) return;
+
+      const btn = $id("btnMarkPaid");
+      busy(btn, true, "جاري الإرسال...");
+      try {
+        const { error } = await client().rpc("mark_p2p_trade_paid", { p_trade_id: tradeId });
+        if (error) throw error;
+        toast("تم تأكيد دفع الأموال للبائع بنجاح.");
+        await refreshTradeRoomData(tradeId);
+      } catch (err) {
+        toast(`خطأ: ${err.message}`, "error");
+      } finally {
+        busy(btn, false);
+      }
+    });
+
+    // Release crypto action
+    $id("btnReleaseCrypto")?.addEventListener("click", async () => {
+      const tradeId = currentActiveTradeId;
+      if (!tradeId) return;
+      if (!confirm("تحذير: لا تقم بتحرير العملات إلا بعد التأكد 100% من استلام المبلغ في حسابك البنكي أو محفظتك. لا يمكن استرجاع العملات بعد تحريرها. هل ترغب بالتحرير الفوري؟")) return;
+
+      const btn = $id("btnReleaseCrypto");
+      busy(btn, true, "جاري تحرير العملات...");
+      try {
+        const { error } = await client().rpc("release_p2p_crypto", { p_trade_id: tradeId });
+        if (error) throw error;
+        toast("تم تحرير عملات الـ ARBR وإرسالها للمشتري بنجاح!");
+        await refreshTradeRoomData(tradeId);
+      } catch (err) {
+        toast(`خطأ في تحرير العملات: ${err.message}`, "error");
+      } finally {
+        busy(btn, false);
+      }
+    });
+
+    // Cancel trade action
+    $id("btnCancelTrade")?.addEventListener("click", async () => {
+      const tradeId = currentActiveTradeId;
+      if (!tradeId) return;
+      if (!confirm("هل أنت متأكد من إلغاء هذه الصفقة؟ سيتم إرجاع العملات للضمان.")) return;
+
+      const btn = $id("btnCancelTrade");
+      busy(btn, true, "جاري الإلغاء...");
+      try {
+        const { error } = await client().rpc("cancel_p2p_trade", { p_trade_id: tradeId });
+        if (error) throw error;
+        toast("تم إلغاء الصفقة بنجاح.");
+        await refreshTradeRoomData(tradeId);
+      } catch (err) {
+        toast(`خطأ: ${err.message}`, "error");
+      } finally {
+        busy(btn, false);
+      }
+    });
+
+    // Dispute trade action
+    $id("btnDisputeTrade")?.addEventListener("click", async () => {
+      const tradeId = currentActiveTradeId;
+      if (!tradeId) return;
+      const reason = prompt("الرجاء كتابة سبب طلب التحكيم والمشكلة بالتفصيل للإدارة:");
+      if (!reason) return;
+
+      const btn = $id("btnDisputeTrade");
+      busy(btn, true, "جاري فتح شكوى...");
+      try {
+        const { error } = await client().rpc("dispute_p2p_trade", { p_trade_id: tradeId, p_reason: reason });
+        if (error) throw error;
+        toast("تم تقديم طلب التحكيم بنجاح. سيقوم الإداري بمراجعة المحادثة.");
+        await refreshTradeRoomData(tradeId);
+      } catch (err) {
+        toast(`خطأ: ${err.message}`, "error");
+      } finally {
+        busy(btn, false);
+      }
+    });
+
+    // Admin Ruling Actions click bindings
+    $id("btnAdminRelease")?.addEventListener("click", async () => {
+      const tradeId = currentActiveTradeId;
+      if (!tradeId) return;
+      if (!confirm("إجراء إداري: هل أنت متأكد من تحرير هذه العملات للمشتري مباشرة؟")) return;
+
+      try {
+        // Fetch dispute ID for this trade
+        const { data: disputes } = await client().from("p2p_disputes").select("id").eq("trade_id", tradeId).eq("status", "pending").limit(1);
+        if (!disputes || disputes.length === 0) return toast("لم يتم العثور على نزاع نشط.", "error");
+        
+        const { error } = await client().rpc("resolve_p2p_dispute", { p_dispute_id: disputes[0].id, p_ruling: "release" });
+        if (error) throw error;
+        toast("تم تحرير العملات للمشتري بنجاح بواسطة الإدارة.");
+        await refreshTradeRoomData(tradeId);
+      } catch (err) {
+        toast(`خطأ إداري: ${err.message}`, "error");
+      }
+    });
+
+    $id("btnAdminRefund")?.addEventListener("click", async () => {
+      const tradeId = currentActiveTradeId;
+      if (!tradeId) return;
+      if (!confirm("إجراء إداري: هل أنت متأكد من إرجاع هذه العملات للبائع؟")) return;
+
+      try {
+        const { data: disputes } = await client().from("p2p_disputes").select("id").eq("trade_id", tradeId).eq("status", "pending").limit(1);
+        if (!disputes || disputes.length === 0) return toast("لم يتم العثور على نزاع نشط.", "error");
+
+        const { error } = await client().rpc("resolve_p2p_dispute", { p_dispute_id: disputes[0].id, p_ruling: "refund" });
+        if (error) throw error;
+        toast("تم إلغاء الصفقة وإرجاع العملات للبائع بنجاح.");
+        await refreshTradeRoomData(tradeId);
+      } catch (err) {
+        toast(`خطأ إداري: ${err.message}`, "error");
+      }
+    });
+
+    // Load advertisements on initial display
+    await loadAds();
   }
 
   async function bindPricePage() {
