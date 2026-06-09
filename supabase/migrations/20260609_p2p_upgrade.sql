@@ -1,14 +1,14 @@
 -- Migration: 20260609_p2p_upgrade.sql
 
 -- 1. Upgrade p2p_orders with extra Binance-style fields
-alter table public.p2p_orders add column if nulls not exists min_limit numeric(18, 2) default 0;
-alter table public.p2p_orders add column if nulls not exists payment_methods text[] default '{}'::text[];
-alter table public.p2p_orders add column if nulls not exists fiat_currency text default 'OMR';
-alter table public.p2p_orders add column if nulls not exists crypto_asset text default 'ARBR';
-alter table public.p2p_orders add column if nulls not exists merchant_only boolean default false;
+alter table public.p2p_orders add column if not exists min_limit numeric(18, 2) default 0;
+alter table public.p2p_orders add column if not exists payment_methods text[] default '{}'::text[];
+alter table public.p2p_orders add column if not exists fiat_currency text default 'OMR';
+alter table public.p2p_orders add column if not exists crypto_asset text default 'ARBR';
+alter table public.p2p_orders add column if not exists merchant_only boolean default false;
 
 -- 2. Upgrade p2p_trades with updated_at column
-alter table public.p2p_trades add column if nulls not exists updated_at timestamptz not null default now();
+alter table public.p2p_trades add column if not exists updated_at timestamptz not null default now();
 
 -- Drop and recreate the status constraint for p2p_trades
 alter table public.p2p_trades drop constraint if exists p2p_trades_status_check;
