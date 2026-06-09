@@ -529,3 +529,7 @@ grant execute on function public.release_p2p_crypto(uuid) to authenticated;
 grant execute on function public.cancel_p2p_trade(uuid) to authenticated;
 grant execute on function public.dispute_p2p_trade(uuid, text) to authenticated;
 grant execute on function public.resolve_p2p_dispute(uuid, text) to authenticated;
+
+-- 13. Add payment_proof_url column to tables
+alter table public.p2p_orders add column if not exists payment_proof_url text;
+alter table public.p2p_trades add column if not exists payment_proof_url text;

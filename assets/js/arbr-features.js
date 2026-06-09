@@ -783,6 +783,46 @@
         // Admin Ruling Actions Section
         $id("adminRulingSection").style.display = (isAdmin && trade.status === "disputed") ? "block" : "none";
 
+        // Payment Proof Upload/Preview Section Display logic
+        const proofUrl = trade.payment_proof_url || orderData.payment_proof_url;
+        const canUpload = isBuyer && ["pending_payment", "paid", "disputed"].includes(trade.status);
+        
+        if (canUpload || proofUrl) {
+          $id("paymentProofSection").style.display = "block";
+          
+          // Show input and upload button only if the user is the buyer and trade is active
+          if (canUpload) {
+            $id("p2pPaymentProofInput").style.display = "block";
+            $id("btnUploadProof").style.display = "block";
+            // Clear upload status if not loading
+            const statusText = $id("proofUploadStatus").textContent || "";
+            if (!statusText.includes("جاري")) {
+              $id("proofUploadStatus").textContent = "";
+            }
+          } else {
+            $id("p2pPaymentProofInput").style.display = "none";
+            $id("btnUploadProof").style.display = "none";
+            $id("proofUploadStatus").textContent = "";
+          }
+
+          // Show preview link if proof url exists
+          if (proofUrl) {
+            $id("proofPreviewLink").style.display = "block";
+            $id("proofLink").href = proofUrl;
+          } else {
+            $id("proofPreviewLink").style.display = "none";
+            $id("proofLink").href = "#";
+          }
+
+          // Set dynamic label text for clarity
+          const label = $id("paymentProofSection").querySelector("label");
+          if (label) {
+            label.textContent = canUpload ? "تحميل إثبات الدفع (Payment Proof)" : "إثبات الدفع (Payment Proof)";
+          }
+        } else {
+          $id("paymentProofSection").style.display = "none";
+        }
+
         // Countdown Timer Logic for disputes
         if (trade.status === "paid") {
           $id("appealTimerContainer").style.display = "block";
@@ -979,6 +1019,125 @@
         await refreshTradeRoomData(tradeId);
       } catch (err) {
         toast(`خطأ إداري: ${err.message}`, "error");
+      }
+    });
+
+    // Event listener for uploading payment proof
+    $id("btnUploadProof")?.addEventListener("click", async () => {
+      const fileInput = $id("p2pPaymentProofInput");
+      const file = fileInput?.files?.[0];
+      const statusDiv = $id("proofUploadStatus");
+      const btn = $id("btnUploadProof");
+
+      if (!file) {
+        toast("الرجاء اختيار ملف صورة أولاً", "error");
+        if (statusDiv) statusDiv.textContent = "الرجاء اختيار ملف صورة أولاً";
+        return;
+      }
+
+      // Check user session
+      const { data: { session }, error: sessionErr } = await client().auth.getSession();
+      if (sessionErr || !session) {
+        toast("يجب عليك تسجيل الدخول لرفع الملفات", "error");
+        if (statusDiv) statusDiv.textContent = "يجب عليك تسجيل الدخول لرفع الملفات";
+        return;
+      }
+
+      // Show loading state
+      busy(btn, true, "جاري الرفع...");
+      if (statusDiv) {
+        statusDiv.textContent = "جاري رفع إثبات الدفع...";
+        statusDiv.style.color = "var(--muted)";
+      }
+
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        // Upload using POST to the Supabase Edge Function
+        const uploadUrl = "https://umxmwcwuwsvkvsbdhbdl.supabase.co/functions/v1/upload-p2p-image";
+        const response = await fetch(uploadUrl, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${session.access_token}`
+          },
+          body: formData
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(errText || `Failed to upload (status ${response.status})`);
+        }
+
+        const result = await response.json();
+        const proofUrl = result.url;
+
+        if (!proofUrl) {
+          throw new Error("لم يتم إرجاع رابط الصورة من خادم الرفع");
+        }
+
+        // Save URL to Supabase p2p_orders table
+        const tradeId = currentActiveTradeId;
+        if (!tradeId) {
+          throw new Error("الصفقة الحالية غير صالحة");
+        }
+
+        // We fetch the trade again to get the latest trade and order_id
+        const { data: trade, error: tradeErr } = await client()
+          .from("p2p_trades")
+          .select("order_id")
+          .eq("id", tradeId)
+          .maybeSingle();
+
+        if (tradeErr || !trade) {
+          throw new Error(tradeErr?.message || "تعذر العثور على الصفقة لتحديث الإثبات");
+        }
+
+        // Update the order with payment_proof_url
+        const { error: updateOrderErr } = await client()
+          .from("p2p_orders")
+          .update({ payment_proof_url: proofUrl })
+          .eq("id", trade.order_id);
+
+        if (updateOrderErr) {
+          throw new Error(updateOrderErr.message);
+        }
+
+        // Also update p2p_trades.payment_proof_url for redundancy/RLS ease
+        await client()
+          .from("p2p_trades")
+          .update({ payment_proof_url: proofUrl })
+          .eq("id", tradeId);
+
+        // Insert system/chat message indicating the proof was uploaded
+        await client().from("p2p_trade_messages").insert({
+          trade_id: tradeId,
+          sender_id: session.user.id,
+          message: "💡 قام المشتري برفع إثبات الدفع.",
+          is_system: true
+        });
+
+        toast("تم رفع إثبات الدفع وحفظه بنجاح!", "success");
+        if (statusDiv) {
+          statusDiv.textContent = "تم الرفع بنجاح!";
+          statusDiv.style.color = "var(--green)";
+        }
+        
+        // Clear input file selection
+        fileInput.value = "";
+
+        // Refresh trade details
+        await refreshTradeRoomData(tradeId);
+
+      } catch (err) {
+        console.error("Upload payment proof error:", err);
+        toast(`فشل رفع إثبات الدفع: ${err.message}`, "error");
+        if (statusDiv) {
+          statusDiv.textContent = `خطأ: ${err.message}`;
+          statusDiv.style.color = "#ef4444";
+        }
+      } finally {
+        busy(btn, false);
       }
     });
 

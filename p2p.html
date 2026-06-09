@@ -398,6 +398,19 @@
               <strong style="font-size:18px; color:#ef4444;" id="appealTimerValue">15:00</strong>
             </div>
 
+            <!-- Payment Proof Upload Section -->
+            <div id="paymentProofSection" style="display:none; border-top: 1px dashed var(--border); margin-top: 12px; padding-top: 12px; text-align:right;">
+              <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:6px;">تحميل إثبات الدفع (Payment Proof)</label>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input type="file" id="p2pPaymentProofInput" accept="image/*" class="arbr-input" style="padding:6px; font-size:12px; flex:1;" />
+                <button class="small-btn btn-primary" id="btnUploadProof" type="button" style="padding:8px 12px; font-size:12px; white-space:nowrap;">رفع الإثبات</button>
+              </div>
+              <div id="proofUploadStatus" style="font-size:11px; color:var(--muted); margin-top:4px;"></div>
+              <div id="proofPreviewLink" style="font-size:12px; margin-top:6px; display:none;">
+                <a id="proofLink" href="#" target="_blank" style="color:var(--gold-light); text-decoration:underline;">عرض إثبات الدفع المرفوع ↗</a>
+              </div>
+            </div>
+
             <div style="display:flex; flex-direction:column; gap:8px;">
               <!-- Action buttons toggled by JS state -->
               <button class="btn-primary" id="btnMarkPaid" type="button" style="width:100%; display:none; background:linear-gradient(135deg, var(--green), #16a34a)">✓ لقد قمت بالدفع المالي (Paid)</button>
