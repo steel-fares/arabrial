@@ -397,7 +397,10 @@ const I18N = {
     continueWithGoogle: 'المتابعة باستخدام Google',
     registerWithGoogle: 'التسجيل باستخدام Google',
     usernameLabel: 'اسم المستخدم',
-    usernamePlaceholder: 'اسم المستخدم'
+    usernamePlaceholder: 'اسم المستخدم',
+    passkeyTab: '🛡️ مفتاح المرور',
+    passkeyOtpInfo: 'استخدم البصمة أو ميزة التعرف على الوجه لتسجيل الدخول الفوري دون الحاجة لكلمة مرور.',
+    doPasskeyLoginBtn: '🛡️ تسجيل الدخول بـ Passkey'
   },
   en: {
     logoSub: 'The Digital Asset',
@@ -699,7 +702,10 @@ const I18N = {
     continueWithGoogle: 'Continue with Google',
     registerWithGoogle: 'Register with Google',
     usernameLabel: 'Username',
-    usernamePlaceholder: 'username'
+    usernamePlaceholder: 'username',
+    passkeyTab: '🛡️ Passkey',
+    passkeyOtpInfo: 'Use fingerprint or facial recognition for instant login without a password.',
+    doPasskeyLoginBtn: '🛡️ Login with Passkey'
   }
 };
 

@@ -199,6 +199,33 @@
         busy(loginBtn, false);
       }
     };
+
+    $id("doPasskeyLogin")?.addEventListener("click", async () => {
+      if (!window.PublicKeyCredential) return toast("This browser does not support passkeys.", "error");
+      const btn = $id("doPasskeyLogin");
+      busy(btn, true, "Verifying...");
+      try {
+        const options = await invoke("webauthn-options", { mode: "login" });
+        const assertionResponse = await SimpleWebAuthnBrowser.startAuthentication({ optionsJSON: options });
+        const verified = await invoke("webauthn-verify", {
+          mode: "login",
+          responseJSON: assertionResponse,
+        });
+        if (!verified?.ok || !verified?.action_link) throw new Error(verified?.message || "Passkey authentication failed.");
+        
+        toast("Verified successfully! Logging in...");
+        await client().rpc("log_login_attempt", { p_identifier: "passkey_login", p_status: "success", p_device_id: deviceId() }).catch(() => null);
+        
+        setTimeout(() => {
+          location.href = verified.action_link;
+        }, 500);
+      } catch (error) {
+        await client().rpc("log_login_attempt", { p_identifier: "passkey_login", p_status: "failed", p_device_id: deviceId(), p_reason: error.message }).catch(() => null);
+        toast(`Passkey login failed: ${error.message}`, "error");
+      } finally {
+        busy(btn, false);
+      }
+    });
   }
 
   function bindForgotPassword() {
@@ -471,27 +498,14 @@
       busy(btn, true, "Preparing...");
       try {
         const options = await invoke("webauthn-options", { mode: "registration" });
-        const challengeBytes = Uint8Array.from(options.challenge.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
-        const credential = await navigator.credentials.create({
-          publicKey: {
-            challenge: challengeBytes,
-            rp: options.rp,
-            user: {
-              id: new TextEncoder().encode(user.id),
-              name: user.email || user.id,
-              displayName: user.user_metadata?.full_name || user.email || "ARBR user",
-            },
-            pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
-            timeout: options.timeout,
-            authenticatorSelection: { userVerification: "preferred", residentKey: "preferred" },
-          },
-        });
+        const attestationResponse = await SimpleWebAuthnBrowser.startRegistration({ optionsJSON: options });
         const verified = await invoke("webauthn-verify", {
           mode: "registration",
-          credential_id: credential.id,
+          responseJSON: attestationResponse,
           device_name: $id("passkeyDeviceName").value.trim() || "Passkey",
         });
-        if (!verified?.ok) throw new Error(verified?.message || "Passkey server verification is not enabled.");
+        if (!verified?.ok) throw new Error(verified?.message || "Passkey server verification failed.");
+        toast("Passkey registered successfully!");
         await load();
       } catch (error) {
         toast(`Passkey registration failed: ${error.message}`, "error");
