@@ -282,26 +282,61 @@ begin
   where user_id = v_trade.seller_id;
 
   -- 2. Add buyer's balance
-  insert into public.wallets (user_id, arbr_balance)
-  values (v_trade.buyer_id, v_trade.amount_arbr)
+  insert into public.wallets (user_id, arbr_balance, wallet_id, wallet_address)
+  values (
+    v_trade.buyer_id, 
+    v_trade.amount_arbr,
+    'ARBR-' || upper(replace(left(v_trade.buyer_id::text, 13), '-', '')),
+    'ARBR-' || upper(replace(v_trade.buyer_id::text, '-', ''))
+  )
   on conflict (user_id) do update set
     arbr_balance = public.wallets.arbr_balance + v_trade.amount_arbr,
     updated_at = now();
 
   -- 3. Log transactions
-  insert into public.transactions (user_id, type, amount_arbr, details)
+  insert into public.transactions (
+    user_id, 
+    counterparty_user_id, 
+    transaction_type, 
+    direction, 
+    arbr_amount, 
+    omr_amount, 
+    status, 
+    reference, 
+    metadata
+  )
   values (
     v_trade.buyer_id, 
+    v_trade.seller_id,
     'p2p_buy', 
+    'incoming',
     v_trade.amount_arbr, 
+    v_trade.total_omr,
+    'completed',
+    p_trade_id::text,
     jsonb_build_object('trade_id', p_trade_id, 'price_omr', v_trade.price_omr, 'total_omr', v_trade.total_omr, 'partner_id', v_trade.seller_id)
   );
 
-  insert into public.transactions (user_id, type, amount_arbr, details)
+  insert into public.transactions (
+    user_id, 
+    counterparty_user_id, 
+    transaction_type, 
+    direction, 
+    arbr_amount, 
+    omr_amount, 
+    status, 
+    reference, 
+    metadata
+  )
   values (
     v_trade.seller_id, 
+    v_trade.buyer_id,
     'p2p_sell', 
+    'outgoing',
     -v_trade.amount_arbr, 
+    v_trade.total_omr,
+    'completed',
+    p_trade_id::text,
     jsonb_build_object('trade_id', p_trade_id, 'price_omr', v_trade.price_omr, 'total_omr', v_trade.total_omr, 'partner_id', v_trade.buyer_id)
   );
 
@@ -465,16 +500,61 @@ begin
         updated_at = now()
     where user_id = v_trade.seller_id;
 
-    insert into public.wallets (user_id, arbr_balance)
-    values (v_trade.buyer_id, v_trade.amount_arbr)
+    insert into public.wallets (user_id, arbr_balance, wallet_id, wallet_address)
+    values (
+      v_trade.buyer_id, 
+      v_trade.amount_arbr,
+      'ARBR-' || upper(replace(left(v_trade.buyer_id::text, 13), '-', '')),
+      'ARBR-' || upper(replace(v_trade.buyer_id::text, '-', ''))
+    )
     on conflict (user_id) do update set
       arbr_balance = public.wallets.arbr_balance + v_trade.amount_arbr,
       updated_at = now();
 
-    insert into public.transactions (user_id, type, amount_arbr, details)
-    values (v_trade.buyer_id, 'p2p_buy', v_trade.amount_arbr, jsonb_build_object('trade_id', v_trade.id, 'price_omr', v_trade.price_omr, 'arbitration', true));
-    insert into public.transactions (user_id, type, amount_arbr, details)
-    values (v_trade.seller_id, 'p2p_sell', -v_trade.amount_arbr, jsonb_build_object('trade_id', v_trade.id, 'price_omr', v_trade.price_omr, 'arbitration', true));
+    insert into public.transactions (
+      user_id, 
+      counterparty_user_id, 
+      transaction_type, 
+      direction, 
+      arbr_amount, 
+      omr_amount, 
+      status, 
+      reference, 
+      metadata
+    )
+    values (
+      v_trade.buyer_id, 
+      v_trade.seller_id,
+      'p2p_buy', 
+      'incoming',
+      v_trade.amount_arbr, 
+      v_trade.total_omr,
+      'completed',
+      v_trade.id::text,
+      jsonb_build_object('trade_id', v_trade.id, 'price_omr', v_trade.price_omr, 'arbitration', true)
+    );
+    insert into public.transactions (
+      user_id, 
+      counterparty_user_id, 
+      transaction_type, 
+      direction, 
+      arbr_amount, 
+      omr_amount, 
+      status, 
+      reference, 
+      metadata
+    )
+    values (
+      v_trade.seller_id, 
+      v_trade.buyer_id,
+      'p2p_sell', 
+      'outgoing',
+      -v_trade.amount_arbr, 
+      v_trade.total_omr,
+      'completed',
+      v_trade.id::text,
+      jsonb_build_object('trade_id', v_trade.id, 'price_omr', v_trade.price_omr, 'arbitration', true)
+    );
 
     update public.p2p_trades
     set status = 'completed',
