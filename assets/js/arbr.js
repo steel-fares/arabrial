@@ -776,8 +776,12 @@ function updateLocalizedUserText() {
 }
 
 /* Toast */
-const toast = document.getElementById('toast');
 function showToast(msg, type = 'success', duration = 3200) {
+  const toast = document.getElementById('toast');
+  if (!toast) {
+    console.warn("Toast element not found. Message:", msg);
+    return;
+  }
   toast.textContent = msg;
   toast.className = 'toast ' + type;
   toast.classList.add('show');
@@ -1954,6 +1958,17 @@ function updateAuthUI() {
 
 async function refreshUserState() {
   await loadPlatformState();
+  const isDemo = new URLSearchParams(location.search).get('demo') === 'true';
+  if (isDemo) {
+    currentUser = { id: '00000000-0000-0000-0000-000000000000', email: 'demo@arab-rial.com' };
+    currentProfile = { full_name: 'Demo User', verification_status: 'verified' };
+    currentWallet = { arbr_balance: 1000, locked_arbr: 0, total_deposit_omr: 100 };
+    currentPurchaseRequests = [];
+    currentPilotDeposits = [];
+    currentRedeemRequests = [];
+    updateAuthUI();
+    return;
+  }
   currentUser = await getCurrentUser();
   if (!currentUser) {
     currentProfile = null;
@@ -2352,6 +2367,10 @@ function bindHomeCurrencyWidget() {
 }
 
 async function insertPurchaseRequest(payload) {
+  const isDemo = new URLSearchParams(location.search).get('demo') === 'true';
+  if (isDemo) {
+    return { data: { id: 'demo-req-' + Math.floor(Math.random() * 1000000), status: 'pending' }, error: null };
+  }
   const response = await supabaseClient
     .from('purchase_requests')
     .insert(payload)
