@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { fetchUsdtPriceClient } from '@/lib/usdtPrice';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { CreditCard, ArrowDownRight, ArrowUpRight, Shield, Activity, RefreshCw } from 'lucide-react';
 
@@ -159,11 +160,8 @@ export default function WalletPage() {
 
   async function fetchLivePrices() {
     try {
-      const res = await fetch('/api/usdt-price');
-      if (res.ok) {
-        const data = await res.json();
-        setLivePrices(data);
-      }
+      const data = await fetchUsdtPriceClient();
+      setLivePrices(data);
     } catch (e) {
       console.error('Error fetching live pricing details:', e);
     }

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import { fetchUsdtPriceClient } from '@/lib/usdtPrice';
 import { Shield, ArrowRightLeft, CreditCard, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function ExchangePage() {
@@ -82,12 +83,9 @@ export default function ExchangePage() {
 
   async function loadPrices() {
     try {
-      const res = await fetch('/api/usdt-price');
-      if (res.ok) {
-        const data = await res.json();
-        setLivePrices(data);
-        setTimeLeft(data.price_lock_seconds || 60);
-      }
+      const data = await fetchUsdtPriceClient();
+      setLivePrices(data);
+      setTimeLeft(data.price_lock_seconds || 60);
     } catch (e) {
       console.error('Failed to load prices:', e);
     }
