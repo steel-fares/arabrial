@@ -2071,7 +2071,7 @@ async function logoutUser() {
   adminSummary = { pendingPurchases: 0, pendingDeposits: 0, totalPending: 0, todayRequests: 0 };
   adminDashboardError = '';
   updateAuthUI();
-  window.location.href = 'index.html';
+  window.location.href = 'home.html';
   showToast(t('logoutSuccess'));
 }
 

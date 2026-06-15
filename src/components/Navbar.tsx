@@ -89,7 +89,7 @@ export default function Navbar() {
   return (
     <nav className="nav-container">
       <div className="nav-start">
-        <a className="logo" href="/index.html">
+        <a className="logo" href="/home.html">
           <div className="logo-mark">
             <img src="/logo-aa.png" alt="Arab Rial ARBR logo" width="46" height="46" />
           </div>
@@ -109,7 +109,7 @@ export default function Navbar() {
       </div>
 
       <ul className={`nav-links ${navOpen ? 'open' : ''}`} id="navLinks">
-        <li><a href="/index.html">الرئيسية</a></li>
+        <li><a href="/home.html">الرئيسية</a></li>
         <li><a href="/buy.html">شراء ARBR</a></li>
         <li><a href="/wallet">المحفظة</a></li>
         <li><a href="/p2p.html">P2P</a></li>

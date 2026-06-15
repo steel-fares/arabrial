@@ -34,7 +34,7 @@ create table if not exists public.usdt_price_history (
 -- 4. Create USDT orders table
 create table if not exists public.usdt_orders (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
   order_type text not null check (order_type in ('buy', 'sell')),
   usdt_amount numeric(18, 2) not null check (usdt_amount > 0),
   market_price numeric(18, 6) not null,
@@ -51,7 +51,7 @@ create table if not exists public.usdt_orders (
 create table if not exists public.usdt_payment_requests (
   id uuid primary key default gen_random_uuid(),
   order_id uuid not null references public.usdt_orders(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
   amount_omr numeric(18, 3) not null,
   usdt_amount numeric(18, 2) not null,
   payment_method text not null,
@@ -67,7 +67,7 @@ create table if not exists public.usdt_payment_requests (
 create table if not exists public.usdt_withdrawal_requests (
   id uuid primary key default gen_random_uuid(),
   order_id uuid not null references public.usdt_orders(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
   usdt_amount numeric(18, 2) not null,
   amount_omr numeric(18, 3) not null,
   wallet_address text not null,

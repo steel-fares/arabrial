@@ -4,7 +4,7 @@
   if (!host) return;
 
   const links = [
-    { href: 'index.html', page: 'home', i18n: 'navHome' },
+    { href: 'home.html', page: 'home', i18n: 'navHome' },
     { href: 'buy.html', page: 'buy', i18n: 'navBuy' },
     { href: 'price.html', page: 'price', i18n: 'navPrice' },
     { href: 'transfer.html', page: 'transfer', i18n: 'navTransfer' },
@@ -20,7 +20,7 @@
   host.outerHTML = `
 <nav>
   <div class="nav-start">
-    <a class="logo" href="index.html">
+    <a class="logo" href="home.html">
       <div class="logo-mark"><img src="logo-aa.png" alt="Arab Rial ARBR logo" width="46" height="46" /></div>
       <div class="logo-text"><b>ARBR</b><small data-i18n="logoSub">The Digital Asset</small></div>
     </a>
