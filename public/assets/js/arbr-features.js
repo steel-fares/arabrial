@@ -396,6 +396,7 @@
     if (page !== "p2p") return;
     const user = await requireUser("p2p.html");
     if (!user) return;
+    const profile = await currentProfile();
 
     let currentActiveTradeId = null;
     let activeTab = "buy"; // buy = takers want to buy (view sell ads), sell = takers want to sell (view buy ads)
@@ -452,30 +453,215 @@
     });
 
     // Create Advertisement Modal handlers
-    openCreateAdBtn?.addEventListener("click", () => createAdModal.classList.add("open"));
+    const btnSell = $id("btnSell");
+    const btnBuy = $id("btnBuy");
+    const adSideInput = $id("adSide");
+    const adFiatCurrency = $id("adFiatCurrency");
+    const adMarketPriceText = $id("adMarketPriceText");
+    const adPriceInput = $id("adPrice");
+
+    function setAdSide(side) {
+      if (side === "sell") {
+        btnSell?.classList.add("sell");
+        btnSell?.classList.remove("buy");
+        btnBuy?.classList.add("buy");
+        btnBuy?.classList.remove("sell");
+        adSideInput.value = "sell";
+      } else {
+        btnBuy?.classList.add("sell");
+        btnBuy?.classList.remove("buy");
+        btnSell?.classList.add("buy");
+        btnSell?.classList.remove("sell");
+        adSideInput.value = "buy";
+      }
+      validateAdForm();
+    }
+
+    btnSell?.addEventListener("click", () => setAdSide("sell"));
+    btnBuy?.addEventListener("click", () => setAdSide("buy"));
+
+    function updateFiatConfig() {
+      const fiat = adFiatCurrency.value;
+      const curr = ARBR_CONFIG.supportedCurrencies.find(c => c.code === fiat) || { omrPerCurrency: 1 };
+      const omrRate = curr.omrPerCurrency || 1;
+      
+      const baseMarketPriceOmr = 0.0385;
+      const convertedMarketPrice = baseMarketPriceOmr / omrRate;
+      
+      adMarketPriceText.textContent = `${convertedMarketPrice.toFixed(4)} ${fiat}`;
+      
+      // Update badges
+      document.querySelectorAll(".ad-fiat-badge").forEach(el => el.textContent = fiat);
+      document.querySelectorAll(".ad-fiat-label").forEach(el => el.textContent = fiat);
+      
+      adPriceInput.placeholder = convertedMarketPrice.toFixed(4);
+      
+      validateAdForm();
+    }
+
+    adFiatCurrency?.addEventListener("change", updateFiatConfig);
+
+    function validateAdForm() {
+      const fiat = adFiatCurrency.value;
+      const curr = ARBR_CONFIG.supportedCurrencies.find(c => c.code === fiat) || { omrPerCurrency: 1 };
+      const omrRate = curr.omrPerCurrency || 1;
+      const baseMarketPriceOmr = 0.0385;
+      const convertedMarketPrice = baseMarketPriceOmr / omrRate;
+
+      const price = Number($id("adPrice").value) || 0;
+      const amount = Number($id("adAmount").value) || 0;
+      const minLimit = Number($id("adMinLimit").value) || 0;
+      const maxLimit = Number($id("adMaxLimit").value) || 0;
+
+      // Price Diff Calculation
+      const priceDiffEl = $id("priceDiff");
+      if (price > 0) {
+        const diff = ((price - convertedMarketPrice) / convertedMarketPrice * 100).toFixed(1);
+        const sign = diff > 0 ? "+" : "";
+        priceDiffEl.style.color = diff > 0 ? "#c9a84c" : "#1D9E75";
+        const isAr = (typeof currentLang !== 'undefined' ? currentLang : (localStorage.getItem('arbr_lang') || 'ar')) === 'ar';
+        priceDiffEl.textContent = isAr 
+          ? `${sign}${diff}% عن سعر السوق` 
+          : `${sign}${diff}% from market price`;
+      } else {
+        priceDiffEl.textContent = "";
+      }
+
+      // Total Calculation
+      const total = price * amount;
+      const adSummaryTotalText = $id("adSummaryTotalText");
+      if (total > 0) {
+        adSummaryTotalText.textContent = `${total.toFixed(3)} ${fiat}`;
+      } else {
+        adSummaryTotalText.textContent = `—`;
+      }
+
+      // Live warning validations
+      const warnBox = $id("adWarnBox");
+      const warnText = $id("adWarnText");
+      let warning = "";
+
+      const isAr = (typeof currentLang !== 'undefined' ? currentLang : (localStorage.getItem('arbr_lang') || 'ar')) === 'ar';
+
+      if (maxLimit > 0 && total > 0 && maxLimit > total) {
+        warning = isAr
+          ? "الحد الأقصى للصفقة أكبر من القيمة الكلية للإعلان. يُرجى المراجعة."
+          : "Maximum trade limit is greater than the total value of the ad.";
+      } else if (minLimit > 0 && maxLimit > 0 && minLimit > maxLimit) {
+        warning = isAr
+          ? "الحد الأدنى للصفقة لا يمكن أن يكون أكبر من الحد الأقصى للصفقة."
+          : "Minimum trade limit cannot be greater than the maximum trade limit.";
+      } else if (minLimit > 0 && total > 0 && minLimit > total) {
+        warning = isAr
+          ? "الحد الأدنى للصفقة أكبر من القيمة الكلية للإعلان."
+          : "Minimum trade limit is greater than the total value of the ad.";
+      }
+
+      if (warning) {
+        warnBox.style.display = "flex";
+        warnText.textContent = warning;
+      } else {
+        warnBox.style.display = "none";
+        warnText.textContent = "";
+      }
+    }
+
+    [$id("adPrice"), $id("adAmount"), $id("adMinLimit"), $id("adMaxLimit")].forEach(el => {
+      el?.addEventListener("input", validateAdForm);
+    });
+
+    document.querySelectorAll("#adPaymentMethodsGrid .pay-option").forEach(opt => {
+      opt.addEventListener("click", () => {
+        opt.classList.toggle("selected");
+        validateAdForm();
+      });
+    });
+
+    async function resetAdModalState() {
+      createAdForm.reset();
+      setAdSide("sell");
+      updateFiatConfig();
+      
+      document.querySelectorAll("#adPaymentMethodsGrid .pay-option").forEach(opt => {
+        if (opt.dataset.value === "Bank Muscat") {
+          opt.classList.add("selected");
+        } else {
+          opt.classList.remove("selected");
+        }
+      });
+      
+      const balanceTextEl = $id("adAvailableBalanceText");
+      balanceTextEl.textContent = "جاري التحميل...";
+      try {
+        const { data: wallet } = await client().from("wallets").select("arbr_balance, locked_arbr").eq("user_id", user.id).maybeSingle();
+        const available = wallet ? (Number(wallet.arbr_balance) - Number(wallet.locked_arbr)) : 0;
+        balanceTextEl.textContent = `${fmt(available)} ARBR`;
+      } catch (err) {
+        balanceTextEl.textContent = "0 ARBR";
+      }
+
+      const btn = $id("btnSubmitAd");
+      btn.innerHTML = `<i class="ti ti-check" aria-hidden="true"></i> تأكيد ونشر الإعلان`;
+      btn.style.background = "#c9a84c";
+      btn.style.color = "#060910";
+      btn.disabled = false;
+      
+      $id("adWarnBox").style.display = "none";
+      $id("priceDiff").textContent = "";
+      $id("adSummaryTotalText").textContent = "—";
+    }
+
+    openCreateAdBtn?.addEventListener("click", () => {
+      const isAr = (typeof currentLang !== 'undefined' ? currentLang : (localStorage.getItem('arbr_lang') || 'ar')) === 'ar';
+      if (!profile || profile.verification_status !== "verified" || profile.kyc_status !== "approved") {
+        return toast(
+          isAr 
+            ? "عذراً، يجب إكمال التحقق من الهوية (KYC) وتوثيق الحساب لنشر إعلانات التداول." 
+            : "Sorry, you must complete identity verification (KYC) and verify your account to publish trading ads.", 
+          "warning"
+        );
+      }
+      createAdModal.classList.add("open");
+      resetAdModalState();
+    });
     closeCreateAdModal?.addEventListener("click", () => createAdModal.classList.remove("open"));
 
     createAdForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const side = $id("adSide").value;
+      const isAr = (typeof currentLang !== 'undefined' ? currentLang : (localStorage.getItem('arbr_lang') || 'ar')) === 'ar';
+      
+      const side = adSideInput.value;
       const amount = Number($id("adAmount").value);
       const price = Number($id("adPrice").value);
       const minLimit = Number($id("adMinLimit").value);
-      const fiat = $id("adFiatCurrency").value;
+      const maxLimit = Number($id("adMaxLimit").value);
+      const fiat = adFiatCurrency.value;
       const crypto = $id("adCryptoAsset").value;
 
-      // Collect selected payment methods
+      // Validate payment methods selection
       const paymentMethods = [];
-      document.querySelectorAll(".ad-pay-chk:checked").forEach(chk => {
-        paymentMethods.push(chk.value);
+      document.querySelectorAll("#adPaymentMethodsGrid .pay-option.selected").forEach(opt => {
+        paymentMethods.push(opt.dataset.value);
       });
 
       if (paymentMethods.length === 0) {
-        return toast("الرجاء اختيار طريقة دفع واحدة على الأقل.", "warning");
+        return toast(
+          isAr ? "الرجاء اختيار طريقة دفع واحدة على الأقل." : "Please select at least one payment method.",
+          "warning"
+        );
       }
 
-      const btn = createAdForm.querySelector("button[type='submit']");
-      busy(btn, true, "جاري النشر...");
+      // Validate limits
+      const total = price * amount;
+      if (maxLimit > total || minLimit > maxLimit || minLimit > total) {
+        return toast(
+          isAr ? "يرجى مراجعة حدود الصفقة المدخلة للتأكد من صحتها." : "Please review the trade limits for correctness.",
+          "warning"
+        );
+      }
+
+      const btn = $id("btnSubmitAd");
+      busy(btn, true, isAr ? "جاري النشر..." : "Publishing...");
       try {
         const { error } = await client().rpc("create_p2p_order", {
           p_side: side,
@@ -488,12 +674,20 @@
           p_merchant_only: false
         });
         if (error) throw error;
-        toast("تم نشر إعلان التداول بنجاح!");
-        createAdModal.classList.remove("open");
-        createAdForm.reset();
-        loadAds();
+        
+        // Success state
+        btn.innerHTML = `<i class="ti ti-check-circle" aria-hidden="true"></i> ${isAr ? 'تم نشر الإعلان بنجاح!' : 'Ad published successfully!'}`;
+        btn.style.background = "#1D9E75";
+        btn.style.color = "#fff";
+        btn.disabled = true;
+        
+        toast(isAr ? "تم نشر إعلان التداول بنجاح!" : "Trading ad published successfully!");
+        setTimeout(() => {
+          createAdModal.classList.remove("open");
+          loadAds();
+        }, 1500);
       } catch (err) {
-        toast(`فشل النشر: ${err.message}`, "error");
+        toast(`${isAr ? 'فشل النشر' : 'Publish failed'}: ${err.message}`, "error");
       } finally {
         busy(btn, false);
       }
@@ -579,6 +773,15 @@
         // Bind clicks on trade action buttons
         document.querySelectorAll("[data-trade-order-id]").forEach(btn => {
           btn.addEventListener("click", () => {
+            const isAr = (typeof currentLang !== 'undefined' ? currentLang : (localStorage.getItem('arbr_lang') || 'ar')) === 'ar';
+            if (!profile || profile.verification_status !== "verified" || profile.kyc_status !== "approved") {
+              return toast(
+                isAr 
+                  ? "عذراً، يجب إكمال التحقق من الهوية (KYC) وتوثيق الحساب لبدء التداول P2P." 
+                  : "Sorry, you must complete identity verification (KYC) and verify your account to initiate a P2P trade.", 
+                "warning"
+              );
+            }
             const orderId = btn.dataset.tradeOrderId;
             const order = filtered.find(o => o.id === orderId);
             if (order) openInitiateTrade(order);
