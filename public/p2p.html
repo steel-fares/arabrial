@@ -241,8 +241,14 @@
     transform: translateY(0);
   }
 
-  /* Redesigned Ad Modal Custom Styles */
   .p2p-modal .modal {
+    position: relative;
+    inset: auto;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: auto;
+    display: block;
+    backdrop-filter: none;
     background: #0d1117;
     border: 0.5px solid rgba(201,168,76,0.2);
     width: 100%;
@@ -256,6 +262,8 @@
   }
   .p2p-modal.open .modal {
     transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
   }
   .modal-header {
     background: linear-gradient(135deg, #0d1117 0%, #111827 100%);
@@ -548,7 +556,11 @@
           <label>طريقة الدفع</label>
           <select class="p2p-filter-input" id="filterPayment">
             <option value="ALL">كل طرق الدفع</option>
-            <option value="Bank Transfer">تحويل بنكي</option>
+            <option value="Bank Muscat">بنك مسقط (Bank Muscat)</option>
+            <option value="Bank Dhofar">بنك ظفار (Bank Dhofar)</option>
+            <option value="Thawani Pay">ثواني (Thawani Pay)</option>
+            <option value="OmanNet">عمان نت (OmanNet)</option>
+            <option value="Bank Transfer">تحويل بنكي عام (Bank Transfer)</option>
             <option value="STC Pay">STC Pay</option>
             <option value="Vodafone Cash">Vodafone Cash</option>
             <option value="Ooredoo Pay">Ooredoo Pay</option>
@@ -832,6 +844,42 @@
             <div>
               <div class="pay-name">OmanNet</div>
               <div class="pay-type">شبكة دفع عُمانية</div>
+            </div>
+          </div>
+          <div class="pay-option" data-value="Bank Transfer">
+            <div class="pay-icon" style="background:rgba(59,130,246,0.15);">
+              <i class="ti ti-building-bank" style="color:#60a5fa; font-size:15px;" aria-hidden="true"></i>
+            </div>
+            <div>
+              <div class="pay-name">Bank Transfer</div>
+              <div class="pay-type">تحويل بنكي عام</div>
+            </div>
+          </div>
+          <div class="pay-option" data-value="STC Pay">
+            <div class="pay-icon" style="background:rgba(139,92,246,0.15);">
+              <i class="ti ti-device-mobile" style="color:#c084fc; font-size:15px;" aria-hidden="true"></i>
+            </div>
+            <div>
+              <div class="pay-name">STC Pay</div>
+              <div class="pay-type">محفظة رقمية</div>
+            </div>
+          </div>
+          <div class="pay-option" data-value="Vodafone Cash">
+            <div class="pay-icon" style="background:rgba(239,68,68,0.15);">
+              <i class="ti ti-device-mobile" style="color:#fca5a5; font-size:15px;" aria-hidden="true"></i>
+            </div>
+            <div>
+              <div class="pay-name">Vodafone Cash</div>
+              <div class="pay-type">محفظة رقمية</div>
+            </div>
+          </div>
+          <div class="pay-option" data-value="Ooredoo Pay">
+            <div class="pay-icon" style="background:rgba(236,72,153,0.15);">
+              <i class="ti ti-device-mobile" style="color:#f9a8d4; font-size:15px;" aria-hidden="true"></i>
+            </div>
+            <div>
+              <div class="pay-name">Ooredoo Pay</div>
+              <div class="pay-type">محفظة رقمية</div>
             </div>
           </div>
         </div>

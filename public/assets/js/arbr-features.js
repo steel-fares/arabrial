@@ -399,6 +399,7 @@
     const profile = await currentProfile();
 
     let currentActiveTradeId = null;
+    let currentSelectedOrder = null;
     let activeTab = "buy"; // buy = takers want to buy (view sell ads), sell = takers want to sell (view buy ads)
     let tradeRoomInterval = null;
     let appealTimerInterval = null;
@@ -705,9 +706,14 @@
         // Fetch active ads corresponding to the current tab
         // Tab [BUY] -> we view SELL advertisements
         // Tab [SELL] -> we view BUY advertisements
+        let selectStr = "*, profiles(username, verification_status)";
+        if (merchOnly) {
+          selectStr = "*, profiles!inner(username, verification_status)";
+        }
+
         let query = client()
           .from("p2p_orders")
-          .select("*, profiles(username, verification_status)")
+          .select(selectStr)
           .eq("status", "active")
           .eq("side", activeTab === "buy" ? "sell" : "buy")
           .eq("fiat_currency", fiat);
@@ -723,10 +729,19 @@
 
         // Apply local filtering for min_limit and payment_method if specified
         if (amt > 0) {
-          filtered = filtered.filter(o => o.min_limit <= amt);
+          filtered = filtered.filter(o => o.min_limit <= amt && (o.remaining_arbr * o.price_omr) >= amt);
         }
         if (payMethod !== "ALL") {
-          filtered = filtered.filter(o => o.payment_methods && o.payment_methods.includes(payMethod));
+          filtered = filtered.filter(o => {
+            if (!o.payment_methods) return false;
+            if (o.payment_methods.includes(payMethod)) return true;
+            if (payMethod === "Bank Transfer") {
+              return o.payment_methods.includes("Bank Muscat") || 
+                     o.payment_methods.includes("Bank Dhofar") ||
+                     o.payment_methods.includes("Bank Transfer");
+            }
+            return false;
+          });
         }
 
         if (filtered.length === 0) {
@@ -737,7 +752,7 @@
         p2pAdsList.innerHTML = filtered.map(o => {
           const u = o.profiles || {};
           const isMerchant = u.verification_status === "verified";
-          const minMaxLimit = `${o.min_limit} - ${o.amount_arbr * o.price_omr} ${o.fiat_currency}`;
+          const minMaxLimit = `${o.min_limit} - ${(o.remaining_arbr * o.price_omr).toFixed(2)} ${o.fiat_currency}`;
           const payBadges = (o.payment_methods || []).map(p => {
             const cls = p.toLowerCase().includes("stc") ? "payment-stc" :
                         p.toLowerCase().includes("vodafone") ? "payment-vodafone" :
@@ -795,11 +810,12 @@
 
     // Initiate Trade Modal setup
     function openInitiateTrade(order) {
+      currentSelectedOrder = order;
       $id("tradeModalOrderId").value = order.id;
       $id("tradeModalTitle").textContent = activeTab === "buy" ? `شراء ${order.crypto_asset}` : `بيع ${order.crypto_asset}`;
       $id("tradeModalPrice").textContent = `${Number(order.price_omr).toFixed(4)} ${order.fiat_currency}`;
       $id("tradeModalAvailable").textContent = `${fmt(order.remaining_arbr)} ${order.crypto_asset}`;
-      $id("tradeModalLimits").textContent = `${order.min_limit} - ${order.amount_arbr * order.price_omr} ${order.fiat_currency}`;
+      $id("tradeModalLimits").textContent = `${order.min_limit} - ${(order.amount_arbr * order.price_omr).toFixed(2)} ${order.fiat_currency}`;
       $id("tradeModalPayment").textContent = (order.payment_methods || []).join(" / ");
       
       $id("tradeModalInputLabel").textContent = activeTab === "buy" 
@@ -823,9 +839,52 @@
 
     initiateTradeForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
+      if (!currentSelectedOrder) return;
       const orderId = $id("tradeModalOrderId").value;
       const amount = Number(tradeModalAmount.value);
       if (amount <= 0) return toast("الرجاء إدخال كمية صحيحة.", "warning");
+
+      const isAr = (typeof currentLang !== 'undefined' ? currentLang : (localStorage.getItem('arbr_lang') || 'ar')) === 'ar';
+
+      // 1. Check if amount exceeds available capacity
+      if (amount > currentSelectedOrder.remaining_arbr) {
+        return toast(
+          isAr 
+            ? `الكمية المدخلة تتجاوز المتاح في الإعلان (${fmt(currentSelectedOrder.remaining_arbr)} ARBR).`
+            : `Amount exceeds the available advertisement capacity (${fmt(currentSelectedOrder.remaining_arbr)} ARBR).`,
+          "warning"
+        );
+      }
+
+      // 2. Check if total fiat amount is below min_limit
+      const totalFiat = amount * currentSelectedOrder.price_omr;
+      if (totalFiat < currentSelectedOrder.min_limit) {
+        return toast(
+          isAr
+            ? `قيمة الصفقة أقل من الحد الأدنى المسموح به (${currentSelectedOrder.min_limit} ${currentSelectedOrder.fiat_currency}).`
+            : `Trade value is below the minimum limit (${currentSelectedOrder.min_limit} ${currentSelectedOrder.fiat_currency}).`,
+          "warning"
+        );
+      }
+      
+      // 3. Check if seller (taker on buy ad) has enough balance
+      if (currentSelectedOrder.side === "buy") {
+        // Taker is seller. They must have enough balance.
+        try {
+          const { data: wallet } = await client().from("wallets").select("arbr_balance, locked_arbr").eq("user_id", user.id).maybeSingle();
+          const available = wallet ? (Number(wallet.arbr_balance) - Number(wallet.locked_arbr)) : 0;
+          if (available < amount) {
+            return toast(
+              isAr
+                ? `رصيدك غير كافي لإتمام هذه الصفقة. الرصيد المتاح: ${fmt(available)} ARBR.`
+                : `Insufficient balance to complete this trade. Available: ${fmt(available)} ARBR.`,
+              "warning"
+            );
+          }
+        } catch (err) {
+          // Ignore and let DB handle it if wallet check fails
+        }
+      }
 
       const btn = $id("btnConfirmTrade");
       busy(btn, true, "جاري بدء الصفقة...");
