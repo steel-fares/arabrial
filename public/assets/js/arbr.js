@@ -89,8 +89,8 @@ const ARBR_CONFIG = {
   lockDays: 30,
   maxSellPerDay: 2000,
   largeBuyVerificationAmount: 5000,
-  ratesApiUrl: 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/omr.json',
-  currencyRateSource: 'Fawaz Ahmed Currency API via jsDelivr',
+  ratesApiUrl: 'https://open.er-api.com/v6/latest/OMR',
+  currencyRateSource: 'ExchangeRate-API',
   supportedCurrencies: [
     { code: 'OMR', ar: 'الريال العماني', en: 'Omani Rial', omrRate: 1 },
     { code: 'USD', ar: 'الدولار الأمريكي', en: 'US Dollar', omrPerCurrency: 0.384998 },
@@ -2264,9 +2264,18 @@ async function loadLiveCurrencyRates() {
     const response = await fetch(ARBR_CONFIG.ratesApiUrl, { cache: 'no-store' });
     if (!response.ok) throw new Error(`FX ${response.status}`);
     const data = await response.json();
-    if (!data?.omr) throw new Error('Invalid FX payload');
-    latestCurrencyRates = data.omr;
-    latestCurrencyDate = data.date || new Date().toISOString().slice(0, 10);
+    if (!data?.rates) throw new Error('Invalid FX payload');
+    
+    // Map keys to lowercase for backward compatibility
+    const lowerRates = {};
+    for (const [key, value] of Object.entries(data.rates)) {
+      lowerRates[key.toLowerCase()] = Number(value);
+    }
+    
+    latestCurrencyRates = lowerRates;
+    latestCurrencyDate = data.time_last_update_utc 
+      ? new Date(data.time_last_update_utc).toISOString().slice(0, 10) 
+      : new Date().toISOString().slice(0, 10);
     latestCurrencySource = ARBR_CONFIG.currencyRateSource;
   } catch (error) {
     latestCurrencyRates = null;
