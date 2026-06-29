@@ -1,6 +1,4 @@
 (function () {
-  const FALLBACK_SUPABASE_URL = 'https://umxmwcwuwsvkvsbdhbdl.supabase.co';
-  const FALLBACK_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVteG13Y3d1d3N2a3ZzYmRoYmRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NDYwNjcsImV4cCI6MjA5NTAyMjA2N30.qCwKT7EU21JJKS-_73_uuXdLrhoI3a9644Wk73O2uJY';
   const DEFAULT_PRICE = 0.0385;
 
   const labels = {
@@ -197,10 +195,11 @@
   async function getClient() {
     if (window.ARBR_SUPABASE_CLIENT) return window.ARBR_SUPABASE_CLIENT;
     if (!window.supabase) return null;
-    const config = window.ARBR_PUBLIC_CONFIG || {
-      supabaseUrl: FALLBACK_SUPABASE_URL,
-      supabaseAnonKey: FALLBACK_SUPABASE_ANON_KEY
-    };
+    const config = window.ARBR_PUBLIC_CONFIG;
+    if (!config?.supabaseUrl || !config?.supabaseAnonKey) {
+      console.warn("Supabase configuration is not loaded.");
+      return null;
+    }
     return window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
   }
 

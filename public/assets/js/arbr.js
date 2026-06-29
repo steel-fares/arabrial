@@ -12,14 +12,27 @@ function sanitizeInput(val) {
 }
 window.sanitizeInput = sanitizeInput;
 
-/* Supabase config
-   ضع القيم من Supabase Dashboard > Project Settings > API.
-   استخدم anon/public key فقط هنا، ولا تضع أي مفتاح إداري داخل GitHub Pages. */
-const SUPABASE_URL = 'https://umxmwcwuwsvkvsbdhbdl.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVteG13Y3d1d3N2a3ZzYmRoYmRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NDYwNjcsImV4cCI6MjA5NTAyMjA2N30.qCwKT7EU21JJKS-_73_uuXdLrhoI3a9644Wk73O2uJY';
+// Synchronously fetch and execute config.public.js if it exists to load window.ARBR_PUBLIC_CONFIG
+if (typeof window !== 'undefined') {
+  try {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'assets/js/config.public.js', false);
+    xhr.send(null);
+    if (xhr.status === 200) {
+      new Function(xhr.responseText)();
+    }
+  } catch (e) {
+    // Ignore fallback if missing
+  }
+}
+
+const SUPABASE_URL = window.ARBR_PUBLIC_CONFIG?.supabaseUrl;
+const SUPABASE_ANON_KEY = window.ARBR_PUBLIC_CONFIG?.supabaseAnonKey;
 const isSupabaseConfigured =
   Boolean(window.supabase) &&
+  typeof SUPABASE_URL === 'string' &&
   SUPABASE_URL.startsWith('https://') &&
+  typeof SUPABASE_ANON_KEY === 'string' &&
   SUPABASE_ANON_KEY.length > 40;
 const supabaseClient = isSupabaseConfigured
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
