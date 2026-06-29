@@ -1,3 +1,17 @@
+// Disable console logs in production to prevent leaking debugging data
+if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  console.log = function() {};
+  console.info = function() {};
+  console.debug = function() {};
+}
+
+// Global sanitization filter to prevent stored/inline XSS and HTML injection without breaking data
+function sanitizeInput(val) {
+  if (typeof val !== 'string') return val;
+  return val.replace(/<[^>]*>/g, '').trim();
+}
+window.sanitizeInput = sanitizeInput;
+
 /* Supabase config
    ضع القيم من Supabase Dashboard > Project Settings > API.
    استخدم anon/public key فقط هنا، ولا تضع أي مفتاح إداري داخل GitHub Pages. */
@@ -1585,8 +1599,8 @@ async function submitPilotDeposit(event) {
   if (!requireVerifiedService()) return;
   const amount = Number(document.getElementById('pilotAmount').value || 0);
   const method = document.getElementById('pilotMethod').value;
-  const reference = document.getElementById('pilotReference').value.trim();
-  const note = document.getElementById('pilotNote').value.trim();
+  const reference = sanitizeInput(document.getElementById('pilotReference').value);
+  const note = sanitizeInput(document.getElementById('pilotNote').value);
   const agreed = document.getElementById('pilotAgree').checked;
   if (amount <= 0) { showToast(t('invalidAmount'), 'warning'); return; }
   if (!method) { showToast(t('choosePaymentWarning'), 'warning'); return; }
@@ -2032,8 +2046,8 @@ async function saveSettings() {
   const btn = document.getElementById('saveSettingsBtn');
   setBusy(btn, true, t('saving'));
   const updates = {
-    full_name: document.getElementById('settingsFullName').value.trim(),
-    phone: document.getElementById('settingsPhone').value.trim()
+    full_name: sanitizeInput(document.getElementById('settingsFullName').value),
+    phone: sanitizeInput(document.getElementById('settingsPhone').value)
   };
   if (!isValidPhone(updates.phone)) {
     setBusy(btn, false);
@@ -2041,7 +2055,7 @@ async function saveSettings() {
     return;
   }
   if (profileHasColumn('country')) {
-    updates.country = document.getElementById('settingsCountry').value.trim();
+    updates.country = sanitizeInput(document.getElementById('settingsCountry').value);
   }
   const { error } = await supabaseClient
     .from('profiles')
@@ -2408,7 +2422,7 @@ function bindBuyPage() {
     if (!requireSupabase()) return;
     if (!requireLoginBeforePurchase()) return;
     const btn = document.getElementById('submitBuy');
-    const note = document.getElementById('wallet').value.trim();
+    const note = sanitizeInput(document.getElementById('wallet').value);
     const calc = currentBuyCalculation();
     const paymentMethod = document.getElementById('payM').value;
     if (!note) { showToast(t('enterWallet'), 'warning'); return; }

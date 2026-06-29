@@ -44,8 +44,7 @@ Deno.serve(async (req) => {
     code_hash: await sha256(`${identifier}:password_reset:${code}:${Deno.env.get("OTP_PEPPER")}`),
     expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
     device_id: req.headers.get("x-device-id"),
-  });
-  console.log(`Password reset OTP for ${identifier}: ${code}`);
+  console.log(`Password reset OTP for ${identifier} generated`);
 
   return jsonResponse({ ok: true, message: "If the account exists, reset instructions were sent." });
 });

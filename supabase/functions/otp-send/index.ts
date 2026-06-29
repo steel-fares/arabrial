@@ -34,6 +34,6 @@ Deno.serve(async (req) => {
   });
 
   // Wire your SMS/email provider here. Keep provider secrets in Supabase function env.
-  console.log(`OTP ${purpose} for ${identifier}: ${code}`);
+  console.log(`OTP ${purpose} for ${identifier} generated`);
   return jsonResponse({ ok: true, message: "OTP sent if provider is configured" });
 });

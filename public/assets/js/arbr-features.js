@@ -5,6 +5,7 @@
   const totalSupply = 100000000;
 
   function $id(id) { return document.getElementById(id); }
+  const sanitizeInput = window.sanitizeInput || ((val) => typeof val === 'string' ? val.replace(/<[^>]*>/g, '').trim() : val);
   function esc(value) {
     return String(value ?? "").replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
   }
@@ -127,7 +128,7 @@
     $id("googleSignupBtn")?.addEventListener("click", () => $id("googleLoginBtn")?.click());
 
     $id("sendPhoneOtpBtn")?.addEventListener("click", async () => {
-      const phone = ($id("phoneOtpInput")?.value || $id("sPhone")?.value || "").trim();
+      const phone = sanitizeInput($id("phoneOtpInput")?.value || $id("sPhone")?.value || "");
       if (!phone) return toast("Enter phone number first.", "warning");
       const btn = $id("sendPhoneOtpBtn");
       busy(btn, true, "Sending...");
@@ -144,8 +145,8 @@
     });
 
     $id("verifyPhoneOtpBtn")?.addEventListener("click", async () => {
-      const phone = ($id("phoneOtpInput")?.value || $id("sPhone")?.value || "").trim();
-      const token = ($id("phoneOtpCode")?.value || "").trim();
+      const phone = sanitizeInput($id("phoneOtpInput")?.value || $id("sPhone")?.value || "");
+      const token = sanitizeInput($id("phoneOtpCode")?.value || "");
       if (!phone || !token) return toast("Enter phone and OTP code.", "warning");
       const btn = $id("verifyPhoneOtpBtn");
       busy(btn, true, "Verifying...");
@@ -166,10 +167,10 @@
 
     const signupBtn = $id("doSignup");
     if (signupBtn) signupBtn.onclick = async () => {
-      const fullName = ($id("sName")?.value || "").trim();
-      const username = ($id("sUsername")?.value || "").trim().toLowerCase();
-      const phone = ($id("sPhone")?.value || "").trim();
-      const email = ($id("sEmail")?.value || "").trim();
+      const fullName = sanitizeInput($id("sName")?.value || "");
+      const username = sanitizeInput($id("sUsername")?.value || "").toLowerCase();
+      const phone = sanitizeInput($id("sPhone")?.value || "");
+      const email = sanitizeInput($id("sEmail")?.value || "");
       const password = $id("sPass")?.value || "";
       if (!fullName || !username || !phone || !email || !password) return toast("Complete all registration fields.", "warning");
       if (!/^[a-z0-9_]{3,24}$/.test(username)) return toast("Username must be 3-24 letters, numbers, or underscores.", "warning");
@@ -199,7 +200,7 @@
 
     const loginBtn = $id("doLogin");
     if (loginBtn) loginBtn.onclick = async () => {
-      const email = ($id("loginEmail")?.value || "").trim();
+      const email = sanitizeInput($id("loginEmail")?.value || "");
       const password = $id("loginPass")?.value || "";
       if (!email || !password) return toast("Enter email and password.", "warning");
       busy(loginBtn, true, "Logging in...");
@@ -252,47 +253,142 @@
   }
 
   function bindForgotPassword() {
-    if (page !== "forgot-password") return;
-    $id("passwordResetForm")?.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const identifier = ($id("resetIdentifier")?.value || "").trim();
-      const btn = $id("requestResetBtn");
-      if (!identifier) return toast("Enter email or phone number.", "warning");
-      busy(btn, true, "Sending...");
-      try {
-        await invoke("password-reset-request", { identifier }).catch(() => null);
-        if (identifier.includes("@")) {
-          const { error } = await client().auth.resetPasswordForEmail(identifier, {
-            redirectTo: `${location.origin}/login.html`,
-          });
-          if (error) throw error;
-        } else {
-          await client().auth.signInWithOtp({ phone: identifier });
+    if (page === "forgot-password") {
+      $id("passwordResetForm")?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const identifier = sanitizeInput($id("resetIdentifier")?.value || "");
+        const btn = $id("requestResetBtn");
+        if (!identifier) return toast("Enter email or phone number.", "warning");
+        busy(btn, true, "Sending...");
+        try {
+          await invoke("password-reset-request", { identifier }).catch(() => null);
+          if (identifier.includes("@")) {
+            const { error } = await client().auth.resetPasswordForEmail(identifier, {
+              redirectTo: `${location.origin}/login.html`,
+            });
+            if (error) throw error;
+          } else {
+            await client().auth.signInWithOtp({ phone: identifier });
+          }
+          toast("Reset instructions sent if the account exists.");
+          // Redirect to the verification/confirmation page
+          setTimeout(() => {
+            location.href = `forgot-password-verify.html?identifier=${encodeURIComponent(identifier)}`;
+          }, 1000);
+        } catch (error) {
+          toast(`Password reset failed: ${error.message}`, "error");
+        } finally {
+          busy(btn, false);
         }
-        toast("Reset instructions sent if the account exists.");
-      } catch (error) {
-        toast(`Password reset failed: ${error.message}`, "error");
-      } finally {
-        busy(btn, false);
+      });
+    }
+
+    if (page === "forgot-password-verify") {
+      // Get identifier from query parameters
+      const params = new URLSearchParams(location.search);
+      const identifier = sanitizeInput(params.get("identifier") || "");
+      if (identifier) {
+        // Display the identifier on the page
+        const identifierDisplay = $id("identifierDisplay");
+        if (identifierDisplay) {
+          identifierDisplay.textContent = identifier;
+        }
+        
+        // Show specific check your email/phone message based on identifier type
+        const verifyMessage = $id("verifyMessage");
+        if (verifyMessage) {
+          const isEmail = identifier.includes("@");
+          const isAr = (typeof currentLang !== 'undefined' ? currentLang : (localStorage.getItem('arbr_lang') || 'ar')) === 'ar';
+          if (isEmail) {
+            verifyMessage.textContent = isAr 
+              ? "يرجى التحقق من بريدك الإلكتروني للحصول على رمز التأكيد." 
+              : "Please check your email for the confirmation code.";
+          } else {
+            verifyMessage.textContent = isAr 
+              ? "يرجى التحقق من هاتفك للحصول على رمز التأكيد." 
+              : "Please check your phone for the confirmation code.";
+          }
+        }
       }
-    });
-    $id("confirmResetBtn")?.addEventListener("click", async () => {
-      const identifier = ($id("resetIdentifier")?.value || "").trim();
-      const code = ($id("resetCode")?.value || "").trim();
-      const newPassword = $id("newPassword")?.value || "";
-      if (!identifier || !code || newPassword.length < 8) return toast("Enter identifier, code, and a new password.", "warning");
-      const btn = $id("confirmResetBtn");
-      busy(btn, true, "Resetting...");
-      try {
-        await invoke("password-reset-confirm", { identifier, code, new_password: newPassword });
-        toast("Password reset completed.");
-        setTimeout(() => location.href = "login.html", 700);
-      } catch (error) {
-        toast(`Password reset failed: ${error.message}`, "error");
-      } finally {
-        busy(btn, false);
+
+      // Handle OTP boxes navigation
+      const otpInputs = document.querySelectorAll('.arbr-otp-input');
+      const resetCode = $id("resetCode");
+      
+      if (otpInputs.length > 0) {
+        otpInputs[0].focus();
+        otpInputs.forEach((input, index) => {
+          input.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (!/^\d?$/.test(val)) {
+              e.target.value = '';
+              return;
+            }
+            if (val && index < 5) {
+              otpInputs[index + 1].focus();
+            }
+            updateCodeValue();
+          });
+
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace') {
+              if (!input.value && index > 0) {
+                otpInputs[index - 1].value = '';
+                otpInputs[index - 1].focus();
+              } else {
+                input.value = '';
+              }
+              updateCodeValue();
+              e.preventDefault();
+            }
+          });
+
+          // Handle paste
+          input.addEventListener('paste', (e) => {
+            const pasteData = (e.clipboardData || window.clipboardData).getData('text').trim();
+            if (/^\d{6}$/.test(pasteData)) {
+              otpInputs.forEach((inp, idx) => {
+                inp.value = pasteData[idx];
+              });
+              if (resetCode) resetCode.value = pasteData;
+              otpInputs[5].focus();
+              e.preventDefault();
+            }
+          });
+        });
+
+        function updateCodeValue() {
+          let code = '';
+          otpInputs.forEach(inp => {
+            code += inp.value;
+          });
+          if (resetCode) resetCode.value = code;
+        }
       }
-    });
+
+      $id("confirmResetBtn")?.addEventListener("click", async () => {
+        const code = sanitizeInput($id("resetCode")?.value || "");
+        const newPassword = $id("newPassword")?.value || "";
+        if (!identifier || !code || newPassword.length < 8) {
+          const isAr = (typeof currentLang !== 'undefined' ? currentLang : (localStorage.getItem('arbr_lang') || 'ar')) === 'ar';
+          return toast(
+            isAr ? "يرجى إدخال الرمز المكون من 6 أرقام وكلمة مرور جديدة (8 أحرف على الأقل)." : "Enter the 6-digit code and a new password (min 8 characters).",
+            "warning"
+          );
+        }
+        const btn = $id("confirmResetBtn");
+        busy(btn, true, "Resetting...");
+        try {
+          await invoke("password-reset-confirm", { identifier, code, new_password: newPassword });
+          toast("Password reset completed.");
+          setTimeout(() => location.href = "login.html", 700);
+        } catch (error) {
+          toast(`Password reset failed: ${error.message}`, "error");
+        } finally {
+          busy(btn, false);
+        }
+      });
+    }
   }
 
   async function bindKyc() {
@@ -323,8 +419,8 @@
         if (upload.error) throw upload.error;
         const { error } = await client().from("kyc_requests").insert({
           user_id: user.id,
-          full_name: $id("kycFullName").value.trim(),
-          country: $id("kycCountry").value.trim(),
+          full_name: sanitizeInput($id("kycFullName").value),
+          country: sanitizeInput($id("kycCountry").value),
           date_of_birth: $id("kycDob").value,
           document_type: $id("kycDocType").value,
           document_path: docPath,
@@ -350,7 +446,7 @@
     $id("transferKycBadge").innerHTML = verificationBadge(profile);
 
     async function lookup() {
-      const value = ($id("recipientLookup")?.value || "").trim();
+      const value = sanitizeInput($id("recipientLookup")?.value || "");
       if (!value) return;
       const { data, error } = await client().rpc("resolve_transfer_recipient", { identifier: value });
       if (error) {
@@ -372,9 +468,9 @@
       busy(btn, true, "Sending...");
       try {
         const { data, error } = await client().rpc("create_wallet_transfer", {
-          p_recipient: $id("recipientLookup").value.trim(),
+          p_recipient: sanitizeInput($id("recipientLookup").value),
           p_amount_arbr: Number($id("transferAmount").value),
-          p_note: $id("transferNote").value.trim(),
+          p_note: sanitizeInput($id("transferNote").value),
         });
         if (error) throw error;
         toast(`Transfer completed: ${data}`);
@@ -1147,7 +1243,7 @@
     $id("tradeChatForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const tradeId = currentActiveTradeId;
-      const msgText = $id("tradeChatInput").value.trim();
+      const msgText = sanitizeInput($id("tradeChatInput").value);
       if (!tradeId || !msgText) return;
 
       const input = $id("tradeChatInput");
