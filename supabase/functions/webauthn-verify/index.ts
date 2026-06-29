@@ -161,13 +161,24 @@ Deno.serve(async (req) => {
         options: { redirectTo: `${appOrigin}/dashboard.html` }
       });
       
-      if (linkError || !linkData?.properties?.action_link) {
-        return jsonResponse({ error: `Auth error: ${linkError?.message || "Failed to generate session link"}` }, 500);
+      if (linkError || !linkData?.properties?.verification_token) {
+        return jsonResponse({ error: `Auth error: ${linkError?.message || "Failed to generate session token"}` }, 500);
+      }
+      
+      // Verify the OTP immediately on the server side to get a secure session
+      const { data: sessionData, error: sessionError } = await supabase.auth.verifyOtp({
+        email: profile.email,
+        token: linkData.properties.verification_token,
+        type: "magiclink"
+      });
+      
+      if (sessionError || !sessionData?.session) {
+        return jsonResponse({ error: `Verification session error: ${sessionError?.message || "Failed to establish secure session"}` }, 500);
       }
       
       return jsonResponse({
         ok: true,
-        action_link: linkData.properties.action_link
+        session: sessionData.session
       }, 200);
       
     } else {

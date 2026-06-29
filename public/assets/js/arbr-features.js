@@ -235,13 +235,19 @@
           mode: "login",
           responseJSON: assertionResponse,
         });
-        if (!verified?.ok || !verified?.action_link) throw new Error(verified?.message || "Passkey authentication failed.");
+        if (!verified?.ok || !verified?.session) throw new Error(verified?.message || "Passkey authentication failed.");
         
         toast("Verified successfully! Logging in...");
         await client().rpc("log_login_attempt", { p_identifier: "passkey_login", p_status: "success", p_device_id: deviceId() }).catch(() => null);
         
+        const { error: sessionError } = await client().auth.setSession({
+          access_token: verified.session.access_token,
+          refresh_token: verified.session.refresh_token
+        });
+        if (sessionError) throw sessionError;
+
         setTimeout(() => {
-          location.href = verified.action_link;
+          location.href = "dashboard.html";
         }, 500);
       } catch (error) {
         await client().rpc("log_login_attempt", { p_identifier: "passkey_login", p_status: "failed", p_device_id: deviceId(), p_reason: error.message }).catch(() => null);
