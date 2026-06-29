@@ -26,8 +26,8 @@ if (typeof window !== 'undefined') {
   }
 }
 
-const SUPABASE_URL = window.ARBR_PUBLIC_CONFIG?.supabaseUrl;
-const SUPABASE_ANON_KEY = window.ARBR_PUBLIC_CONFIG?.supabaseAnonKey;
+const SUPABASE_URL = window.ARBR_PUBLIC_CONFIG?.supabaseUrl || 'https://umxmwcwuwsvkvsbdhbdl.supabase.co';
+const SUPABASE_ANON_KEY = window.ARBR_PUBLIC_CONFIG?.supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVteG13Y3d1d3N2a3ZzYmRoYmRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NDYwNjcsImV4cCI6MjA5NTAyMjA2N30.qCwKT7EU21JJKS-_73_uuXdLrhoI3a9644Wk73O2uJY';
 const isSupabaseConfigured =
   Boolean(window.supabase) &&
   typeof SUPABASE_URL === 'string' &&
